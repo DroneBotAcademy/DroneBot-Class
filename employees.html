@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DroneBot - EMPLOYEE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: "Kanit", sans-serif; background-color: #f8fafc; }
+
+    .customer-card {
+      transition: all 0.25s ease;
+      border: 1px solid #f1f5f9;
+    }
+    .customer-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px -10px rgba(220, 38, 38, 0.15);
+      border-color: #fecaca;
+    }
+
+    .avatar-ring {
+      box-shadow: 0 0 0 3px white, 0 0 0 5px #fee2e2;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Edit modal */
+    .edit-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: "Kanit", sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .edit-input:focus { border-color: #e63946; background: white; }
+
+    #editModal, #detailModal { backdrop-filter: blur(4px); background: rgba(0,0,0,0.45); }
+
+    .modal-box { animation: slideUp 0.25s ease; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+  <style>body { display: none; }</style>
+  <script src="./js/auth-guard.js"></script>
+  <div id="main-navbar"></div>
+
+  <main class="flex-1 p-6 md:p-10 overflow-auto">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Employees</h1>
+      <p class="text-gray-400 text-sm mt-1">รายชื่อพนักงานทั้งหมดในระบบ</p>
+    </div>
+
+    <!-- Stats -->
+    <div id="statsBar" class="flex items-center gap-2 mb-6 text-sm text-gray-400">
+      <span>กำลังโหลด...</span>
+    </div>
+
+    <!-- Grid -->
+    <div id="customerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+
+    <!-- Empty -->
+    <div id="emptyState" class="hidden flex-col items-center justify-center py-24 text-center">
+      <div class="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-4">
+        <i class="fas fa-users text-3xl text-red-300"></i>
+      </div>
+      <p class="text-gray-500 font-semibold">ไม่พบข้อมูลพนักงาน</p>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════
+       EDIT MODAL (แก้ไขได้เฉพาะบัญชีตัวเอง)
+  ════════════════════════════════════════════ -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="modal-box bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
+
+      <div class="bg-gray-900 px-8 py-5 flex items-center justify-between">
+        <h2 class="text-white font-black text-lg">แก้ไขข้อมูลของฉัน</h2>
+        <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <div class="p-8 space-y-4">
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">ชื่อ-นามสกุล</p>
+          <input id="edit-fullName" type="text" class="edit-input" placeholder="ชื่อ-นามสกุล" />
+        </div>
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">เบอร์โทรศัพท์</p>
+          <input id="edit-phone" type="text" class="edit-input" placeholder="เบอร์โทร" />
+        </div>
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">รหัสผ่านใหม่ (เว้นว่างถ้าไม่เปลี่ยน)</p>
+          <input id="edit-password" type="password" class="edit-input" placeholder="••••••" />
+        </div>
+
+        <div id="edit-status" class="hidden p-3 rounded-xl text-sm font-bold text-center"></div>
+      </div>
+
+      <div class="px-8 pb-8 flex gap-3 justify-end">
+        <button onclick="closeEditModal()" class="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all">ยกเลิก</button>
+        <button onclick="saveEdit()" id="save-edit-btn" class="px-6 py-3 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all">
+          <i class="fas fa-save mr-2 text-sm"></i>บันทึก
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/main-navbar.js"></script>
+  <script>
+    let allUsers    = [];
+    let filtered    = [];
+    let editTarget  = null; // email ของคนที่กำลังแก้
+
+    // ── ดึง current user จาก localStorage (ที่ login ไว้จากหน้า Login.html) ─────────
+    function getCurrentUser() {
+      try { return JSON.parse(localStorage.getItem("userData") || "{}"); }
+      catch { return {}; }
+    }
+
+    // ── Avatar color ────────────────────────────────────────────────
+    const COLORS = [
+      { bg: "#fef2f2", text: "#dc2626" },
+      { bg: "#fdf4ff", text: "#9333ea" },
+      { bg: "#eff6ff", text: "#2563eb" },
+      { bg: "#f0fdf4", text: "#16a34a" },
+      { bg: "#fff7ed", text: "#ea580c" },
+      { bg: "#fefce8", text: "#ca8a04" },
+    ];
+    function getColor(str) {
+      let h = 0;
+      for (let c of (str || "")) h += c.charCodeAt(0);
+      return COLORS[h % COLORS.length];
+    }
+    function initials(name) {
+      const p = (name || "?").trim().split(" ");
+      return p.length >= 2 ? p[0][0] + p[1][0] : (name[0] || "?");
+    }
+
+    // ── Fetch ────────────────────────────────────────────────────────
+    async function fetchUsers() {
+      showSkeletons();
+      try {
+        const res  = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "getUsers" })
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+          allUsers = json.data || [];
+          applyFilter();
+        } else {
+          showError("โหลดข้อมูลไม่สำเร็จ");
+        }
+      } catch(e) {
+        showError("เชื่อมต่อ API ไม่ได้: " + e.message);
+      }
+    }
+
+    function showSkeletons() {
+      const g = document.getElementById("customerGrid");
+      g.innerHTML = "";
+      for (let i = 0; i < 6; i++) {
+        g.innerHTML += `
+          <div class="bg-white rounded-2xl p-5 border border-gray-100">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="skeleton w-12 h-12 rounded-full"></div>
+              <div class="flex-1"><div class="skeleton h-4 w-3/4 mb-2"></div><div class="skeleton h-3 w-1/2"></div></div>
+            </div>
+            <div class="skeleton h-3 w-full mb-2"></div>
+            <div class="skeleton h-3 w-2/3"></div>
+          </div>`;
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById("customerGrid").innerHTML = `
+        <div class="col-span-4 flex flex-col items-center py-16 text-center">
+          <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-3">
+            <i class="fas fa-exclamation-triangle text-2xl text-red-400"></i>
+          </div>
+          <p class="text-gray-500 font-semibold text-sm">${msg}</p>
+        </div>`;
+      document.getElementById("statsBar").innerHTML = "";
+    }
+
+    // ── Filter / Search ──────────────────────────────────────────────
+    function onSearch() {
+      applyFilter();
+    }
+
+    function applyFilter() {
+      filtered = allUsers.slice();
+      updateStats();
+      renderCards();
+    }
+
+    function updateStats() {
+      const admins   = allUsers.filter(u => (u.role||"").toLowerCase().includes("admin")).length;
+      const managers = allUsers.filter(u => (u.role||"").toLowerCase().includes("manager")).length;
+      document.getElementById("statsBar").innerHTML = `
+        <span class="text-gray-700 font-semibold">${filtered.length}</span>
+        <span class="text-gray-400">จากทั้งหมด</span>
+        <span class="text-gray-700 font-semibold">${allUsers.length}</span>
+        <span class="text-gray-400">คน</span>
+        <span class="mx-2 text-gray-200">|</span>
+        <span class="text-red-600 font-semibold">${admins}</span> <span class="text-gray-400">Admin</span>
+        <span class="mx-1 text-gray-200">·</span>
+        <span class="text-purple-600 font-semibold">${managers}</span> <span class="text-gray-400">Manager</span>`;
+    }
+
+    // ── Render Cards ─────────────────────────────────────────────────
+    function renderCards() {
+      const grid    = document.getElementById("customerGrid");
+      const empty   = document.getElementById("emptyState");
+      const me      = getCurrentUser();
+
+      grid.innerHTML = "";
+
+      if (filtered.length === 0) {
+        empty.classList.remove("hidden");
+        empty.classList.add("flex");
+        return;
+      }
+      empty.classList.add("hidden");
+      empty.classList.remove("flex");
+
+      filtered.forEach((u, idx) => {
+        const color    = getColor(u.fullName);
+        const ini      = initials(u.fullName);
+        const role     = (u.role || "guest").trim().toLowerCase();
+        const isAdmin  = role === "admin";
+        const isMe     = me.email && me.email === u.email;
+
+        // role badge config
+        const roleCfg  = isAdmin
+          ? { bg: "bg-red-100",    text: "text-red-600",    icon: "fa-shield-alt", label: "Admin"   }
+          : role === "manager"
+          ? { bg: "bg-purple-100", text: "text-purple-600", icon: "fa-user-tie",   label: "Manager" }
+          : { bg: "bg-gray-100",   text: "text-gray-500",   icon: "fa-user",       label: u.role    };
+
+        grid.innerHTML += `
+          <div class="customer-card bg-white rounded-2xl p-5 relative overflow-hidden flex flex-col gap-3">
+
+            <!-- Top row: avatar + name + 3-dot -->
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center text-base font-bold avatar-ring flex-shrink-0"
+                   style="background:${color.bg}; color:${color.text}">${ini}</div>
+              <div class="flex-1 overflow-hidden pt-0.5">
+                <p class="font-bold text-gray-800 text-sm leading-tight truncate">${u.fullName || "-"}</p>
+                <p class="text-[11px] text-gray-400 truncate mt-0.5">${u.email || ""}</p>
+              </div>
+              ${isMe ? `
+              <button onclick="openEditModal(${idx})" title="แก้ไขข้อมูลของฉัน"
+                class="w-8 h-8 rounded-full bg-gray-50 hover:bg-red-50 hover:text-red-500 text-gray-400 flex items-center justify-center transition-all flex-shrink-0">
+                <i class="fas fa-ellipsis-v text-xs"></i>
+              </button>` : ""}
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-gray-50"></div>
+
+            <!-- Details -->
+            <div class="space-y-1.5">
+              ${u.phone ? `
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <i class="fas fa-phone w-4 text-center text-red-400"></i>
+                <span>${String(u.phone)}</span>
+              </div>` : ""}
+              <div class="flex items-center gap-2 text-xs text-gray-500">
+                <i class="fas fa-envelope w-4 text-center text-gray-300"></i>
+                <span class="truncate">${u.email || "-"}</span>
+              </div>
+            </div>
+
+            <!-- Role badge + Admin button row -->
+            <div class="flex items-center justify-between mt-1">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${roleCfg.bg} ${roleCfg.text}">
+                <i class="fas ${roleCfg.icon} text-[9px]"></i>${roleCfg.label}
+              </span>
+              
+            </div>
+
+          </div>`;
+      });
+    }
+
+    // ── Admin redirect ───────────────────────────────────────────────
+    function goAdmin() {
+      window.location.href = "./admin/adminlog.html";
+    }
+
+    // ── Edit Modal ───────────────────────────────────────────────────
+    function openEditModal(idx) {
+      const u = filtered[idx];
+      if (!u) return;
+      editTarget = u;
+
+      document.getElementById("edit-fullName").value = u.fullName || "";
+      document.getElementById("edit-phone").value    = String(u.phone || "");
+      document.getElementById("edit-password").value = "";
+      hideEditStatus();
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.add("hidden");
+      editTarget = null;
+    }
+
+    function hideEditStatus() {
+      const el = document.getElementById("edit-status");
+      el.classList.add("hidden");
+      el.className = "hidden p-3 rounded-xl text-sm font-bold text-center";
+    }
+
+    async function saveEdit() {
+      if (!editTarget) return;
+
+      const btn = document.getElementById("save-edit-btn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2 text-sm"></i>กำลังบันทึก...';
+
+      const payload = {
+        action:   "updateUser",
+        email:    editTarget.email,
+        fullName: document.getElementById("edit-fullName").value.trim(),
+        phone:    document.getElementById("edit-phone").value.trim(),
+        password: document.getElementById("edit-password").value,
+      };
+
+      try {
+        const res  = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+        const json = await res.json();
+        const statusEl = document.getElementById("edit-status");
+
+        if (json.status === "success") {
+          statusEl.className = "block p-3 rounded-xl text-sm font-bold text-center bg-green-50 text-green-600 border border-green-100";
+          statusEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i>บันทึกสำเร็จ!';
+          await fetchUsers(); // reload
+          setTimeout(closeEditModal, 1200);
+        } else {
+          statusEl.className = "block p-3 rounded-xl text-sm font-bold text-center bg-red-50 text-red-600 border border-red-100";
+          statusEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>' + (json.message || "เกิดข้อผิดพลาด");
+        }
+      } catch(e) {
+        const statusEl = document.getElementById("edit-status");
+        statusEl.className = "block p-3 rounded-xl text-sm font-bold text-center bg-red-50 text-red-600 border border-red-100";
+        statusEl.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>เชื่อมต่อไม่ได้';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save mr-2 text-sm"></i>บันทึก';
+    }
+
+    // Close modal on backdrop click
+    document.getElementById("editModal").addEventListener("click", function(e) {
+      if (e.target === this) closeEditModal();
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", fetchUsers);
+  </script>
+</body>
+</html>

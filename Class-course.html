@@ -1,0 +1,492 @@
+﻿﻿﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DroneBot - Course Class</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
+    .sidebar-active { background: linear-gradient(135deg, #e63946 0%, #b91c1c 100%); color: white !important; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3); }
+    .tab-active { background-color: #e63946; color: white; }
+    .student-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
+    .student-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-color: #e63946; }
+    /* Skeleton Loading */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .progress-step { height: 8px; border-radius: 4px; background: #e2e8f0; transition: all 0.5s; }
+    .progress-done { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+
+    .custom-select-wrapper { position: relative; display: inline-flex; align-items: center; }
+    .custom-select-wrapper .select-icon { position: absolute; left: 16px; color: #e63946; font-size: 14px; pointer-events: none; z-index: 1; }
+    .custom-select-wrapper .chevron-icon { position: absolute; right: 14px; color: #94a3b8; font-size: 11px; pointer-events: none; z-index: 1; }
+    
+    #courseDropdown {
+      appearance: none; -webkit-appearance: none; padding: 14px 44px 14px 44px;
+      background: white; border: 2px solid #f1f5f9; border-radius: 999px;
+      font-family: 'Kanit', sans-serif; font-size: 14px; font-weight: 500;
+      color: #374151; min-width: 240px; cursor: pointer; outline: none;
+      transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    #courseDropdown:focus { border-color: #e63946; box-shadow: 0 0 0 4px rgba(230,57,70,0.1), 0 2px 8px rgba(0,0,0,0.05); }
+    #courseDropdown:hover { border-color: #fca5a5; }
+    .btn-complete { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+  </style>
+  <style>body { visibility: hidden; }</style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+  <script src="./js/auth-guard.js"></script>
+  <div id="main-navbar"></div>
+
+  <main class="flex-1">
+    <div class="p-10">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <!-- Course Dropdown -->
+        <div class="custom-select-wrapper">
+          <i class="fas fa-layer-group select-icon"></i>
+          <select id="courseDropdown" onchange="loadStudents()">
+            <option value="">— Select Course (All) —</option>
+          </select>
+          <i class="fas fa-chevron-down chevron-icon"></i>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-3 items-stretch w-full md:w-auto">
+          <!-- Search Input -->
+          <div class="relative w-full md:w-72">
+            <input 
+              type="text" 
+              id="searchInput"
+              onkeyup="if(event.key==='Enter') loadStudents()"
+              placeholder="Search name, nickname..."
+              class="w-full p-4 pl-12 pr-4 bg-white border-2 border-gray-100 rounded-full outline-none focus:border-red-500 transition-all shadow-sm text-sm font-medium"
+            >
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
+          </div>
+
+          <!-- Search Button -->
+          <button 
+            onclick="loadStudents()"
+            class="w-full md:w-auto bg-blue-600 text-white px-6 py-4 rounded-full font-bold text-sm hover:bg-blue-700 transition-all shadow-md flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-search"></i> 
+            <span class="hidden sm:inline">Search</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="currentTabText" class="text-xl font-bold text-gray-800">Course Class Students</h2>
+        <div class="flex gap-3">
+          <button onclick="openAddCourseModal()"
+            class="bg-white border-2 border-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-bold text-sm hover:border-red-500 hover:text-red-600 transition-all shadow-sm">
+            <i class="fas fa-plus mr-2"></i> Add Course
+          </button>
+          <button onclick="openAddStudentModal()"
+            class="bg-gray-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-red-600 transition-all shadow-lg">
+            <i class="fas fa-user-plus mr-2"></i> Add Student
+          </button>
+        </div>
+      </div>
+
+      <div id="studentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Skeleton Loading -->
+        <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+          <div class="absolute top-0 right-0">
+            <div class="skeleton w-24 h-8 rounded-bl-2xl"></div>
+          </div>
+          <div class="flex justify-between items-start mb-6 mt-2">
+            <div class="flex-1">
+              <div class="skeleton h-6 w-3/4 mb-2"></div>
+              <div class="skeleton h-4 w-1/2"></div>
+            </div>
+            <div class="skeleton w-16 h-6 rounded-full"></div>
+          </div>
+          <div class="space-y-3 mb-8 text-xs">
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-4 w-5/6"></div>
+            <div class="skeleton h-4 w-2/3"></div>
+          </div>
+          <div class="border-t border-gray-50 pt-6">
+            <div class="skeleton h-4 w-full mb-3"></div>
+            <div class="grid grid-cols-6 gap-1"><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div></div>
+          </div>
+          <div class="skeleton h-12 w-full mt-8 rounded-2xl"></div>
+          <div class="skeleton h-10 w-full mt-3 rounded-2xl"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Progress Modal -->
+  <div id="progressModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl">
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+          <i class="fas fa-tasks"></i>
+        </div>
+        <h2 id="modalStudentName" class="text-2xl font-black text-gray-900"></h2>
+        <p class="text-gray-400 text-sm mt-1">Manage session progress</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-8" id="sessionList"></div>
+
+      <div class="space-y-3">
+        <button id="btnSaveProgress" onclick="saveProgressData()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+        <button id="btnFinishNow" onclick="finishCourseNow()" class="w-full py-4 bg-emerald-500 text-white rounded-2xl font-bold shadow-lg hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-graduation-cap"></i> Complete Course
+        </button>
+        <button onclick="closeModal('progressModal')" class="w-full py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition-all">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Course Modal -->
+  <div id="addCourseModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl">
+      <h2 class="text-2xl font-black text-gray-900 mb-6">Add New Course</h2>
+      <input type="text" id="newCourseName" placeholder="Course name..."
+        class="w-full p-5 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-500 mb-6">
+      <div class="flex gap-4">
+        <button onclick="submitAddCourse()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all">Save</button>
+        <button onclick="closeModal('addCourseModal')" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Student Modal — เลือกนักเรียน + คอร์สเท่านั้น -->
+  <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl">
+      <h2 class="text-2xl font-black text-gray-900 mb-6">Add Student to Course</h2>
+      <div class="flex flex-col gap-4 mb-6">
+
+        <!-- เลือกนักเรียน -->
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Student</p>
+          <select id="new-student-select"
+            class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 transition-all font-[Kanit] text-sm">
+            <option value="">— Select Student —</option>
+          </select>
+        </div>
+
+        <!-- เลือกคอร์ส -->
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Course</p>
+          <select id="new-student-course"
+            class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 transition-all font-[Kanit] text-sm">
+            <option value="">— Select Course —</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="flex gap-4">
+        <button onclick="submitAddStudent()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-lg">Save</button>
+        <button onclick="closeModal('addStudentModal')" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/main-navbar.js"></script>
+  <script>
+    const currentPageName = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    let currentTab        = currentPageName === 'class-regular.html' ? 'regular' : 'course';
+    let currentStudentId  = null;
+    let currentCourseId   = null;
+    let currentProgress   = 0;
+    let tempProgress      = 0;
+
+    window.onload = () => {
+      fetchCourseList();
+      switchTab(currentTab);
+    };
+
+    /* ─── โหลดรายการคอร์สลง Dropdown หลัก ─── */
+    function fetchCourseList() {
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getCourseData" }) })
+        .then(r => r.json())
+        .then(res => {
+          const dd = document.getElementById('courseDropdown');
+          dd.innerHTML = '<option value="">— Select Course (All) —</option>';
+          (res.data || []).forEach(c => {
+            dd.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+          });
+        });
+    }
+
+    function switchTab(tab) {
+      const targetPage = tab === 'regular' ? 'Class-regular.html' : 'Class-course.html';
+      if (['class-course.html', 'class-regular.html'].includes(currentPageName) && currentPageName !== targetPage.toLowerCase()) {
+        window.location.href = targetPage;
+        return;
+      }
+      currentTab = tab;
+      document.getElementById('currentTabText').innerText = (tab === 'course') ? 'Course Class Students' : 'Regular Class Students';
+      loadStudents();
+    }
+
+    function loadStudents() {
+      const q        = document.getElementById('searchInput').value.trim();
+      const courseId = document.getElementById('courseDropdown').value;
+      const grid     = document.getElementById('studentGrid');
+      // Display skeleton loading
+      grid.innerHTML = `
+        <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+          <div class="absolute top-0 right-0">
+            <div class="skeleton w-24 h-8 rounded-bl-2xl"></div>
+          </div>
+          <div class="flex justify-between items-start mb-6 mt-2">
+            <div class="flex-1">
+              <div class="skeleton h-6 w-3/4 mb-2"></div>
+              <div class="skeleton h-4 w-1/2"></div>
+            </div>
+            <div class="skeleton w-16 h-6 rounded-full"></div>
+          </div>
+          <div class="space-y-3 mb-8 text-xs">
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-4 w-5/6"></div>
+            <div class="skeleton h-4 w-2/3"></div>
+          </div>
+          <div class="border-t border-gray-50 pt-6">
+            <div class="skeleton h-4 w-full mb-3"></div>
+            <div class="grid grid-cols-6 gap-1"><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div></div>
+          </div>
+          <div class="skeleton h-12 w-full mt-8 rounded-2xl"></div>
+          <div class="skeleton h-10 w-full mt-3 rounded-2xl"></div>
+        </div>
+      `;
+
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getStudentsByType", type: currentTab, courseId, query: q }) })
+        .then(r => r.json())
+        .then(res => renderCards(res.data || []))
+        .catch(() => {
+          grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-400 italic">Unable to load student data</div>`;
+        });
+    }
+
+    function renderCards(students) {
+      const grid = document.getElementById('studentGrid');
+      grid.innerHTML = '';
+      if (!students || students.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-gray-100 text-gray-300 italic">No students found</div>`;
+        return;
+      }
+
+      students.forEach(s => {
+        const p       = s.progress !== undefined ? Number(s.progress) : 0;
+        const isCourse = currentTab === 'course';
+        const isDone  = p >= 6;
+
+        grid.innerHTML += `
+          <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
+            <div class="absolute top-0 right-0">
+              <div class="bg-red-50 text-red-600 px-4 py-2 rounded-bl-2xl text-[10px] font-bold uppercase tracking-wider shadow-sm border-l border-b border-red-100">
+                <i class="fas fa-book-open mr-1"></i> ${s.courseName || '-'}
+              </div>
+            </div>
+            <div class="flex justify-between items-start mb-6 mt-2">
+              <div>
+                <h3 class="text-xl font-bold text-gray-800">${s.nickname || '-'}</h3>
+                <p class="text-sm text-red-500 font-medium tracking-wide">${s.name || '-'}</p>
+              </div>
+              <div class="bg-gray-50 px-3 py-1 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-tighter">${s.studentId}</div>
+            </div>
+
+            <div class="space-y-3 mb-8 text-xs text-gray-400 font-medium">
+              <div><i class="fas fa-tag w-5"></i> ${s.nameEng || '-'}</div>
+              <div><i class="fas fa-user w-5"></i> อายุ: ${s.age || '-'}</div>
+              <div><i class="fas fa-phone w-5"></i> ${s.phone || '-'}</div>
+            </div>
+
+            ${isCourse ? `
+              <div class="border-t border-gray-50 pt-6">
+                <div class="flex justify-between text-[10px] font-black uppercase text-gray-300 mb-3 tracking-widest">
+                  <span>PROGRESS</span>
+                  <span class="${isDone ? 'text-green-500' : ''}">${p}/6 COMPLETED</span>
+                </div>
+                <div class="grid grid-cols-6 gap-1">
+                  ${Array.from({length: 6}, (_, i) => `<div class="progress-step ${p > i ? 'progress-done' : ''}"></div>`).join('')}
+                </div>
+              </div>` : ''}
+
+            <button onclick="openProgressModal('${(s.name || '').replace(/'/g, "\\'")}', ${p}, '${s.studentId}', '${s.courseId || ''}')"
+              class="mt-8 w-full py-4 bg-gray-50 text-gray-800 rounded-2xl font-bold group-hover:bg-red-600 group-hover:text-white transition-all shadow-sm">
+              ${isCourse ? 'Update Progress' : 'View Profile'} <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+            </button>
+            <button onclick="deleteEnrollment('${s.studentId}', '${s.courseId}')"
+              class="mt-3 w-full py-3 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-600 hover:text-white transition-all shadow-sm">
+              <i class="fas fa-trash mr-2"></i> Remove from Course
+            </button>
+          </div>`;
+      });
+    }
+
+    /* ─── Progress Modal ─── */
+    function openProgressModal(name, progress, studentId, studentCourseId) {
+      currentStudentId = studentId;
+      currentCourseId  = studentCourseId;
+      tempProgress     = Number(progress);
+      document.getElementById('modalStudentName').innerText = name;
+      renderSessionCheckboxes();
+      document.getElementById('progressModal').classList.remove('hidden');
+    }
+
+    function renderSessionCheckboxes() {
+      const sessionList = document.getElementById('sessionList');
+      sessionList.innerHTML = '';
+      for (let i = 1; i <= 6; i++) {
+        const isSelected = i <= tempProgress;
+        sessionList.innerHTML += `
+          <div onclick="toggleSession(${i})" class="flex items-center justify-between p-4 ${isSelected ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-transparent'} rounded-2xl cursor-pointer border-2 transition-all">
+            <span class="font-bold ${isSelected ? 'text-green-700' : 'text-gray-500'}">S${i}</span>
+            <div class="w-6 h-6 border-2 ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'} rounded-full flex items-center justify-center shadow-sm">
+              <i class="fas fa-check text-[10px] text-white ${isSelected ? 'scale-100' : 'scale-0'} transition-transform"></i>
+            </div>
+          </div>`;
+      }
+      const isDone = tempProgress >= 6;
+      const certStatus  = document.getElementById('certStatus');
+      const btnFinishNow = document.getElementById('btnFinishNow');
+      if (certStatus)   certStatus.className = isDone ? "block p-4 bg-green-50 border border-green-100 rounded-2xl mb-6 text-center text-green-600 font-bold text-sm" : "hidden";
+      if (btnFinishNow) btnFinishNow.style.display = isDone ? 'none' : 'block';
+    }
+
+    function toggleSession(step) {
+      tempProgress = (step === tempProgress) ? step - 1 : step;
+      renderSessionCheckboxes();
+    }
+
+    function saveProgressData() {
+      const btn = document.getElementById('btnSaveProgress');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Saving...';
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateProgress", studentId: currentStudentId, courseId: currentCourseId, newProgress: tempProgress })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") {
+          loadStudents();
+          closeModal('progressModal');
+        }
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      });
+    }
+
+    function finishCourseNow() {
+      if (!confirm("ต้องการบันทึกจบหลักสูตรทันทีใช่หรือไม่?")) return;
+      tempProgress = 6;
+      saveProgressData();
+    }
+
+    /* ─── Add Course ─── */
+    function openAddCourseModal() {
+      document.getElementById('newCourseName').value = '';
+      document.getElementById('addCourseModal').classList.remove('hidden');
+    }
+
+    function submitAddCourse() {
+      const name = document.getElementById('newCourseName').value.trim();
+      if (!name) return;
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "addNewCourse", courseName: name }) })
+        .then(r => r.json())
+        .then(res => {
+          if (res.status === "success") {
+            closeModal('addCourseModal');
+            fetchCourseList();
+          }
+        });
+    }
+
+    /* ─── Add Student Modal ─── */
+    function openAddStudentModal() {
+      const selStudent = document.getElementById('new-student-select');
+      const selCourse  = document.getElementById('new-student-course');
+      selStudent.innerHTML = '<option value="">— Select Student —</option>';
+      selCourse.innerHTML  = '<option value="">— Select Course —</option>';
+
+      // โหลดนักเรียนทั้งหมด
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents" }) })
+        .then(r => r.json())
+        .then(res => {
+          (res.data || []).forEach(s => {
+            const opt = document.createElement('option');
+            opt.value       = s.studentId;
+            opt.textContent = `${s.name || '-'} (${s.nickname || s.studentId})`;
+            selStudent.appendChild(opt);
+          });
+        });
+
+      // โหลดคอร์ส
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getCourseData" }) })
+        .then(r => r.json())
+        .then(res => {
+          (res.data || []).forEach(c => {
+            const opt = document.createElement('option');
+            opt.value       = c.id;
+            opt.textContent = c.name;
+            selCourse.appendChild(opt);
+          });
+        });
+
+      document.getElementById('addStudentModal').classList.remove('hidden');
+    }
+
+    function submitAddStudent() {
+      const studentId = document.getElementById('new-student-select').value;
+      const courseId  = document.getElementById('new-student-course').value;
+
+      if (!studentId) { alert('กรุณาเลือกนักเรียน'); return; }
+      if (!courseId)  { alert('กรุณาเลือกคอร์ส');    return; }
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "addStudent", studentId, courseId, type: "Course" })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") {
+          closeModal('addStudentModal');
+          loadStudents();
+        } else {
+          alert(res.message || "เกิดข้อผิดพลาด");
+        }
+      });
+    }
+
+    /* ─── Delete Enrollment ─── */
+    function deleteEnrollment(studentId, courseId) {
+      if (!confirm("ต้องการลบออกจากคอร์สนี้ใช่ไหม?")) return;
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "deleteEnrollment", studentId, courseId })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") loadStudents();
+        else alert("ลบไม่สำเร็จ");
+      });
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  </script>
+</body>
+</html>

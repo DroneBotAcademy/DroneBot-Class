@@ -1,0 +1,790 @@
+<!--admin-employees-->
+<!doctype html>
+<html lang="th" data-bs-theme="auto">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Management - DroneBot Thailand</title>
+
+    <!-- Bootstrap 5 & Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS เดิม (เหมือน Class page) -->
+    <link rel="stylesheet" href="../css/style.css" />
+    <link href="../css/dashboard.css" rel="stylesheet" />
+    <link href="../css/adminclass.css" rel="stylesheet" />
+
+    <!-- Theme Logic — ต้องมาก่อน render เสมอ -->
+    <script src="../assets/js/color-modes.js"></script>
+
+    <script>
+      (function () {
+        const authStatus = sessionStorage.getItem("isLoggedIn");
+        if (authStatus !== "true") {
+          window.location.replace("adminlog.html");
+        }
+      })();
+    </script>
+
+    <style>
+      body {
+        font-family: "Kanit", sans-serif;
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+      }
+
+      /* คืนค่าฟอนต์ให้ Navbar เพื่อป้องกันเลย์เอาต์เพี้ยน */
+      .sidebar,
+      .navbar,
+      .offcanvas {
+        font-family: var(--bs-font-sans-serif) !important;
+      }
+
+      .stat-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 12px;
+        padding: 20px;
+        background: var(--bs-body-bg);
+      }
+
+      .employee-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 16px;
+        background: var(--bs-body-bg);
+        transition: all 0.3s ease;
+      }
+
+      .employee-card:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+      .status-active {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+      }
+      .status-inactive {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+      }
+
+      .dept-tag {
+        border: 1px solid var(--bs-border-color);
+        padding: 2px 10px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: var(--bs-secondary-color);
+      }
+
+      /* Skeleton */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--bs-border-color) 25%,
+          var(--bs-secondary-bg) 50%,
+          var(--bs-border-color) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+        border-radius: 8px;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .skeleton-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 16px;
+        padding: 20px;
+        background: var(--bs-body-bg);
+      }
+
+      /* Avatar */
+      .emp-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+
+      /* Role badge */
+      .role-badge {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .role-admin {
+        background: rgba(220, 38, 38, 0.15);
+        color: #dc2626;
+      }
+      .role-manager {
+        background: rgba(147, 51, 234, 0.15);
+        color: #9333ea;
+      }
+      .role-guest {
+        background: rgba(107, 114, 128, 0.15);
+        color: #6b7280;
+      }
+
+      /* Dropdown action menu */
+      .card-actions .dropdown-toggle::after {
+        display: none;
+      }
+
+      /* Modal backdrop override for bs auto theme */
+      .modal-backdrop {
+        --bs-backdrop-opacity: 0.6;
+      }
+
+      /* Responsive tweaks */
+      @media (max-width: 768px) {
+        .d-flex.justify-content-between.align-items-center.mb-4 {
+          /* Filter bar */
+          flex-direction: column;
+          align-items: stretch !important; /* Stretch items to full width */
+          gap: 10px;
+          padding: 10px !important; /* Adjust padding */
+        }
+        .input-group.w-50 {
+          /* Search input */
+          width: 100% !important; /* Take full width */
+        }
+        .d-flex.gap-2.pe-2 {
+          /* Role filter dropdown */
+          width: 100%; /* Take full width */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ─── Navbar placeholder (ไม่แตะ) ─── -->
+    <div id="icons-placeholder"></div>
+    
+    <!-- Theme Toggle (Floating) -->
+    <div
+      class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle"
+    >
+      <button
+        class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center"
+        id="bd-theme"
+        type="button"
+        aria-expanded="false"
+        data-bs-toggle="dropdown"
+        aria-label="Toggle theme (auto)"
+      >
+        <i class="bi bi-circle-half my-1 theme-icon-active"></i>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+      </button>
+      <ul
+        class="dropdown-menu dropdown-menu-end shadow"
+        aria-labelledby="bd-theme-text"
+      >
+        <li>
+          <button
+            type="button"
+            class="dropdown-item d-flex align-items-center"
+            data-bs-theme-value="light"
+          >
+            <i class="bi bi-sun-fill me-2 opacity-50"></i> Light
+            <i class="bi bi-check2 ms-auto d-none"></i>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="dropdown-item d-flex align-items-center"
+            data-bs-theme-value="dark"
+          >
+            <i class="bi bi-moon-stars-fill me-2 opacity-50"></i> Dark
+            <i class="bi bi-check2 ms-auto d-none"></i>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="dropdown-item d-flex align-items-center active"
+            data-bs-theme-value="auto"
+          >
+            <i class="bi bi-circle-half me-2 opacity-50"></i> Auto
+            <i class="bi bi-check2 ms-auto d-none"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div id="header-placeholder"></div>  <!-- เพิ่ม header-placeholder -->
+
+  <div class="container-fluid">
+    <div class="row" style="min-height:100vh; align-items: stretch;">
+      <div id="navbar-placeholder" class="col-md-3 col-lg-2 p-0"></div>
+
+        <!-- ─── Main Content ─── -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <!-- Header -->
+          <div
+            class="d-flex justify-content-between align-items-center pt-4 pb-3"
+          >
+            <h2 class="fw-bold">Employees</h2>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-primary shadow-sm"
+                onclick="openAddModal()"
+              >
+                <i class="bi bi-plus-lg"></i> New Employee
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Summary -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="stat-card shadow-sm d-flex align-items-center">
+                <div class="rounded-circle bg-primary-subtle p-3 me-3">
+                  <i class="bi bi-people text-primary"></i>
+                </div>
+                <div>
+                  <small class="text-muted">Total Employees</small>
+                  <h4 class="mb-0 fw-bold" id="totalCount">—</h4>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card shadow-sm d-flex align-items-center">
+                <div class="rounded-circle bg-danger-subtle p-3 me-3">
+                  <i class="bi bi-shield-fill text-danger"></i>
+                </div>
+                <div>
+                  <small class="text-muted">Admin</small>
+                  <h4 class="mb-0 fw-bold" id="adminCount">—</h4>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-card shadow-sm d-flex align-items-center">
+                <div
+                  class="rounded-circle bg-purple-subtle p-3 me-3"
+                  style="background: rgba(147, 51, 234, 0.15)"
+                >
+                  <i class="bi bi-person-badge" style="color: #9333ea"></i>
+                </div>
+                <div>
+                  <small class="text-muted">Manager</small>
+                  <h4 class="mb-0 fw-bold" id="managerCount">—</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Bar -->
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 bg-body-tertiary p-2 rounded-3 border shadow-sm"
+          >
+            <div class="input-group w-50">
+              <span class="input-group-text bg-transparent border-0"
+                ><i class="bi bi-search"></i
+              ></span>
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control border-0 bg-transparent"
+                placeholder="Search Employee..."
+                oninput="applyFilter()"
+              />
+            </div>
+            <div class="d-flex gap-2 pe-2">
+              <select
+                id="roleFilter"
+                class="form-select form-select-sm border"
+                onchange="applyFilter()"
+                style="width: 130px"
+              >
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Employee Grid -->
+          <div class="row g-4" id="employeeGrid">
+            <!-- filled by JS -->
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         ADD / EDIT MODAL
+    ════════════════════════════════════════════ -->
+    <div class="modal fade" id="empModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="empModalTitle">New Employee</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body pt-2">
+            <input type="hidden" id="empEmail" />
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold small"
+                >Email <span class="text-danger">*</span></label
+              >
+              <input
+                type="email"
+                id="empEmailInput"
+                class="form-control rounded-3"
+                placeholder="email@example.com"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small"
+                >ชื่อ-นามสกุล <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                id="empFullName"
+                class="form-control rounded-3"
+                placeholder="ชื่อ นามสกุล"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">เบอร์โทรศัพท์</label>
+              <input
+                type="text"
+                id="empPhone"
+                class="form-control rounded-3"
+                placeholder="08x-xxx-xxxx"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small"
+                >Role <span class="text-danger">*</span></label
+              >
+              <select id="empRole" class="form-select rounded-3">
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+              </select>
+            </div>
+            <div class="mb-3" id="passwordGroup">
+              <label class="form-label fw-semibold small"
+                >รหัสผ่าน
+                <span class="text-danger" id="passRequired">*</span></label
+              >
+              <input
+                type="password"
+                id="empPassword"
+                class="form-control rounded-3"
+                placeholder="••••••"
+              />
+              <div class="form-text" id="passHint"></div>
+            </div>
+
+            <!-- Alert -->
+            <div id="modalAlert" class="alert py-2 small d-none"></div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button
+              type="button"
+              class="btn btn-outline-secondary rounded-3"
+              data-bs-dismiss="modal"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary rounded-3 px-4"
+              id="empSaveBtn"
+              onclick="saveEmployee()"
+            >
+              <i class="bi bi-save me-1"></i>บันทึก
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         DELETE CONFIRM MODAL
+    ════════════════════════════════════════════ -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-body text-center p-4">
+            <div class="rounded-circle bg-danger-subtle d-inline-flex p-3 mb-3">
+              <i class="bi bi-trash3 text-danger fs-4"></i>
+            </div>
+            <h6 class="fw-bold mb-1">ลบพนักงาน?</h6>
+            <p class="text-muted small mb-3" id="deleteTargetName">—</p>
+            <div class="d-flex gap-2 justify-content-center">
+              <button
+                class="btn btn-outline-secondary btn-sm rounded-3 px-3"
+                data-bs-dismiss="modal"
+              >
+                ยกเลิก
+              </button>
+              <button
+                class="btn btn-danger btn-sm rounded-3 px-3"
+                id="confirmDeleteBtn"
+                onclick="confirmDelete()"
+              >
+                ลบ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts — เหมือน Class page ทุกอย่าง -->
+    <script src="../js/config.js"></script>
+    <script src="admin-common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // ── ใช้ scriptURL จาก config.js (เหมือน Class page) ──
+      function post(body) {
+        return fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(body),
+        }).then((r) => r.json());
+      }
+
+      let allUsers = [];
+      let filtered = [];
+      let deleteTarget = null;
+      let modalMode = "add";
+
+      const empModal = new bootstrap.Modal(document.getElementById("empModal"));
+      const deleteModal = new bootstrap.Modal(
+        document.getElementById("deleteModal"),
+      );
+
+      const PALETTE = [
+        { bg: "rgba(59,130,246,.18)", color: "#2563eb" },
+        { bg: "rgba(16,185,129,.18)", color: "#059669" },
+        { bg: "rgba(239,68,68,.18)", color: "#dc2626" },
+        { bg: "rgba(234,179,8,.18)", color: "#b45309" },
+        { bg: "rgba(168,85,247,.18)", color: "#9333ea" },
+        { bg: "rgba(236,72,153,.18)", color: "#db2777" },
+      ];
+      function getColor(str) {
+        let h = 0;
+        for (let c of str || "") h += c.charCodeAt(0);
+        return PALETTE[h % PALETTE.length];
+      }
+      function initials(name) {
+        const p = (name || "?").trim().split(" ");
+        return p.length >= 2
+          ? (p[0][0] + p[1][0]).toUpperCase()
+          : (name[0] || "?").toUpperCase();
+      }
+
+      async function fetchUsers() {
+        showSkeletons();
+        try {
+          const json = await post({ action: "getUsers" });
+          if (json.status === "success") {
+            allUsers = json.data || [];
+            applyFilter();
+          } else {
+            showError("โหลดข้อมูลไม่สำเร็จ: " + (json.message || ""));
+          }
+        } catch (e) {
+          showError("เชื่อมต่อ API ไม่ได้: " + e.message);
+        }
+      }
+
+      function applyFilter() {
+        const q = (
+          document.getElementById("searchInput").value || ""
+        ).toLowerCase();
+        const role = (
+          document.getElementById("roleFilter").value || ""
+        ).toLowerCase();
+        filtered = allUsers.filter((u) => {
+          const matchQ =
+            !q ||
+            (u.fullName + " " + u.email + " " + (u.phone || ""))
+              .toLowerCase()
+              .includes(q);
+          const matchRole = !role || (u.role || "").toLowerCase() === role;
+          return matchQ && matchRole;
+        });
+        updateStats();
+        renderCards();
+      }
+
+      function updateStats() {
+        document.getElementById("totalCount").textContent = allUsers.length;
+        document.getElementById("adminCount").textContent = allUsers.filter(
+          (u) => (u.role || "").toLowerCase() === "admin",
+        ).length;
+        document.getElementById("managerCount").textContent = allUsers.filter(
+          (u) => (u.role || "").toLowerCase() === "manager",
+        ).length;
+      }
+
+      function renderCards() {
+        const grid = document.getElementById("employeeGrid");
+        grid.innerHTML = "";
+        if (filtered.length === 0) {
+          grid.innerHTML =
+            '<div class="col-12 text-center py-5 text-muted"><i class="bi bi-people fs-1 d-block mb-2 opacity-25"></i>ไม่พบข้อมูลพนักงาน</div>';
+          return;
+        }
+        filtered.forEach((u) => {
+          const col = getColor(u.fullName);
+          const ini = initials(u.fullName);
+          const role = (u.role || "guest").toLowerCase();
+          const roleBadge =
+            role === "admin"
+              ? `<span class="role-badge role-admin"><i class="bi bi-shield-fill me-1"></i>Admin</span>`
+              : role === "manager"
+                ? `<span class="role-badge role-manager"><i class="bi bi-person-badge me-1"></i>Manager</span>`
+                : `<span class="role-badge role-guest">${u.role || "Guest"}</span>`;
+          const emailSafe = (u.email || "").replace(/'/g, "\\'");
+          const nameSafe = (u.fullName || "").replace(/'/g, "\\'");
+          const card = document.createElement("div");
+          card.className = "col-md-6 col-xl-4";
+          card.innerHTML = `
+            <div class="employee-card p-3 shadow-sm">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="emp-avatar" style="background:${col.bg}; color:${col.color}">${ini}</div>
+                  <div>
+                    <h6 class="mb-0 fw-bold">${u.fullName || "-"}</h6>
+                    <small class="text-muted">${u.email || ""}</small>
+                  </div>
+                </div>
+                <div class="dropdown card-actions">
+                  <button class="btn btn-link text-muted p-0" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                    <li><a class="dropdown-item" href="#" onclick="openEditModal('${emailSafe}'); return false;">
+                      <i class="bi bi-pencil me-2 text-primary"></i>แก้ไข
+                    </a></li>
+                    <li><hr class="dropdown-divider my-1"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="openDeleteModal('${emailSafe}','${nameSafe}'); return false;">
+                      <i class="bi bi-trash3 me-2"></i>ลบ
+                    </a></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <small class="text-muted d-block">Mobile</small>
+                  <small class="text-body">${u.phone && u.phone !== "-" ? u.phone : "—"}</small>
+                </div>
+                <div class="col-6">
+                  <small class="text-muted d-block">Email</small>
+                  <small class="text-body text-truncate d-block">${u.email || "-"}</small>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                ${roleBadge}
+                <span class="status-badge status-active">Active</span>
+              </div>
+            </div>`;
+          grid.appendChild(card);
+        });
+      }
+
+      function showSkeletons() {
+        const grid = document.getElementById("employeeGrid");
+        grid.innerHTML = "";
+        for (let i = 0; i < 6; i++) {
+          grid.innerHTML += `
+            <div class="col-md-6 col-xl-4">
+              <div class="skeleton-card shadow-sm">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <div class="skeleton rounded-circle" style="width:46px;height:46px;flex-shrink:0"></div>
+                  <div class="flex-grow-1">
+                    <div class="skeleton mb-1" style="height:14px;width:70%"></div>
+                    <div class="skeleton" style="height:11px;width:50%"></div>
+                  </div>
+                </div>
+                <div class="skeleton mb-2" style="height:11px;width:100%"></div>
+                <div class="skeleton" style="height:11px;width:60%"></div>
+              </div>
+            </div>`;
+        }
+      }
+
+      function showError(msg) {
+        document.getElementById("employeeGrid").innerHTML = `
+          <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-exclamation-triangle fs-1 d-block mb-2 text-danger opacity-50"></i>
+            ${msg}
+          </div>`;
+      }
+
+      function openAddModal() {
+        modalMode = "add";
+        document.getElementById("empModalTitle").textContent = "New Employee";
+        document.getElementById("empEmail").value = "";
+        document.getElementById("empEmailInput").value = "";
+        document.getElementById("empEmailInput").disabled = false;
+        document.getElementById("empFullName").value = "";
+        document.getElementById("empPhone").value = "";
+        document.getElementById("empRole").value = "admin";
+        document.getElementById("empPassword").value = "";
+        document.getElementById("passRequired").classList.remove("d-none");
+        document.getElementById("passHint").textContent = "";
+        hideModalAlert();
+        empModal.show();
+      }
+
+      function openEditModal(email) {
+        const u = allUsers.find((x) => x.email === email);
+        if (!u) return;
+        modalMode = "edit";
+        document.getElementById("empModalTitle").textContent = "แก้ไขพนักงาน";
+        document.getElementById("empEmail").value = u.email;
+        document.getElementById("empEmailInput").value = u.email;
+        document.getElementById("empEmailInput").disabled = true;
+        document.getElementById("empFullName").value = u.fullName || "";
+        document.getElementById("empPhone").value =
+          u.phone && u.phone !== "-" ? u.phone : "";
+        document.getElementById("empRole").value = (
+          u.role || "admin"
+        ).toLowerCase();
+        document.getElementById("empPassword").value = "";
+        document.getElementById("passRequired").classList.add("d-none");
+        document.getElementById("passHint").textContent =
+          "เว้นว่างถ้าไม่ต้องการเปลี่ยนรหัสผ่าน";
+        hideModalAlert();
+        empModal.show();
+      }
+
+      async function saveEmployee() {
+        const email =
+          modalMode === "add"
+            ? document.getElementById("empEmailInput").value.trim()
+            : document.getElementById("empEmail").value.trim();
+        const fullName = document.getElementById("empFullName").value.trim();
+        const phone = document.getElementById("empPhone").value.trim();
+        const role = document.getElementById("empRole").value;
+        const password = document.getElementById("empPassword").value;
+
+        if (!email || !fullName) {
+          showModalAlert("danger", "กรุณากรอก Email และชื่อ-นามสกุล");
+          return;
+        }
+        if (modalMode === "add" && !password) {
+          showModalAlert("danger", "กรุณากรอกรหัสผ่าน");
+          return;
+        }
+
+        const btn = document.getElementById("empSaveBtn");
+        btn.disabled = true;
+        btn.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-1"></span>กำลังบันทึก...';
+        try {
+          const action = modalMode === "add" ? "addUser" : "updateUser";
+          const json = await post({
+            action,
+            email,
+            fullName,
+            phone: phone || "-",
+            role,
+            password,
+          });
+          if (json.status === "success") {
+            showModalAlert("success", "บันทึกสำเร็จ!");
+            await fetchUsers();
+            setTimeout(() => empModal.hide(), 900);
+          } else {
+            showModalAlert("danger", json.message || "เกิดข้อผิดพลาด");
+          }
+        } catch (e) {
+          showModalAlert("danger", "เชื่อมต่อไม่ได้: " + e.message);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-save me-1"></i>บันทึก';
+      }
+
+      function openDeleteModal(email, name) {
+        deleteTarget = email;
+        document.getElementById("deleteTargetName").textContent = name || email;
+        deleteModal.show();
+      }
+
+      async function confirmDelete() {
+        if (!deleteTarget) return;
+        const btn = document.getElementById("confirmDeleteBtn");
+        btn.disabled = true;
+        btn.innerHTML =
+          '<span class="spinner-border spinner-border-sm"></span>';
+        try {
+          const json = await post({
+            action: "deleteUser",
+            email: deleteTarget,
+          });
+          if (json.status === "success") {
+            deleteModal.hide();
+            await fetchUsers();
+          } else alert("ลบไม่สำเร็จ: " + (json.message || ""));
+        } catch (e) {
+          alert("เชื่อมต่อไม่ได้: " + e.message);
+        }
+        btn.disabled = false;
+        btn.innerHTML = "ลบ";
+        deleteTarget = null;
+      }
+
+      function showModalAlert(type, msg) {
+        const el = document.getElementById("modalAlert");
+        el.className = `alert alert-${type} py-2 small`;
+        el.textContent = msg;
+      }
+      function hideModalAlert() {
+        document.getElementById("modalAlert").className =
+          "alert py-2 small d-none";
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof loadAdminShell === "function") loadAdminShell();
+        fetchUsers();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+<style>
+  html, body {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+  }
+
+  html.page-loaded, body.page-loaded {
+    opacity: 1;
+  }
+
+  html.page-fade-out, body.page-fade-out {
+    opacity: 0;
+  }
+</style>
+<script>
+  (function() {
+    const root = document.documentElement;
+    let body = document.body;
+
+    function showPage() {
+      body = body || document.body;
+      root.classList.add('page-loaded');
+      if (body) body.classList.add('page-loaded');
+    }
+
+    function fadeOut() {
+      body = body || document.body;
+      root.classList.remove('page-loaded');
+      if (body) body.classList.remove('page-loaded');
+      root.classList.add('page-fade-out');
+      if (body) body.classList.add('page-fade-out');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        requestAnimationFrame(showPage);
+      });
+    } else {
+      requestAnimationFrame(showPage);
+    }
+
+    window.fadeAndNavigate = function(url, top = false, replace = false) {
+      fadeOut();
+      setTimeout(function() {
+        if (replace) {
+          window.location.replace(url);
+        } else if (top) {
+          window.open(url, '_top');
+        } else {
+          window.location.href = url;
+        }
+      }, 250);
+    };
+
+    document.addEventListener('click', function(event) {
+      const anchor = event.target.closest('a[href]');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute('href');
+      const target = anchor.getAttribute('target');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      if (target && target !== '_self') return;
+
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.origin !== window.location.origin) return;
+      } catch (e) {
+        return;
+      }
+
+      event.preventDefault();
+      fadeOut();
+      setTimeout(function() {
+        window.location.href = href;
+      }, 250);
+    });
+  })();
+</script>
+ 

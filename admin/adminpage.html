@@ -1,0 +1,1132 @@
+  <!--admin-dashboard-->
+  <!doctype html>
+  <html lang="en" data-bs-theme="auto">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta
+        http-equiv="Cache-Control"
+        content="no-cache, no-store, must-revalidate"
+      />
+      <meta http-equiv="Pragma" content="no-cache" />
+      <meta http-equiv="Expires" content="0" />
+      <title>Dashboard — DroneBot Thailand</title>
+      <script src="../assets/js/color-modes.js"></script>
+      <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet" />
+      <link href="../css/dashboard.css" rel="stylesheet" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+      />
+      <script>
+        (function () {
+          const authStatus = sessionStorage.getItem("isLoggedIn");
+          if (authStatus !== "true") window.location.replace("adminlog.html");
+        })();
+      </script>
+
+      <style>
+        /* ══════════════════════════════════════════════
+          CSS VARIABLES — light / dark auto via Bootstrap
+        ══════════════════════════════════════════════ */
+        :root {
+          --db-red: #dc2424;
+          --db-red-dark: #b91c1c;
+          --db-red-dim: rgba(220, 36, 36, 0.12);
+          --db-red-glow: rgba(220, 36, 36, 0.25);
+
+          /* light mode */
+          --db-card-bg: #ffffff;
+          --db-card-border: #e5e7eb;
+          --db-header-bg: linear-gradient(
+            135deg,
+            #111827 0%,
+            #1f2937 60%,
+            #450a0a 100%
+          );
+          --db-body-bg: #f3f4f6;
+          --db-text-primary: #111827;
+          --db-text-secondary: #6b7280;
+          --db-text-muted: #9ca3af;
+          --db-row-hover: #fef2f2;
+          --db-thead-bg: #f9fafb;
+          --db-divider: #f3f4f6;
+          --db-tag-done-bg: #fee2e2;
+          --db-tag-done-fg: #dc2424;
+          --db-tag-end-bg: #f3f4f6;
+          --db-tag-end-fg: #6b7280;
+          --db-btn-ghost-bg: #f3f4f6;
+          --db-btn-ghost-hover: #fee2e2;
+        }
+
+        [data-bs-theme="dark"] {
+          --db-card-bg: #1e1e2e;
+          --db-card-border: #2d2d3f;
+          --db-body-bg: #13131f;
+          --db-text-primary: #f1f5f9;
+          --db-text-secondary: #94a3b8;
+          --db-text-muted: #64748b;
+          --db-row-hover: rgba(220, 36, 36, 0.07);
+          --db-thead-bg: rgba(255, 255, 255, 0.04);
+          --db-divider: rgba(255, 255, 255, 0.06);
+          --db-tag-done-bg: rgba(220, 36, 36, 0.18);
+          --db-tag-done-fg: #fca5a5;
+          --db-tag-end-bg: rgba(255, 255, 255, 0.08);
+          --db-tag-end-fg: #94a3b8;
+          --db-btn-ghost-bg: rgba(255, 255, 255, 0.07);
+          --db-btn-ghost-hover: rgba(220, 36, 36, 0.18);
+        }
+
+        /* ── Base ── */
+        body {
+          font-family: "Kanit", sans-serif;
+        }
+
+        /* คืนค่าฟอนต์ให้ Navbar เพื่อป้องกันเลย์เอาต์เพี้ยน */
+        .sidebar,
+        .navbar,
+        .offcanvas {
+          font-family: var(--bs-font-sans-serif) !important;
+        }
+
+        .sidebar .nav-link.active {
+          color: #dc2424;
+        }
+        .bi {
+          vertical-align: -0.125em;
+          fill: currentColor;
+        }
+        .btn-bd-primary {
+          --bd-violet-bg: #dc2424;
+          --bs-btn-font-weight: 600;
+          --bs-btn-color: #fff;
+          --bs-btn-bg: var(--bd-violet-bg);
+          --bs-btn-border-color: var(--bd-violet-bg);
+          --bs-btn-hover-bg: #b91c1c;
+          --bs-btn-hover-border-color: #b91c1c;
+        }
+        .bd-mode-toggle {
+          z-index: 1500;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* ── Dashboard wrapper ── */
+        .db-main {
+          padding: 24px 28px 40px;
+        }
+
+        /* ── Page title bar ── */
+        .db-titlebar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 24px;
+          padding-bottom: 18px;
+          border-bottom: 1px solid var(--db-card-border);
+        }
+        .db-titlebar h1 {
+          font-size: 22px;
+          font-weight: 800;
+          color: var(--db-text-primary);
+          margin: 0;
+          letter-spacing: -0.3px;
+        }
+        .db-titlebar p {
+          font-size: 12px;
+          color: var(--db-text-muted);
+          margin: 2px 0 0;
+        }
+
+        /* ── Add Event button ── */
+        .db-add-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          background: var(--db-red);
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          padding: 10px 20px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          letter-spacing: 0.2px;
+          box-shadow: 0 4px 14px var(--db-red-glow);
+          transition: all 0.2s;
+        }
+        .db-add-btn:hover {
+          background: var(--db-red-dark);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 20px var(--db-red-glow);
+        }
+        .db-add-btn svg {
+          width: 14px;
+          height: 14px;
+        }
+
+        /* ── Panel card ── */
+        .db-panel {
+          background: var(--db-card-bg);
+          border: 1px solid var(--db-card-border);
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+          margin-bottom: 24px;
+          transition: box-shadow 0.3s;
+        }
+        .db-panel:hover {
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ── Panel header ── */
+        .db-panel-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 14px 20px;
+          background: var(--db-header-bg);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .db-panel-header-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .db-panel-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--db-red);
+          box-shadow: 0 0 8px var(--db-red);
+          flex-shrink: 0;
+        }
+        .db-panel-title {
+          color: #f9fafb;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.3px;
+        }
+        .db-panel-subtitle {
+          color: #fca5a5;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        /* ── Nav buttons in header ── */
+        .db-nav-btn {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          color: #e5e7eb;
+          border-radius: 7px;
+          padding: 5px 14px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          line-height: 1.4;
+        }
+        .db-nav-btn:hover {
+          background: rgba(255, 255, 255, 0.16);
+        }
+        .db-nav-btn.primary {
+          background: var(--db-red);
+          border-color: var(--db-red);
+          color: #fff;
+          box-shadow: 0 2px 8px rgba(220, 36, 36, 0.35);
+        }
+        .db-nav-btn.primary:hover {
+          background: var(--db-red-dark);
+        }
+
+        /* ── Calendar iframe wrapper ── */
+        .db-calendar-wrap {
+          height: 580px;
+        }
+        .db-calendar-wrap iframe {
+          display: block;
+          width: 100%;
+          height: 100%;
+          border: 0;
+        }
+
+        /* ── Activities table ── */
+        .db-act-body {
+          padding: 0;
+          overflow-x: auto;
+        }
+
+        table.db-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 600px;
+        }
+        .db-table thead tr {
+          background: var(--db-thead-bg);
+          border-bottom: 2px solid var(--db-card-border);
+        }
+        .db-table th {
+          padding: 10px 16px;
+          font-size: 10px;
+          font-weight: 800;
+          color: var(--db-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.7px;
+          text-align: left;
+          white-space: nowrap;
+        }
+        .db-table th:last-child {
+          text-align: center;
+        }
+        .db-table td {
+          padding: 13px 16px;
+          vertical-align: middle;
+          border-bottom: 1px solid var(--db-divider);
+          color: var(--db-text-primary);
+        }
+        .db-table tbody tr:last-child td {
+          border-bottom: none;
+        }
+        .db-table tbody tr {
+          transition: background 0.15s;
+        }
+        .db-table tbody tr:hover {
+          background: var(--db-row-hover);
+        }
+
+        /* date cell */
+        .db-date-cell {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .db-date-day {
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--db-text-primary);
+        }
+        .db-date-year {
+          font-size: 10px;
+          color: var(--db-text-muted);
+        }
+
+        /* time tags */
+        .db-time-tag {
+          display: inline-block;
+          padding: 2px 8px;
+          border-radius: 5px;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.1px;
+        }
+        .db-time-start {
+          background: var(--db-tag-done-bg);
+          color: var(--db-tag-done-fg);
+        }
+        .db-time-end {
+          background: var(--db-tag-end-bg);
+          color: var(--db-tag-end-fg);
+        }
+        .db-time-sep {
+          color: var(--db-text-muted);
+          margin: 0 4px;
+          font-size: 11px;
+        }
+
+        /* event title */
+        .db-ev-title {
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--db-text-primary);
+        }
+        .db-ev-desc {
+          font-size: 11px;
+          color: var(--db-text-muted);
+          margin-top: 2px;
+        }
+
+        /* location */
+        .db-location {
+          font-size: 12px;
+          color: var(--db-text-secondary);
+        }
+
+        /* action buttons */
+        .db-act-btns {
+          display: flex;
+          gap: 6px;
+          justify-content: center;
+        }
+        .db-icon-btn {
+          width: 30px;
+          height: 30px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--db-card-border);
+          border-radius: 7px;
+          background: var(--db-btn-ghost-bg);
+          color: var(--db-text-secondary);
+          cursor: pointer;
+          font-size: 12px;
+          transition: all 0.15s;
+          text-decoration: none;
+        }
+        .db-icon-btn:hover {
+          background: var(--db-btn-ghost-hover);
+          color: var(--db-red);
+          border-color: var(--db-red);
+        }
+        .db-icon-btn.del:hover {
+          background: rgba(220, 36, 36, 0.12);
+          color: var(--db-red);
+          border-color: var(--db-red);
+        }
+
+        /* empty / loading state */
+        .db-empty {
+          text-align: center;
+          padding: 48px 20px;
+          color: var(--db-text-muted);
+          font-size: 13px;
+        }
+        .db-spinner {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          border: 3px solid transparent;
+          border-top-color: var(--db-red);
+          animation: spin 0.7s linear infinite;
+          margin: 0 auto 12px;
+        }
+
+        /* footer count */
+        .db-act-footer {
+          padding: 10px 18px;
+          font-size: 11px;
+          color: var(--db-text-muted);
+          text-align: right;
+          border-top: 1px solid var(--db-divider);
+        }
+
+        /* ── Event Modal ── */
+        .db-modal-backdrop {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: rgba(0, 0, 0, 0.65);
+          backdrop-filter: blur(4px);
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+        .db-modal-backdrop.open {
+          display: flex;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .db-modal {
+          background: var(--db-card-bg);
+          border: 1px solid var(--db-card-border);
+          border-radius: 20px;
+          width: 100%;
+          max-width: 440px;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+          overflow: hidden;
+          position: relative;
+        }
+        .db-modal-topbar {
+          height: 4px;
+          background: var(--db-red);
+        }
+        .db-modal-head {
+          padding: 24px 28px 16px;
+          border-bottom: 1px solid var(--db-card-border);
+        }
+        .db-modal-head h3 {
+          font-size: 18px;
+          font-weight: 800;
+          color: var(--db-text-primary);
+          margin: 0 0 3px;
+        }
+        .db-modal-head p {
+          font-size: 12px;
+          color: var(--db-text-muted);
+          margin: 0;
+        }
+
+        .db-modal-body {
+          padding: 20px 28px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .db-field label {
+          display: block;
+          font-size: 10px;
+          font-weight: 800;
+          color: var(--db-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.6px;
+          margin-bottom: 6px;
+        }
+        .db-field input {
+          width: 100%;
+          padding: 10px 14px;
+          background: var(--db-thead-bg);
+          border: 1.5px solid var(--db-card-border);
+          border-radius: 10px;
+          color: var(--db-text-primary);
+          font-size: 14px;
+          outline: none;
+          box-sizing: border-box;
+          transition: border-color 0.2s;
+          font-family: inherit;
+        }
+        .db-field input:focus {
+          border-color: var(--db-red);
+          background: var(--db-card-bg);
+        }
+
+        .db-field-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .db-modal-foot {
+          padding: 16px 28px 24px;
+          display: flex;
+          gap: 10px;
+        }
+        .db-modal-cancel {
+          flex: 1;
+          padding: 11px;
+          background: transparent;
+          border: 1.5px solid var(--db-card-border);
+          border-radius: 10px;
+          color: var(--db-text-secondary);
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-family: inherit;
+        }
+        .db-modal-cancel:hover {
+          border-color: var(--db-red);
+          color: var(--db-red);
+        }
+        .db-modal-save {
+          flex: 2;
+          padding: 11px;
+          background: var(--db-red);
+          border: none;
+          border-radius: 10px;
+          color: #fff;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 3px 12px var(--db-red-glow);
+          font-family: inherit;
+        }
+        .db-modal-save:hover {
+          background: var(--db-red-dark);
+          transform: translateY(-1px);
+        }
+        .db-modal-save:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+          .db-main {
+            padding: 16px;
+          }
+          .db-field-row {
+            grid-template-columns: 1fr;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      <div id="icons-placeholder"></div>
+
+      <!-- ── SVG symbol defs (Bootstrap icons) ── -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+        <symbol id="check2" viewBox="0 0 16 16">
+          <path
+            d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"
+          />
+        </symbol>
+        <symbol id="circle-half" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z" />
+        </symbol>
+        <symbol id="moon-stars-fill" viewBox="0 0 16 16">
+          <path
+            d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"
+          />
+        </symbol>
+        <symbol id="sun-fill" viewBox="0 0 16 16">
+          <path
+            d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8z"
+          />
+        </symbol>
+      </svg>
+
+      <!-- Theme toggle -->
+      <div
+        class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle"
+      >
+        <button
+          class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center"
+          id="bd-theme"
+          type="button"
+          aria-expanded="false"
+          data-bs-toggle="dropdown"
+          aria-label="Toggle theme (auto)"
+        >
+          <svg class="bi my-1 theme-icon-active" aria-hidden="true">
+            <use href="#circle-half"></use>
+          </svg>
+          <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+        </button>
+        <ul
+          class="dropdown-menu dropdown-menu-end shadow"
+          aria-labelledby="bd-theme-text"
+        >
+          <li>
+            <button
+              type="button"
+              class="dropdown-item d-flex align-items-center"
+              data-bs-theme-value="light"
+              aria-pressed="false"
+            >
+              <svg class="bi me-2 opacity-50" aria-hidden="true">
+                <use href="#sun-fill"></use></svg
+              >Light
+              <svg class="bi ms-auto d-none" aria-hidden="true">
+                <use href="#check2"></use>
+              </svg>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="dropdown-item d-flex align-items-center"
+              data-bs-theme-value="dark"
+              aria-pressed="false"
+            >
+              <svg class="bi me-2 opacity-50" aria-hidden="true">
+                <use href="#moon-stars-fill"></use></svg
+              >Dark
+              <svg class="bi ms-auto d-none" aria-hidden="true">
+                <use href="#check2"></use>
+              </svg>
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="dropdown-item d-flex align-items-center active"
+              data-bs-theme-value="auto"
+              aria-pressed="true"
+            >
+              <svg class="bi me-2 opacity-50" aria-hidden="true">
+                <use href="#circle-half"></use></svg
+              >Auto
+              <svg class="bi ms-auto d-none" aria-hidden="true">
+                <use href="#check2"></use>
+              </svg>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Header placeholder — ไม่แตะ -->
+      <div id="header-placeholder"></div>
+
+      <div class="container-fluid">
+        <div class="row" style="min-height:100vh; align-items: stretch;">
+          <!-- Sidebar — ไม่แตะ -->
+          <div id="navbar-placeholder" class="col-md-3 col-lg-2 p-0"></div>
+          <!-- ════════════════════════════════════════
+              MAIN CONTENT — redesigned
+          ════════════════════════════════════════ -->
+          <main class="col-md-9 ms-sm-auto col-lg-10 db-main">
+            <!-- Title bar -->
+            <div class="db-titlebar">
+              <div>
+                <h1>Dashboard</h1>
+                <p>ภาพรวมกิจกรรมและปฏิทินของ DroneBot Thailand</p>
+              </div>
+              <button class="db-add-btn" onclick="openAddEventModal()">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add Event
+              </button>
+            </div>
+
+            <!-- ── Calendar Panel ── -->
+            <div class="db-panel">
+              <div class="db-panel-header">
+                <div class="db-panel-header-left">
+                  <div class="db-panel-dot"></div>
+                  <span class="db-panel-title">📅 Schedule Calendar</span>
+                </div>
+              </div>
+              <div class="db-calendar-wrap">
+                <iframe
+                  id="adminCalendarIframe"
+                  src="https://calendar.google.com/calendar/embed?src=dronebot.thailand%40gmail.com&ctz=Asia%2FBangkok&showTitle=0&showPrint=0&showTabs=0&showCalendars=0"
+                  frameborder="0"
+                  scrolling="no"
+                >
+                </iframe>
+              </div>
+            </div>
+
+            <!-- ── Activities Panel ── -->
+            <div class="db-panel">
+              <div class="db-panel-header">
+                <div class="db-panel-header-left">
+                  <div class="db-panel-dot"></div>
+                  <span class="db-panel-title">
+                    📋 Activities —&nbsp;<span
+                      id="act-month-label"
+                      class="db-panel-subtitle"
+                    ></span>
+                  </span>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center">
+                  <button class="db-nav-btn" onclick="changeMonth(-1)">
+                    ‹ Prev
+                  </button>
+                  <button class="db-nav-btn primary" onclick="goToday()">
+                    Today
+                  </button>
+                  <button class="db-nav-btn" onclick="changeMonth(1)">
+                    Next ›
+                  </button>
+                  <button
+                    class="db-nav-btn"
+                    onclick="loadActivitiesForCurrentMonth()"
+                    title="Refresh"
+                  >
+                    ↻
+                  </button>
+                </div>
+              </div>
+
+              <div class="db-act-body" id="dash-activities-list">
+                <div class="db-empty">
+                  <!-- Skeleton Loading for table -->
+                  <table class="db-table">
+                    <thead>
+                      <tr>
+                        <th style="width:110px">Date</th>
+                        <th style="width:150px">Time</th>
+                        <th>Event</th>
+                        <th style="width:160px">Location</th>
+                        <th style="width:90px;text-align:center">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><div class="skeleton h-4 w-full"></div></td>
+                        <td><div class="skeleton h-4 w-full"></div></td>
+                        <td><div class="skeleton h-4 w-full"></div></td>
+                        <td><div class="skeleton h-4 w-full"></div></td>
+                        <td><div class="skeleton h-4 w-full"></div></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════
+          ADD / EDIT EVENT MODAL
+      ════════════════════════════════════════ -->
+      <div
+        class="db-modal-backdrop"
+        id="eventModal"
+        onclick="handleBackdropClick(event)"
+      >
+        <div class="db-modal">
+          <div class="db-modal-topbar"></div>
+          <div class="db-modal-head">
+            <h3 id="modalTitle">Add Event</h3>
+            <p>Fill in the event details below.</p>
+          </div>
+          <div class="db-modal-body">
+            <div class="db-field">
+              <label>Event Name</label>
+              <input
+                id="ev-title"
+                type="text"
+                placeholder="e.g. Drone Training Class"
+              />
+            </div>
+            <div class="db-field">
+              <label>Date</label>
+              <input id="ev-date" type="date" />
+            </div>
+            <div class="db-field-row">
+              <div class="db-field">
+                <label>Start Time</label>
+                <input id="ev-start" type="time" />
+              </div>
+              <div class="db-field">
+                <label>End Time</label>
+                <input id="ev-end" type="time" />
+              </div>
+            </div>
+            <div class="db-field">
+              <label>Location</label>
+              <input
+                id="ev-location"
+                type="text"
+                placeholder="e.g. Hat Yai Training Center"
+              />
+            </div>
+          </div>
+          <div class="db-modal-foot">
+            <button class="db-modal-cancel" onclick="closeEventModal()">
+              Cancel
+            </button>
+            <button class="db-modal-save" id="modalSaveBtn" onclick="saveEvent()">
+              Save Event
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════
+          SCRIPTS
+      ════════════════════════════════════════ -->
+      <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+      <script
+        src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"
+        crossorigin="anonymous"
+      ></script>
+      <script src="../js/dashboard.js"></script>
+      <script src="../js/config.js"></script>
+      <script src="admin-common.js"></script>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          if (typeof loadAdminShell === "function") loadAdminShell();
+        });
+      </script>
+
+      <!-- ── Activities logic ── -->
+      <script>
+        (function () {
+          const MONTHS = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          let currentYear, currentMonth;
+          let allActivities = [];
+
+          function init() {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+            updateMonthLabel();
+            loadActivitiesForCurrentMonth();
+          }
+
+          function updateMonthLabel() {
+            const el = document.getElementById("act-month-label");
+            if (el) el.textContent = MONTHS[currentMonth] + " " + currentYear;
+          }
+
+          window.loadActivitiesForCurrentMonth = function () {
+            const list = document.getElementById("dash-activities-list");
+            if (!list) return;
+            list.innerHTML = `<div class="db-empty"><div class="db-spinner"></div><p style="margin:0">Loading…</p></div>`;
+            updateMonthLabel();
+
+            const url = typeof scriptURL !== "undefined" ? scriptURL : "";
+            if (!url) {
+              showEmpty("scriptURL not defined.");
+              return;
+            }
+
+            fetch(url, {
+              method: "POST",
+              body: JSON.stringify({ action: "getActivities", view: "all" }),
+            })
+              .then((r) => r.json())
+              .then((res) => {
+                if (res.status !== "success") {
+                  showEmpty("Could not load activities.");
+                  return;
+                }
+                const mMap = {
+                  Jan: "01",
+                  Feb: "02",
+                  Mar: "03",
+                  Apr: "04",
+                  May: "05",
+                  Jun: "06",
+                  Jul: "07",
+                  Aug: "08",
+                  Sep: "09",
+                  Oct: "10",
+                  Nov: "11",
+                  Dec: "12",
+                };
+                allActivities = res.data.map((a) => {
+                  const p = a.date.split(" ");
+                  const ds = `${p[2]}-${mMap[p[1]] || "01"}-${p[0].padStart(2, "0")}`;
+                  return { ...a, _dateStr: ds };
+                });
+                filterByMonth();
+              })
+              .catch(() => showEmpty("Connection error. Please try again."));
+          };
+
+          window.filterByMonth = function () {
+            const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
+            renderActivityList(
+              allActivities.filter((a) => a._dateStr.startsWith(prefix)),
+            );
+          };
+
+          function renderActivityList(events) {
+            const list = document.getElementById("dash-activities-list");
+            if (!events.length) {
+              list.innerHTML = `<div class="db-empty"><p style="margin:0">No activities this month.</p></div>`;
+              return;
+            }
+
+            const rows = events
+              .map((a, i) => {
+                const dateLabel = new Date(
+                  a._dateStr + "T00:00:00",
+                ).toLocaleDateString("th-TH", {
+                  day: "numeric",
+                  month: "short",
+                  year: "2-digit",
+                });
+                const locIcon = a.location
+                  ? `<span style="color:var(--db-red);margin-right:4px;">📍</span>${a.location}`
+                  : "—";
+                const escaped = JSON.stringify(a).replace(/"/g, "&quot;");
+                return `
+                <tr>
+                  <td>
+                    <span class="db-date-day">${dateLabel}</span>
+                  </td>
+                  <td>
+                    <span class="db-time-tag db-time-start">${a.startTime}</span>
+                    ${a.endTime ? `<span class="db-time-sep">–</span><span class="db-time-tag db-time-end">${a.endTime}</span>` : ""}
+                  </td>
+                  <td>
+                    <div class="db-ev-title">${a.title}</div>
+                    ${a.description ? `<div class="db-ev-desc">${a.description}</div>` : ""}
+                  </td>
+                  <td class="db-location">${locIcon}</td>
+                  <td>
+                    <div class="db-act-btns">
+                      <button class="db-icon-btn" title="Edit" onclick='openEditModal(${escaped})'>✏️</button>
+                      <button class="db-icon-btn del" title="Delete" onclick="deleteActivity('${a.eventId}')">🗑️</button>
+                    </div>
+                  </td>
+                </tr>`;
+              })
+              .join("");
+
+            list.innerHTML = `
+              <table class="db-table">
+                <thead>
+                  <tr>
+                    <th style="width:110px">Date</th>
+                    <th style="width:150px">Time</th>
+                    <th>Event</th>
+                    <th style="width:160px">Location</th>
+                    <th style="width:90px;text-align:center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+              <div class="db-act-footer">${events.length} event${events.length !== 1 ? "s" : ""}</div>`;
+          }
+
+          function showEmpty(msg) {
+            const list = document.getElementById("dash-activities-list");
+            if (list)
+              list.innerHTML = `<div class="db-empty"><p style="margin:0">${msg}</p></div>`;
+          }
+
+          window.changeMonth = function (delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+              currentMonth = 11;
+              currentYear--;
+            }
+            if (currentMonth > 11) {
+              currentMonth = 0;
+              currentYear++;
+            }
+            updateMonthLabel();
+            loadActivitiesForCurrentMonth();
+            const iframe = document.getElementById("adminCalendarIframe");
+            if (iframe) {
+              const d = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-01`;
+              iframe.src = `https://calendar.google.com/calendar/embed?src=dronebot.thailand%40gmail.com&ctz=Asia%2FBangkok&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&dates=${d.replace(/-/g, "")}%2F${d.replace(/-/g, "")}`;
+            }
+          };
+
+          window.goToday = function () {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+            updateMonthLabel();
+            loadActivitiesForCurrentMonth();
+            const iframe = document.getElementById("adminCalendarIframe");
+            if (iframe)
+              iframe.src = `https://calendar.google.com/calendar/embed?src=dronebot.thailand%40gmail.com&ctz=Asia%2FBangkok&showTitle=0&showPrint=0&showTabs=0&showCalendars=0`;
+          };
+
+          init();
+        })();
+      </script>
+
+      <!-- ── Modal logic ── -->
+      <script>
+        let editingId = null;
+
+        function openAddEventModal() {
+          editingId = null;
+          document.getElementById("modalTitle").textContent = "Add Event";
+          ["ev-title", "ev-date", "ev-start", "ev-end", "ev-location"].forEach(
+            (id) => {
+              document.getElementById(id).value = "";
+            },
+          );
+          document.getElementById("eventModal").classList.add("open");
+        }
+
+        function openEditModal(activity) {
+          editingId = activity.eventId || activity.id;
+          document.getElementById("modalTitle").textContent = "Edit Event";
+          document.getElementById("ev-title").value = activity.title || "";
+          document.getElementById("ev-date").value = activity._dateStr || "";
+          document.getElementById("ev-start").value = activity.startTime || "";
+          document.getElementById("ev-end").value = activity.endTime || "";
+          document.getElementById("ev-location").value = activity.location || "";
+          document.getElementById("eventModal").classList.add("open");
+        }
+
+        function closeEventModal() {
+          document.getElementById("eventModal").classList.remove("open");
+        }
+
+        function handleBackdropClick(e) {
+          if (e.target === document.getElementById("eventModal"))
+            closeEventModal();
+        }
+
+        function saveEvent() {
+          const btn = document.getElementById("modalSaveBtn");
+          const data = {
+            title: document.getElementById("ev-title").value.trim(),
+            date: document.getElementById("ev-date").value,
+            startTime: document.getElementById("ev-start").value,
+            endTime: document.getElementById("ev-end").value,
+            location: document.getElementById("ev-location").value.trim(),
+          };
+          if (!data.title || !data.date) {
+            alert("Please fill in title and date.");
+            return;
+          }
+
+          btn.textContent = "Saving…";
+          btn.disabled = true;
+
+          const action = editingId ? "updateEvent" : "addEvent";
+          if (editingId) data.eventId = editingId;
+
+          fetch(typeof scriptURL !== "undefined" ? scriptURL : "", {
+            method: "POST",
+            body: JSON.stringify({ action, eventId: editingId, data }),
+          })
+            .then((r) => r.json())
+            .then((res) => {
+              if (res.status === "success") {
+                closeEventModal();
+                const iframe = document.getElementById("adminCalendarIframe");
+                if (iframe) iframe.src = iframe.src;
+                loadActivitiesForCurrentMonth();
+              } else {
+                alert("Error: " + (res.message || "Could not save."));
+              }
+            })
+            .catch(() => alert("Connection error."))
+            .finally(() => {
+              btn.textContent = "Save Event";
+              btn.disabled = false;
+            });
+        }
+
+        function deleteActivity(id) {
+          if (!confirm("Delete this event?")) return;
+          fetch(typeof scriptURL !== "undefined" ? scriptURL : "", {
+            method: "POST",
+            body: JSON.stringify({ action: "deleteEvent", eventId: id }),
+          })
+            .then((r) => r.json())
+            .then((res) => {
+              if (res.status === "success") loadActivitiesForCurrentMonth();
+              else alert("Could not delete.");
+            })
+            .catch(() => alert("Connection error."));
+        }
+      </script>
+    </body>
+  </html>

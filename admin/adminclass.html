@@ -1,0 +1,1820 @@
+<!--admin-class-->
+<!doctype html>
+<html lang="th" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Class Management - DroneBot Thailand</title>
+    <!-- ใช้ชุดเดียวกับ Employee page -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link href="../css/dashboard.css" rel="stylesheet" />
+    <link href="../css/adminclass.css" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Theme Logic — ต้องมาก่อน render เสมอ -->
+    <script src="../assets/js/color-modes.js"></script>
+
+    <script>
+      (function () {
+        const authStatus = sessionStorage.getItem("isLoggedIn");
+        if (authStatus !== "true") {
+          window.location.replace("adminlog.html");
+        }
+      })();
+    </script>
+
+    <style>
+      body {
+        font-family: "Kanit", sans-serif;
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+      }
+
+      /* คืนค่าฟอนต์ให้ Navbar เพื่อป้องกันเลย์เอาต์เพี้ยน */
+      .sidebar,
+      .navbar,
+      .offcanvas {
+        font-family: var(--bs-font-sans-serif) !important;
+      }
+
+      /* ─── Tab Switcher ─── */
+      .class-tab-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+      .class-tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 26px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 14px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.25s;
+      }
+      .class-tab-btn.course {
+        background: #2563eb;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+      }
+      .class-tab-btn.course:not(.active) {
+        background: transparent;
+        border-color: #2563eb;
+        color: #2563eb;
+        box-shadow: none;
+      }
+      .class-tab-btn.regular {
+        background: #6b7280;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+      }
+      .class-tab-btn.regular:not(.active) {
+        background: transparent;
+        border-color: #6b7280;
+        color: #6b7280;
+        box-shadow: none;
+      }
+
+      /* ─── Cards — adapts to both light and dark admin theme ─── */
+      .db-student-card {
+        background: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+      .db-student-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        border-color: #e63946;
+      }
+      .db-student-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #e63946, #ff6b6b);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .db-student-card:hover::before {
+        opacity: 1;
+      }
+
+      /* Progress bars */
+      .prog-bar-wrap {
+        display: grid;
+        gap: 4px;
+      }
+      .prog-bar-wrap.s4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .prog-bar-wrap.s6 {
+        grid-template-columns: repeat(6, 1fr);
+      }
+      .prog-seg {
+        height: 7px;
+        border-radius: 4px;
+        background: var(--bs-secondary-bg);
+      }
+      .prog-seg.done-course {
+        background: #10b981;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+      }
+      .prog-seg.done-regular {
+        background: linear-gradient(90deg, #e63946, #ff6b6b);
+        box-shadow: 0 0 6px rgba(230, 57, 70, 0.4);
+      }
+
+      /* Course badge — theme-aware */
+      .course-tag {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: rgba(230, 57, 70, 0.12);
+        color: #e63946;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-bottom-left-radius: 1rem;
+        border-left: 1px solid rgba(230, 57, 70, 0.25);
+        border-bottom: 1px solid rgba(230, 57, 70, 0.25);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Badge progress — theme-aware */
+      .prog-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(230, 57, 70, 0.12);
+        color: #e63946;
+        border-radius: 999px;
+        padding: 2px 10px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .prog-badge.green {
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+      }
+
+      /* Action buttons inside cards */
+      .card-action-btn {
+        width: 100%;
+        padding: 10px;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .card-action-btn.primary {
+        background: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
+      }
+      .card-action-btn.primary:hover {
+        background: #e63946;
+        color: #fff;
+      }
+      .card-action-btn.danger {
+        background: rgba(230, 57, 70, 0.1);
+        color: #e63946;
+      }
+      .card-action-btn.danger:hover {
+        background: #e63946;
+        color: #fff;
+      }
+      .card-action-btn.complete {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .card-action-btn.complete:hover {
+        background: #10b981;
+        color: #fff;
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--bs-secondary-bg) 25%,
+          var(--bs-tertiary-bg) 50%,
+          var(--bs-secondary-bg) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+        display: block;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* helper size classes ที่ใช้ใน skeleton HTML */
+      .h-7px {
+        height: 7px !important;
+      }
+      .h-10px {
+        height: 10px !important;
+      }
+      .h-12px {
+        height: 12px !important;
+      }
+      .h-13px {
+        height: 13px !important;
+      }
+      .h-17px {
+        height: 17px !important;
+      }
+      .h-20px {
+        height: 20px !important;
+      }
+      .h-40px {
+        height: 40px !important;
+      }
+      .w-50px {
+        width: 50px !important;
+      }
+      .w-75px {
+        width: 75px !important;
+      }
+      .w-full {
+        width: 100% !important;
+      }
+      .flex-1 {
+        flex: 1;
+      }
+      .rounded-1rem {
+        border-radius: 1rem !important;
+      }
+      .rounded-bl-1rem {
+        border-bottom-left-radius: 1rem !important;
+      }
+      /* Toolbar inputs */
+      .db-pill-input,
+      .db-pill-select {
+        background: var(--bs-tertiary-bg);
+        border: 2px solid var(--bs-border-color);
+        border-radius: 999px;
+        padding: 10px 18px;
+        color: var(--bs-body-color);
+        font-size: 13px;
+        font-weight: 500;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .db-pill-input:focus,
+      .db-pill-select:focus {
+        border-color: #e63946;
+      }
+      .db-pill-select {
+        appearance: none;
+        padding-right: 36px;
+        cursor: pointer;
+      }
+      .db-search-wrap {
+        position: relative;
+      }
+      .db-search-wrap i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 13px;
+      }
+      .db-search-wrap input {
+        padding-left: 36px;
+      }
+
+      /* Modal */
+      .db-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .db-modal-overlay.open {
+        display: flex;
+      }
+      .db-modal-box {
+        background: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      /* Session checkboxes */
+      .session-tile {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-radius: 1rem;
+        cursor: pointer;
+        border: 2px solid transparent;
+        background: var(--bs-secondary-bg);
+        transition: all 0.2s;
+      }
+      .session-tile.selected {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: #10b981;
+      }
+      .session-tile.selected-regular {
+        background: rgba(230, 57, 70, 0.08);
+        border-color: #e63946;
+      }
+      .check-circle {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .check-circle.active-course {
+        background: #10b981;
+        border-color: #10b981;
+      }
+      .check-circle.active-regular {
+        background: #e63946;
+        border-color: #e63946;
+      }
+
+      /* Step card for regular */
+      .step-card {
+        border: 2px solid var(--bs-border-color);
+        border-radius: 1rem;
+        padding: 12px;
+        transition: all 0.2s;
+      }
+      .step-card.active-step {
+        border-color: #e63946;
+        background: rgba(230, 57, 70, 0.05);
+      }
+      .step-card input,
+      .step-card select {
+        background: var(--bs-secondary-bg);
+        border: 2px solid transparent;
+        border-radius: 0.75rem;
+        padding: 8px 12px;
+        width: 100%;
+        font-size: 13px;
+        color: var(--bs-body-color);
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .step-card input:focus,
+      .step-card select:focus {
+        border-color: #fca5a5;
+      }
+
+      /* Save loading overlay */
+      #saveLoadingOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        backdrop-filter: blur(4px);
+      }
+      #saveLoadingOverlay.show {
+        display: flex;
+      }
+      .spinner {
+        width: 52px;
+        height: 52px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #e63946;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Empty state */
+      .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 60px 20px;
+        border: 2px dashed var(--bs-border-color, #e2e8f0);
+        border-radius: 2rem;
+        color: var(--bs-secondary-color, #9ca3af);
+      }
+
+      /* Add Course/Student modal form inputs */
+      .modal-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--bs-secondary-bg);
+        border: 2px solid var(--bs-border-color);
+        border-radius: 1rem;
+        color: var(--bs-body-color);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .modal-input:focus {
+        border-color: #e63946;
+      }
+      .modal-btn-primary {
+        width: 100%;
+        padding: 13px;
+        border-radius: 1rem;
+        background: #e63946;
+        color: #fff;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .modal-btn-primary:hover {
+        background: #b91c1c;
+      }
+      .modal-btn-secondary {
+        width: 100%;
+        padding: 13px;
+        border-radius: 1rem;
+        background: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
+        font-weight: 700;
+        border: 1px solid var(--bs-border-color);
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .modal-btn-secondary:hover {
+        opacity: 0.7;
+      }
+      .modal-btn-green {
+        width: 100%;
+        padding: 13px;
+        border-radius: 1rem;
+        background: #10b981;
+        color: #fff;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .modal-btn-green:hover {
+        background: #059669;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Save loading overlay -->
+    <div id="saveLoadingOverlay">
+      <div class="spinner"></div>
+      <p style="color: #fff; font-weight: 700; font-size: 16px">
+        กำลังบันทึก...
+      </p>
+    </div>
+
+    <div id="icons-placeholder"></div>
+    <div
+      class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle"
+      style="z-index: 1060"
+    >
+      <button
+        class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center"
+        id="bd-theme"
+        type="button"
+        aria-expanded="false"
+        data-bs-toggle="dropdown"
+        aria-label="Toggle theme (auto)"
+      >
+        <svg class="bi my-1 theme-icon-active" aria-hidden="true">
+          <use href="#circle-half"></use>
+        </svg>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+      </button>
+      <ul
+        class="dropdown-menu dropdown-menu-end shadow"
+        aria-labelledby="bd-theme-text"
+      >
+        <li>
+          <button
+            type="button"
+            class="dropdown-item d-flex align-items-center"
+            data-bs-theme-value="light"
+            aria-pressed="false"
+          >
+            <svg class="bi me-2 opacity-50" aria-hidden="true">
+              <use href="#sun-fill"></use></svg
+            >Light
+            <svg class="bi ms-auto d-none" aria-hidden="true">
+              <use href="#check2"></use>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="dropdown-item d-flex align-items-center"
+            data-bs-theme-value="dark"
+            aria-pressed="false"
+          >
+            <svg class="bi me-2 opacity-50" aria-hidden="true">
+              <use href="#moon-stars-fill"></use></svg
+            >Dark
+            <svg class="bi ms-auto d-none" aria-hidden="true">
+              <use href="#check2"></use>
+            </svg>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="dropdown-item d-flex align-items-center active"
+            data-bs-theme-value="auto"
+            aria-pressed="true"
+          >
+            <svg class="bi me-2 opacity-50" aria-hidden="true">
+              <use href="#circle-half"></use></svg
+            >Auto
+            <svg class="bi ms-auto d-none" aria-hidden="true">
+              <use href="#check2"></use>
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div id="header-placeholder"></div>
+    <div class="container-fluid">
+      <div class="row" style="min-height: 100vh; align-items: stretch">
+        <div id="navbar-placeholder" class="col-md-3 col-lg-2 p-0"></div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+          <!-- Page Header -->
+          <div
+            class="d-flex justify-content-between flex-wrap align-items-center pt-2 pb-3 mb-4 border-bottom"
+          >
+            <div>
+              <h1 class="h2 mb-1" style="font-weight: 800">Classes</h1>
+              <p class="text-body-secondary mb-0" style="font-size: 13px">
+                จัดการคลาสเรียนและความคืบหน้านักเรียน
+              </p>
+            </div>
+          </div>
+
+          <!-- ── Tab Switcher ── -->
+          <div class="class-tab-bar">
+            <button
+              class="class-tab-btn course active"
+              id="tabCourse"
+              onclick="switchTab('course')"
+            >
+              <i class="fas fa-book-open"></i> Course Class
+            </button>
+            <button
+              class="class-tab-btn regular"
+              id="tabRegular"
+              onclick="switchTab('regular')"
+            >
+              <i class="fas fa-chalkboard-teacher"></i> Regular Class
+            </button>
+          </div>
+
+          <!-- ══════════════════════════════════════
+             COURSE CLASS PANEL
+        ══════════════════════════════════════ -->
+          <div id="panelCourse">
+            <!-- Toolbar -->
+            <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+              <!-- Course dropdown -->
+              <div
+                class="position-relative d-flex align-items-center"
+                style="gap: 8px"
+              >
+                <i
+                  class="fas fa-layer-group"
+                  style="color: #e63946; font-size: 14px"
+                ></i>
+                <select
+                  id="courseDropdown"
+                  onchange="loadCourseStudents()"
+                  class="db-pill-select"
+                  style="min-width: 220px"
+                >
+                  <option value="">— Select Course (All) —</option>
+                </select>
+              </div>
+              <!-- Search -->
+              <div class="db-search-wrap flex-grow-1" style="max-width: 300px">
+                <i class="fas fa-search"></i>
+                <input
+                  id="courseSearch"
+                  class="db-pill-input w-100"
+                  placeholder="Search name, nickname..."
+                  onkeyup="if (event.key === 'Enter') loadCourseStudents();"
+                />
+              </div>
+              <button
+                onclick="loadCourseStudents()"
+                class="btn btn-primary rounded-pill px-4"
+                style="font-weight: 700; font-size: 13px"
+              >
+                <i class="fas fa-search me-1"></i> Search
+              </button>
+              <div class="ms-auto d-flex gap-2">
+                <button
+                  onclick="openModal('addCourseModal')"
+                  class="btn btn-outline-secondary rounded-pill px-4"
+                  style="font-weight: 700; font-size: 13px"
+                >
+                  <i class="fas fa-plus me-1"></i> Add Course
+                </button>
+                <button
+                  onclick="openAddCourseStudentModal()"
+                  class="btn btn-dark rounded-pill px-4"
+                  style="font-weight: 700; font-size: 13px"
+                >
+                  <i class="fas fa-user-plus me-1"></i> Add Student
+                </button>
+              </div>
+            </div>
+
+            <!-- Course student grid -->
+            <div id="courseGrid" class="row g-4">
+              <!-- Skeleton Loading -->
+              <div class="col-md-6 col-lg-4">
+                <div class="db-student-card">
+                  <div
+                    class="skeleton w-75px h-20px rounded-bl-1rem position-absolute top-0 end-0"
+                  ></div>
+                  <div
+                    class="d-flex justify-content-between align-items-start mt-2 mb-3"
+                  >
+                    <div class="flex-1">
+                      <div class="skeleton h-17px w-75 mb-1"></div>
+                      <div class="skeleton h-13px w-50"></div>
+                    </div>
+                    <div class="skeleton w-50px h-20px rounded-pill"></div>
+                  </div>
+                  <div class="d-flex gap-2 mb-3 text-body-secondary">
+                    <div class="skeleton h-12px w-100"></div>
+                  </div>
+                  <div class="d-flex gap-2 mb-3 text-body-secondary">
+                    <div class="skeleton h-12px w-100"></div>
+                  </div>
+                  <div class="mb-3">
+                    <div class="skeleton h-10px w-100 mb-2"></div>
+                    <div class="prog-bar-wrap s6">
+                      <div class="skeleton h-7px w-full"></div>
+                      <div class="skeleton h-7px w-full"></div>
+                      <div class="skeleton h-7px w-full"></div>
+                      <div class="skeleton h-7px w-full"></div>
+                      <div class="skeleton h-7px w-full"></div>
+                      <div class="skeleton h-7px w-full"></div>
+                    </div>
+                  </div>
+                  <div class="d-grid gap-2">
+                    <div class="skeleton h-40px w-full rounded-1rem"></div>
+                    <div class="skeleton h-40px w-full rounded-1rem"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4 d-none d-md-block"></div>
+              <div class="col-md-6 col-lg-4 d-none d-lg-block"></div>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════════════════
+             REGULAR CLASS PANEL
+        ══════════════════════════════════════ -->
+          <div id="panelRegular" style="display: none">
+            <!-- Toolbar -->
+            <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+              <div
+                class="position-relative d-flex align-items-center"
+                style="gap: 8px"
+              >
+                <i
+                  class="fas fa-chalkboard-teacher"
+                  style="color: #e63946; font-size: 14px"
+                ></i>
+                <select
+                  id="instructorDropdown"
+                  onchange="loadRegularStudents()"
+                  class="db-pill-select"
+                  style="min-width: 200px"
+                >
+                  <option value="">ครูทั้งหมด</option>
+                </select>
+              </div>
+              <div class="db-search-wrap flex-grow-1" style="max-width: 300px">
+                <i class="fas fa-search"></i>
+                <input
+                  id="regularSearch"
+                  class="db-pill-input w-100"
+                  placeholder="ค้นหาชื่อนักเรียน..."
+                  onkeyup="if (event.key === 'Enter') loadRegularStudents();"
+                />
+              </div>
+              <button
+                onclick="loadRegularStudents()"
+                class="btn btn-primary rounded-pill px-4"
+                style="font-weight: 700; font-size: 13px"
+              >
+                <i class="fas fa-search me-1"></i> ค้นหา
+              </button>
+              <div class="ms-auto">
+                <button
+                  onclick="openAddRegularStudentModal()"
+                  class="btn btn-dark rounded-pill px-4"
+                  style="font-weight: 700; font-size: 13px"
+                >
+                  <i class="fas fa-user-plus me-1"></i> เพิ่มนักเรียน
+                </button>
+              </div>
+            </div>
+
+            <!-- Regular student grid -->
+            <div id="regularGrid" class="row g-4">
+              <!-- Skeleton Loading -->
+              <div class="col-md-6 col-lg-4">
+                <div class="db-student-card">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-3"
+                  >
+                    <div class="flex-1">
+                      <div class="skeleton h-17px w-75 mb-1"></div>
+                      <div class="skeleton h-12px w-50"></div>
+                    </div>
+                    <div class="skeleton w-50px h-20px rounded-pill"></div>
+                  </div>
+                  <div
+                    class="prog-bar-wrap s4 mb-3"
+                    style="grid-template-columns: repeat(4, 1fr); gap: 8px"
+                  >
+                    <div class="skeleton h-7px w-full"></div>
+                    <div class="skeleton h-7px w-full"></div>
+                    <div class="skeleton h-7px w-full"></div>
+                    <div class="skeleton h-7px w-full"></div>
+                  </div>
+                  <div class="d-grid gap-2">
+                    <div class="skeleton h-40px w-full rounded-1rem"></div>
+                    <div class="skeleton h-40px w-full rounded-1rem"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4 d-none d-md-block"></div>
+              <div class="col-md-6 col-lg-4 d-none d-lg-block"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+       MODALS
+  ══════════════════════════════════════ -->
+
+    <!-- Course Progress Modal -->
+    <div id="courseProgressModal" class="db-modal-overlay">
+      <div class="db-modal-box">
+        <div class="text-center mb-4">
+          <div
+            style="
+              width: 56px;
+              height: 56px;
+              background: rgba(16, 185, 129, 0.1);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 0 auto 12px;
+            "
+          >
+            <i class="fas fa-tasks" style="color: #10b981; font-size: 20px"></i>
+          </div>
+          <h5
+            style="font-weight: 800; margin-bottom: 4px"
+            id="courseModalName"
+          ></h5>
+          <p style="color: #9ca3af; font-size: 12px; margin: 0">
+            Manage session progress
+          </p>
+        </div>
+        <div
+          id="courseSessionList"
+          class="d-grid gap-2 mb-4"
+          style="grid-template-columns: 1fr 1fr"
+        ></div>
+        <div class="d-grid gap-2">
+          <button
+            id="btnSaveCourseProgress"
+            onclick="saveCourseProgress()"
+            class="modal-btn-primary"
+          >
+            <i class="fas fa-save me-1"></i> Save Changes
+          </button>
+          <button
+            id="btnCompleteCourse"
+            onclick="completeCourseNow()"
+            class="modal-btn-green"
+          >
+            <i class="fas fa-graduation-cap me-1"></i> Complete Course
+          </button>
+          <button
+            onclick="closeModal('courseProgressModal')"
+            class="modal-btn-secondary"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Regular Progress Modal -->
+    <div id="regularProgressModal" class="db-modal-overlay">
+      <div class="db-modal-box">
+        <div class="text-center mb-4">
+          <div
+            style="
+              width: 56px;
+              height: 56px;
+              background: rgba(230, 57, 70, 0.08);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 0 auto 12px;
+            "
+          >
+            <i class="fas fa-tasks" style="color: #e63946; font-size: 20px"></i>
+          </div>
+          <h5
+            style="font-weight: 800; margin-bottom: 4px"
+            id="regularModalName"
+          ></h5>
+          <p style="color: #9ca3af; font-size: 12px; margin: 0">
+            บันทึกความคืบหน้าการเรียน
+          </p>
+        </div>
+        <div id="regularSteps" class="d-grid gap-2 mb-4"></div>
+        <div class="d-grid gap-2">
+          <button
+            onclick="saveRegularProgress()"
+            class="modal-btn-primary"
+            style="background: #e63946"
+          >
+            <i class="fas fa-save me-1"></i> บันทึก
+          </button>
+          <button
+            onclick="closeModal('regularProgressModal')"
+            class="modal-btn-secondary"
+          >
+            ปิด
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Course Modal -->
+    <div id="addCourseModal" class="db-modal-overlay">
+      <div class="db-modal-box" style="max-width: 400px">
+        <h5 style="font-weight: 800; margin-bottom: 20px">Add New Course</h5>
+        <input
+          type="text"
+          id="newCourseName"
+          class="modal-input mb-3"
+          placeholder="Course name..."
+        />
+        <div class="d-grid gap-2">
+          <button onclick="submitAddCourse()" class="modal-btn-primary">
+            Save
+          </button>
+          <button
+            onclick="closeModal('addCourseModal')"
+            class="modal-btn-secondary"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Student (Course) Modal -->
+    <div id="addCourseStudentModal" class="db-modal-overlay">
+      <div class="db-modal-box" style="max-width: 520px">
+        <h5 style="font-weight: 800; margin-bottom: 20px">
+          Add New Student — Course Class
+        </h5>
+        <div class="row g-2 mb-3">
+          <input type="hidden" id="cs-studentId" />
+          <div class="col-12">
+            <input
+              type="text"
+              id="cs-name"
+              list="csExistingStudents"
+              oninput="autoFillCourseStudent()"
+              class="modal-input"
+              placeholder="Full Name"
+            />
+            <datalist id="csExistingStudents"></datalist>
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="cs-nickname"
+              class="modal-input"
+              placeholder="Nickname"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="cs-nameEng"
+              class="modal-input"
+              placeholder="English Name"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="number"
+              id="cs-age"
+              class="modal-input"
+              placeholder="Age"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="cs-nicknameEng"
+              class="modal-input"
+              placeholder="English Nickname"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="cs-phone"
+              class="modal-input"
+              placeholder="Phone"
+            />
+          </div>
+          <div class="col-6">
+            <select id="cs-course" class="modal-input">
+              <option value="">— Select Course —</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-grid gap-2">
+          <button onclick="submitCourseStudent()" class="modal-btn-primary">
+            Save
+          </button>
+          <button
+            onclick="closeModal('addCourseStudentModal')"
+            class="modal-btn-secondary"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Student (Regular) Modal -->
+    <div id="addRegularStudentModal" class="db-modal-overlay">
+      <div class="db-modal-box" style="max-width: 520px">
+        <h5 style="font-weight: 800; margin-bottom: 20px">
+          เพิ่มนักเรียน — Regular Class
+        </h5>
+        <div class="row g-2 mb-3">
+          <div class="col-12">
+            <select
+              id="rs-existingSelect"
+              onchange="fillFromExistingRegular()"
+              class="modal-input"
+            >
+              <option value="">
+                — เลือกนักเรียนที่มีอยู่แล้ว หรือกรอกใหม่ —
+              </option>
+            </select>
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="rs-name"
+              class="modal-input"
+              placeholder="ชื่อ-นามสกุล"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="rs-nickname"
+              class="modal-input"
+              placeholder="ชื่อเล่น"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="rs-nameEng"
+              class="modal-input"
+              placeholder="Name Eng"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="rs-nicknameEng"
+              class="modal-input"
+              placeholder="Nickname Eng"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="rs-age"
+              class="modal-input"
+              placeholder="อายุ"
+            />
+          </div>
+          <div class="col-6">
+            <input
+              type="text"
+              id="rs-phone"
+              class="modal-input"
+              placeholder="เบอร์โทร"
+            />
+          </div>
+        </div>
+        <div class="d-grid gap-2">
+          <button
+            onclick="submitRegularStudent()"
+            class="modal-btn-primary"
+            style="background: #e63946"
+          >
+            บันทึก
+          </button>
+          <button
+            onclick="closeModal('addRegularStudentModal')"
+            class="modal-btn-secondary"
+          >
+            ยกเลิก
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="admin-common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // ─────────────────────────────
+      // Shared State
+      // ─────────────────────────────
+      let instructors = [];
+      let courseList = [];
+      let allCourseStudentsCache = [];
+      let allRegularStudentsCache = [];
+
+      // Course progress state
+      let cCurrentStudentId = "";
+      let cCurrentCourseId = "";
+      let cTempProgress = 0;
+
+      // Regular progress state
+      let rCurrentStudentId = "";
+      let rTempProgress = 0;
+      let rCurrentWeeks = [];
+      let rCurrentInstructorsWeek = [];
+
+      // ─────────────────────────────
+      // Tab switching
+      // ─────────────────────────────
+      function switchTab(tab) {
+        document.getElementById("panelCourse").style.display =
+          tab === "course" ? "block" : "none";
+        document.getElementById("panelRegular").style.display =
+          tab === "regular" ? "block" : "none";
+
+        const tabC = document.getElementById("tabCourse");
+        const tabR = document.getElementById("tabRegular");
+        if (tab === "course") {
+          tabC.classList.add("active");
+          tabR.classList.remove("active");
+        } else {
+          tabR.classList.add("active");
+          tabC.classList.remove("active");
+        }
+      }
+
+      // ─────────────────────────────
+      // Utility
+      // ─────────────────────────────
+      function showLoading() {
+        document.getElementById("saveLoadingOverlay").classList.add("show");
+      }
+      function hideLoading() {
+        document.getElementById("saveLoadingOverlay").classList.remove("show");
+      }
+      function openModal(id) {
+        document.getElementById(id).classList.add("open");
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
+
+      function post(body) {
+        return fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify(body),
+        }).then((r) => r.json());
+      }
+
+      // ─────────────────────────────
+      // Init
+      // ─────────────────────────────
+      window.onload = () => {
+        loadInstructors();
+        fetchCourseList();
+        loadCourseStudents();
+      };
+
+      // ─────────────────────────────
+      // COURSE CLASS
+      // ─────────────────────────────
+      function fetchCourseList() {
+        post({ action: "getCourseData" }).then((res) => {
+          courseList = res.data || [];
+          const dd = document.getElementById("courseDropdown");
+          const modal = document.getElementById("cs-course");
+          dd.innerHTML = '<option value="">— Select Course (All) —</option>';
+          modal.innerHTML = '<option value="">— Select Course —</option>';
+          courseList.forEach((c) => {
+            const opt = `<option value="${c.id}">${c.name}</option>`;
+            dd.innerHTML += opt;
+            modal.innerHTML += opt;
+          });
+        });
+      }
+
+      function loadCourseStudents() {
+        const q = document.getElementById("courseSearch").value.trim();
+        const courseId = document.getElementById("courseDropdown").value;
+        const grid = document.getElementById("courseGrid");
+        // Display skeleton loading
+        grid.innerHTML = `
+        <div class="col-md-6 col-lg-4">
+          <div class="db-student-card">
+            <div class="skeleton w-75px h-20px rounded-bl-1rem position-absolute top-0 end-0"></div>
+            <div class="d-flex justify-content-between align-items-start mt-2 mb-3">
+              <div class="flex-1">
+                <div class="skeleton h-17px w-75 mb-1"></div>
+                <div class="skeleton h-13px w-50"></div>
+              </div>
+              <div class="skeleton w-50px h-20px rounded-pill"></div>
+            </div>
+            <div class="d-flex gap-2 mb-3 text-body-secondary"><div class="skeleton h-12px w-100"></div></div>
+            <div class="d-flex gap-2 mb-3 text-body-secondary"><div class="skeleton h-12px w-100"></div></div>
+            <div class="mb-3"><div class="skeleton h-10px w-100 mb-2"></div><div class="prog-bar-wrap s6"><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div></div></div>
+            <div class="d-grid gap-2">
+              <div class="skeleton h-40px w-full rounded-1rem"></div>
+              <div class="skeleton h-40px w-full rounded-1rem"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="db-student-card">
+            <div class="skeleton w-75px h-20px rounded-bl-1rem position-absolute top-0 end-0"></div>
+            <div class="d-flex justify-content-between align-items-start mt-2 mb-3"><div class="flex-1"><div class="skeleton h-17px w-75 mb-1"></div><div class="skeleton h-13px w-50"></div></div><div class="skeleton w-50px h-20px rounded-pill"></div></div>
+            <div class="d-flex gap-2 mb-3 text-body-secondary"><div class="skeleton h-12px w-100"></div></div><div class="d-flex gap-2 mb-3 text-body-secondary"><div class="skeleton h-12px w-100"></div></div><div class="mb-3"><div class="skeleton h-10px w-100 mb-2"></div><div class="prog-bar-wrap s6"><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div></div></div>
+            <div class="d-grid gap-2"><div class="skeleton h-40px w-full rounded-1rem"></div><div class="skeleton h-40px w-full rounded-1rem"></div></div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 d-none d-lg-block">
+          <div class="db-student-card">
+            <div class="skeleton w-75px h-20px rounded-bl-1rem position-absolute top-0 end-0"></div>
+            <div class="d-flex justify-content-between align-items-start mt-2 mb-3"><div class="flex-1"><div class="skeleton h-17px w-75 mb-1"></div><div class="skeleton h-13px w-50"></div></div><div class="skeleton w-50px h-20px rounded-pill"></div></div>
+            <div class="d-flex gap-2 mb-3 text-body-secondary"><div class="skeleton h-12px w-100"></div></div><div class="d-flex gap-2 mb-3 text-body-secondary"><div class="skeleton h-12px w-100"></div></div><div class="mb-3"><div class="skeleton h-10px w-100 mb-2"></div><div class="prog-bar-wrap s6"><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div></div></div>
+            <div class="d-grid gap-2"><div class="skeleton h-40px w-full rounded-1rem"></div><div class="skeleton h-40px w-full rounded-1rem"></div></div>
+          </div>
+        </div>
+      `;
+
+        post({
+          action: "getStudentsByType",
+          type: "course",
+          courseId,
+          query: q,
+        })
+          .then((res) => renderCourseCards(res.data || []))
+          .catch(() => {
+            grid.innerHTML =
+              '<div class="col-12"><div class="empty-state text-danger">ไม่สามารถโหลดข้อมูลได้</div></div>';
+          });
+      }
+
+      function renderCourseCards(students) {
+        const grid = document.getElementById("courseGrid");
+        grid.innerHTML = "";
+        if (!students.length) {
+          grid.innerHTML =
+            '<div class="col-12"><div class="empty-state"><i class="fas fa-user-graduate fa-3x mb-3 d-block"></i>No students found</div></div>';
+          return;
+        }
+        students.forEach((s) => {
+          const p = Number(s.progress) || 0;
+          const isDone = p >= 6;
+          const bars = Array.from(
+            { length: 6 },
+            (_, i) =>
+              `<div class="prog-seg ${p > i ? "done-course" : ""}"></div>`,
+          ).join("");
+          grid.innerHTML += `
+        <div class="col-md-6 col-lg-4">
+          <div class="db-student-card">
+            <div class="course-tag"><i class="fas fa-book-open me-1"></i>${s.courseName || "-"}</div>
+            <div class="d-flex justify-content-between align-items-start mt-2 mb-3">
+              <div>
+                <div style="font-weight:800;font-size:17px;">${s.nickname || "-"}</div>
+                <div style="color:#e63946;font-weight:600;font-size:13px;">${s.name || "-"}</div>
+              </div>
+              <span class="prog-badge ${isDone ? "green" : ""}">
+                <i class="fas fa-${isDone ? "check-circle" : "circle"}" style="font-size:9px;"></i>
+                ${p}/6
+              </span>
+            </div>
+            <div class="d-flex gap-2 mb-3 text-body-secondary" style="font-size:12px;">
+              <span><i class="fas fa-tag me-1"></i>${s.nameEng || "-"}</span>
+              <span><i class="fas fa-user me-1"></i>อายุ ${s.age || "-"}</span>
+            </div>
+            <div class="d-flex gap-2 mb-3 text-body-secondary" style="font-size:12px;">
+              <span><i class="fas fa-phone me-1"></i>${s.phone || "-"}</span>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div class="d-flex justify-content-between" style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">
+                <span>Progress</span><span class="${isDone ? "text-success" : ""}">${p}/6 Completed</span>
+              </div>
+              <div class="prog-bar-wrap s6">${bars}</div>
+            </div>
+            <div class="d-grid gap-2">
+              <button class="card-action-btn primary"
+                onclick="openCourseProgress('${s.name?.replace(/'/g, "\\'") || ""}',${p},'${s.studentId}','${s.courseId || ""}')">
+                <i class="fas fa-pen-to-square" style="font-size:11px;"></i> Update Progress
+              </button>
+              <button class="card-action-btn danger"
+                onclick="deleteEnrollment('${s.studentId}','${s.courseId}')">
+                <i class="fas fa-trash" style="font-size:11px;"></i> Remove from Course
+              </button>
+            </div>
+          </div>
+        </div>`;
+        });
+      }
+
+      function openCourseProgress(name, progress, studentId, courseId) {
+        cCurrentStudentId = studentId;
+        cCurrentCourseId = courseId;
+        cTempProgress = Number(progress);
+        document.getElementById("courseModalName").innerText = name;
+        renderCourseSessionTiles();
+        openModal("courseProgressModal");
+      }
+
+      function renderCourseSessionTiles() {
+        const box = document.getElementById("courseSessionList");
+        box.innerHTML = "";
+        for (let i = 1; i <= 6; i++) {
+          const sel = i <= cTempProgress;
+          box.innerHTML += `
+        <div onclick="toggleCourseSession(${i})" class="session-tile ${sel ? "selected" : ""}">
+          <span style="font-weight:700;${sel ? "color:#10b981;" : ""}">S${i}</span>
+          <div class="check-circle ${sel ? "active-course" : ""}">
+            <i class="fas fa-check" style="font-size:9px;color:#fff;${sel ? "" : "opacity:0;"}"></i>
+          </div>
+        </div>`;
+        }
+        const done = cTempProgress >= 6;
+        document.getElementById("btnCompleteCourse").style.display = done
+          ? "none"
+          : "block";
+      }
+
+      function toggleCourseSession(step) {
+        cTempProgress = step === cTempProgress ? step - 1 : step;
+        renderCourseSessionTiles();
+      }
+
+      function completeCourseNow() {
+        if (!confirm("ต้องการบันทึกจบหลักสูตรทันทีใช่หรือไม่?")) return;
+        cTempProgress = 6;
+        saveCourseProgress();
+      }
+
+      function saveCourseProgress() {
+        const btn = document.getElementById("btnSaveCourseProgress");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
+        post({
+          action: "updateProgress",
+          studentId: cCurrentStudentId,
+          courseId: cCurrentCourseId,
+          newProgress: cTempProgress,
+        })
+          .then((res) => {
+            if (res.status === "success") {
+              closeModal("courseProgressModal");
+              loadCourseStudents();
+            }
+          })
+          .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save me-1"></i> Save Changes';
+          });
+      }
+
+      function deleteEnrollment(studentId, courseId) {
+        if (!confirm("ต้องการลบออกจากคอร์สนี้ใช่ไหม?")) return;
+        showLoading();
+        post({ action: "deleteEnrollment", studentId, courseId })
+          .then((res) => {
+            hideLoading();
+            if (res.status === "success") loadCourseStudents();
+            else alert("ลบไม่สำเร็จ: " + res.message);
+          })
+          .catch(() => {
+            hideLoading();
+          });
+      }
+
+      // Add Course
+      function submitAddCourse() {
+        const name = document.getElementById("newCourseName").value.trim();
+        if (!name) return;
+        post({ action: "addNewCourse", courseName: name }).then((res) => {
+          if (res.status === "success") {
+            closeModal("addCourseModal");
+            fetchCourseList();
+          }
+        });
+      }
+
+      // Add Student (Course)
+      function openAddCourseStudentModal() {
+        [
+          "cs-studentId",
+          "cs-name",
+          "cs-nickname",
+          "cs-nameEng",
+          "cs-nicknameEng",
+          "cs-age",
+          "cs-phone",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        // Load existing students into datalist
+        post({ action: "getStudentsByType", type: "Course" }).then((res) => {
+          allCourseStudentsCache = res.data || [];
+          const list = document.getElementById("csExistingStudents");
+          list.innerHTML = "";
+          allCourseStudentsCache.forEach((s) => {
+            const opt = document.createElement("option");
+            opt.value = s.name;
+            list.appendChild(opt);
+          });
+        });
+        openModal("addCourseStudentModal");
+      }
+
+      function autoFillCourseStudent() {
+        const name = document.getElementById("cs-name").value;
+        const s = allCourseStudentsCache.find((x) => x.name === name);
+        if (s) {
+          document.getElementById("cs-studentId").value = s.studentId;
+          document.getElementById("cs-nickname").value = s.nickname || "";
+          document.getElementById("cs-nameEng").value = s.nameEng || "";
+          document.getElementById("cs-nicknameEng").value = s.nicknameEng || "";
+          document.getElementById("cs-age").value = s.age || "";
+          document.getElementById("cs-phone").value = s.phone || "";
+        }
+      }
+
+      function submitCourseStudent() {
+        const courseId = document.getElementById("cs-course").value;
+        if (!courseId) {
+          alert("กรุณาเลือกคอร์ส");
+          return;
+        }
+        const name = document.getElementById("cs-name").value.trim();
+        if (!name) {
+          alert("กรุณากรอกชื่อ");
+          return;
+        }
+        showLoading();
+        post({
+          action: "addStudent",
+          studentId: document.getElementById("cs-studentId").value.trim(),
+          name,
+          nickname: document.getElementById("cs-nickname").value.trim(),
+          nameEng: document.getElementById("cs-nameEng").value.trim(),
+          nicknameEng: document.getElementById("cs-nicknameEng").value.trim(),
+          age: document.getElementById("cs-age").value.trim(),
+          phone: document.getElementById("cs-phone").value.trim(),
+          type: "Course",
+          courseId,
+        })
+          .then((res) => {
+            hideLoading();
+            if (res.status === "success") {
+              closeModal("addCourseStudentModal");
+              loadCourseStudents();
+            } else alert("เกิดข้อผิดพลาด");
+          })
+          .catch(() => {
+            hideLoading();
+            alert("เกิดข้อผิดพลาด");
+          });
+      }
+
+      // ─────────────────────────────
+      // REGULAR CLASS
+      // ─────────────────────────────
+      function loadInstructors() {
+        post({ action: "getInstructors" }).then((res) => {
+          instructors = res.data || [];
+          const dd = document.getElementById("instructorDropdown");
+          dd.innerHTML = '<option value="">ครูทั้งหมด</option>';
+          instructors.forEach((i) => {
+            dd.innerHTML += `<option value="${i.name}">${i.name}</option>`;
+          });
+        });
+      }
+
+      function loadRegularStudents() {
+        const q = document.getElementById("regularSearch").value.toLowerCase();
+        const instructor = document.getElementById("instructorDropdown").value;
+        const grid = document.getElementById("regularGrid");
+        // Display skeleton loading
+        grid.innerHTML = `
+        <div class="col-md-6 col-lg-4">
+          <div class="db-student-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="flex-1">
+                <div class="skeleton h-17px w-75 mb-1"></div>
+                <div class="skeleton h-12px w-50"></div>
+              </div>
+              <div class="skeleton w-50px h-20px rounded-pill"></div>
+            </div>
+            <div class="prog-bar-wrap s4 mb-3" style="grid-template-columns:repeat(4,1fr);gap:8px;">
+              <div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div>
+            </div>
+            <div class="d-grid gap-2">
+              <div class="skeleton h-40px w-full rounded-1rem"></div>
+              <div class="skeleton h-40px w-full rounded-1rem"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="db-student-card">
+            <div class="d-flex justify-content-between align-items-start mb-3"><div class="flex-1"><div class="skeleton h-17px w-75 mb-1"></div><div class="skeleton h-12px w-50"></div></div><div class="skeleton w-50px h-20px rounded-pill"></div></div>
+            <div class="prog-bar-wrap s4 mb-3" style="grid-template-columns:repeat(4,1fr);gap:8px;"><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div></div>
+            <div class="d-grid gap-2"><div class="skeleton h-40px w-full rounded-1rem"></div><div class="skeleton h-40px w-full rounded-1rem"></div></div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4 d-none d-lg-block">
+          <div class="db-student-card">
+            <div class="d-flex justify-content-between align-items-start mb-3"><div class="flex-1"><div class="skeleton h-17px w-75 mb-1"></div><div class="skeleton h-12px w-50"></div></div><div class="skeleton w-50px h-20px rounded-pill"></div></div>
+            <div class="prog-bar-wrap s4 mb-3" style="grid-template-columns:repeat(4,1fr);gap:8px;"><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div><div class="skeleton h-7px w-full"></div></div>
+            <div class="d-grid gap-2"><div class="skeleton h-40px w-full rounded-1rem"></div><div class="skeleton h-40px w-full rounded-1rem"></div></div>
+          </div>
+        </div>
+      `;
+
+        post({ action: "getStudentCoursesRegular" }).then((res) => {
+          let data = (res.data || []).filter(
+            (x) =>
+              (!instructor || x.instructor == instructor) &&
+              x.name.toLowerCase().includes(q),
+          );
+          renderRegularCards(data);
+        });
+      }
+
+      function renderRegularCards(data) {
+        const grid = document.getElementById("regularGrid");
+        grid.innerHTML = "";
+        if (!data.length) {
+          grid.innerHTML =
+            '<div class="col-12"><div class="empty-state"><i class="fas fa-user-graduate fa-3x mb-3 d-block"></i>ไม่พบข้อมูลนักเรียน</div></div>';
+          return;
+        }
+        data.forEach((s) => {
+          const p = Number(s.progress) || 0;
+          const bars = [1, 2, 3, 4]
+            .map(
+              (i) =>
+                `<div class="d-flex flex-column align-items-center gap-1">
+            <div class="prog-seg ${p >= i ? "done-regular" : ""}" style="width:100%;"></div>
+            <span style="font-size:9px;font-weight:700;${p >= i ? "color:#e63946;" : "color:#9ca3af;"}">S${i}</span>
+          </div>`,
+            )
+            .join("");
+          grid.innerHTML += `
+        <div class="col-md-6 col-lg-4">
+          <div class="db-student-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <div style="font-weight:800;font-size:17px;">${s.name}</div>
+                <div style="font-size:12px;color:#9ca3af;">${s.studentId || ""}</div>
+              </div>
+              <span class="prog-badge">
+                <i class="fas fa-check-circle" style="font-size:9px;"></i> ${p}/4 S
+              </span>
+            </div>
+            <div class="prog-bar-wrap s4 mb-3" style="grid-template-columns:repeat(4,1fr);gap:8px;">
+              ${bars}
+            </div>
+            <div class="d-grid gap-2">
+              <button class="card-action-btn primary"
+                onclick='openRegularProgress("${s.studentId}","${s.courseId || ""}","${s.name}",${p},${JSON.stringify(s.weeks || [])},${JSON.stringify(s.instructorsWeek || [])})'>
+                <i class="fas fa-pen-to-square" style="font-size:11px;"></i> อัปเดต Progress
+              </button>
+              <button class="card-action-btn danger"
+                onclick='deleteRegularEnrollment("${s.studentId}")'>
+                <i class="fas fa-trash" style="font-size:11px;"></i> ลบออกจากคลาส
+              </button>
+            </div>
+          </div>
+        </div>`;
+        });
+      }
+
+      function openRegularProgress(id, courseId, name, p, weeks, insWeek) {
+        rCurrentStudentId = id;
+        rTempProgress = p;
+        rCurrentWeeks = weeks;
+        rCurrentInstructorsWeek = insWeek;
+        document.getElementById("regularModalName").innerText = name;
+        renderRegularSteps();
+        openModal("regularProgressModal");
+      }
+
+      function renderRegularSteps() {
+        const box = document.getElementById("regularSteps");
+        box.innerHTML = "";
+        for (let i = 1; i <= 4; i++) {
+          const done = rTempProgress >= i;
+          box.innerHTML += `
+        <div class="step-card ${done ? "active-step" : ""}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="session-tile ${done ? "selected-regular" : ""}"
+              style="padding:6px 14px;cursor:pointer;border-radius:.75rem;"
+              onclick="toggleRegularStep(${i})">
+              <span style="font-weight:700;${done ? "color:#e63946;" : ""}">S${i}</span>
+              <div class="check-circle ${done ? "active-regular" : ""}" style="width:18px;height:18px;">
+                <i class="fas fa-check" style="font-size:8px;color:#fff;${done ? "" : "opacity:0;"}"></i>
+              </div>
+            </div>
+            <select id="ins${i}" style="border:2px solid var(--bs-border-color);padding:6px 10px;border-radius:.75rem;font-size:13px;background:var(--bs-secondary-bg);color:var(--bs-body-color);outline:none;">
+              ${instructors.map((ins) => `<option value="${ins.name}" ${rCurrentInstructorsWeek[i - 1] == ins.name ? "selected" : ""}>${ins.name}</option>`).join("")}
+            </select>
+          </div>
+          <input id="week${i}" value="${rCurrentWeeks[i - 1] || ""}"
+            placeholder="สัปดาห์นี้เรียนอะไร..."
+            oninput="autoTickRegular(${i})"
+            style="width:100%;border:2px solid transparent;border-radius:.75rem;padding:8px 12px;font-size:13px;background:var(--bs-secondary-bg);color:var(--bs-body-color);outline:none;">
+        </div>`;
+        }
+      }
+
+      function toggleRegularStep(i) {
+        rTempProgress = i === rTempProgress ? i - 1 : i;
+        renderRegularSteps();
+      }
+
+      function autoTickRegular(i) {
+        const val = document.getElementById("week" + i).value.trim();
+        if (val && rTempProgress < i) {
+          rTempProgress = i;
+          renderRegularSteps();
+        } else if (!val && rTempProgress === i) {
+          rTempProgress = i - 1;
+          renderRegularSteps();
+        }
+      }
+
+      function saveRegularProgress() {
+        showLoading();
+        const weekData = [],
+          instructorData = [];
+        for (let i = 1; i <= 4; i++) {
+          weekData.push(document.getElementById("week" + i).value);
+          instructorData.push(document.getElementById("ins" + i).value);
+        }
+        post({
+          action: "updateWeekAndInstructor",
+          studentId: rCurrentStudentId,
+          weekData,
+          instructorData,
+        })
+          .then(() =>
+            post({
+              action: "updateProgressRegular",
+              studentId: rCurrentStudentId,
+              progress: rTempProgress,
+            }),
+          )
+          .then(() => {
+            hideLoading();
+            closeModal("regularProgressModal");
+            loadRegularStudents();
+          })
+          .catch(() => hideLoading());
+      }
+
+      function deleteRegularEnrollment(studentId) {
+        if (!confirm("ต้องการลบนักเรียนคนนี้ออกจาก Regular Class ใช่ไหม?"))
+          return;
+        showLoading();
+        post({ action: "deleteEnrollmentRegular", studentId, courseId: "" })
+          .then((res) => {
+            hideLoading();
+            if (res.status === "success") loadRegularStudents();
+            else alert("ลบไม่สำเร็จ: " + res.message);
+          })
+          .catch(() => hideLoading());
+      }
+
+      // Add Student (Regular)
+      function openAddRegularStudentModal() {
+        [
+          "rs-name",
+          "rs-nickname",
+          "rs-nameEng",
+          "rs-nicknameEng",
+          "rs-age",
+          "rs-phone",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        post({
+          action: "getStudentsByType",
+          type: "Regular",
+          courseId: "",
+          query: "",
+        }).then((res) => {
+          allRegularStudentsCache = res.data || [];
+          const sel = document.getElementById("rs-existingSelect");
+          sel.innerHTML =
+            '<option value="">— เลือกนักเรียนที่มีอยู่แล้ว หรือกรอกใหม่ —</option>';
+          allRegularStudentsCache.forEach((s) => {
+            sel.innerHTML += `<option value="${s.studentId}">${s.name}</option>`;
+          });
+        });
+        openModal("addRegularStudentModal");
+      }
+
+      function fillFromExistingRegular() {
+        const studentId = document.getElementById("rs-existingSelect").value;
+        if (!studentId) return;
+        const s = allRegularStudentsCache.find((x) => x.studentId == studentId);
+        if (s) {
+          document.getElementById("rs-name").value = s.name || "";
+          document.getElementById("rs-nickname").value = s.nickname || "";
+          document.getElementById("rs-nameEng").value = s.nameEng || "";
+          document.getElementById("rs-nicknameEng").value = s.nicknameEng || "";
+          document.getElementById("rs-age").value = s.age || "";
+          document.getElementById("rs-phone").value = s.phone || "";
+        }
+      }
+
+      function submitRegularStudent() {
+        const existingId = document.getElementById("rs-existingSelect").value;
+        const name = document.getElementById("rs-name").value.trim();
+        if (!name) {
+          alert("กรุณากรอกชื่อ");
+          return;
+        }
+        showLoading();
+        if (existingId) {
+          post({ action: "addStudentToCourseRegular", studentId: existingId })
+            .then(() => {
+              hideLoading();
+              closeModal("addRegularStudentModal");
+              loadRegularStudents();
+            })
+            .catch(() => {
+              hideLoading();
+              alert("เกิดข้อผิดพลาด");
+            });
+        } else {
+          post({
+            action: "addStudent",
+            name,
+            nickname: document.getElementById("rs-nickname").value.trim(),
+            nameEng: document.getElementById("rs-nameEng").value.trim(),
+            nicknameEng: document.getElementById("rs-nicknameEng").value.trim(),
+            age: document.getElementById("rs-age").value.trim(),
+            phone: document.getElementById("rs-phone").value.trim(),
+            type: "Regular",
+            courseId: "",
+          })
+            .then((res) => {
+              if (res.status === "success") {
+                post({ action: "getAllStudents" }).then((res2) => {
+                  const ns = (res2.data || []).find((s) => s.name === name);
+                  if (ns) {
+                    post({
+                      action: "addStudentToCourseRegular",
+                      studentId: ns.studentId,
+                    }).then(() => {
+                      hideLoading();
+                      closeModal("addRegularStudentModal");
+                      loadRegularStudents();
+                    });
+                  } else {
+                    hideLoading();
+                    closeModal("addRegularStudentModal");
+                    loadRegularStudents();
+                  }
+                });
+              } else {
+                hideLoading();
+                alert("เกิดข้อผิดพลาดในการเพิ่มนักเรียน");
+              }
+            })
+            .catch(() => {
+              hideLoading();
+              alert("เกิดข้อผิดพลาด");
+            });
+        }
+      }
+
+      // Load Regular when tab switches
+      document.getElementById("tabRegular").addEventListener("click", () => {
+        loadInstructors();
+        loadRegularStudents();
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof loadAdminShell === "function") {
+          loadAdminShell();
+        }
+      });
+    </script>
+  </body>
+</html>

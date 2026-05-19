@@ -1,0 +1,121 @@
+/* DRONEBOT CLASS DESIGN SYSTEM */
+
+body {
+    font-family: 'Kanit', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    min-height: 100vh;
+}
+
+
+.header-banner {
+    background-color: #000000;
+    padding: 10px 40px; /* ลด padding ลงเล็กน้อยเพื่อให้โลโก้เด่น */
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* ปรับแต่งขนาดรูปโลโก้ */
+.header-logo {
+    height: 60px; /* ปรับความสูงตามความเหมาะสม */
+    width: auto;  /* ให้ความกว้างปรับตามสัดส่วนรูป */
+    object-fit: contain;
+}
+
+/* Welcome Typography */
+.content-wrapper {
+    padding-top: 3rem;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.welcome-text {
+    font-style: italic;
+    font-weight: 500;
+    font-size: 2.2rem;
+    margin: 0;
+    line-height: 1;
+}
+
+.brand-title {
+    font-size: 4rem;
+    font-weight: 800;
+    font-style: italic;
+    margin: 0;
+}
+
+.text-red {
+    color: #e31e24; /* สีแดงแบรนด์ */
+}
+
+/* Login Card Box */
+.login-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 3rem 4rem;
+    
+    /* แก้ไขจุดนี้: เพิ่มความโค้งมน */
+    border: 2px solid #000000; 
+    border-radius: 30px; /* เพิ่มความโค้ง (ลองปรับเลข 20-40 ตามใจชอบ) */
+    
+    background-color: #ffffff;
+    
+    /* เพิ่มเงาฟุ้งๆ (Shadow) เพื่อให้กล่องดูลอยและละมุนขึ้น */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+}
+
+/* Form Styling */
+.form-label {
+    color: #e31e24;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 1px solid #888888;
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #e31e24;
+    box-shadow: 0 0 0 0.2rem rgba(227, 30, 36, 0.15);
+}
+
+/* Submit Button */
+.btn-confirm {
+    background-color: #e31e24;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.6rem 3.5rem;
+    font-weight: 700;
+    font-size: 1.4rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-confirm:hover {
+    background-color: #b3171b;
+    transform: scale(1.03);
+}
+
+.btn-confirm:active {
+    transform: scale(0.97);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .brand-title {
+        font-size: 2.8rem;
+    }
+    .login-container {
+        padding: 2rem;
+        margin: 0 1rem;
+    }
+}

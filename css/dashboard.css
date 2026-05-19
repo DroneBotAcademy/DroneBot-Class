@@ -1,0 +1,104 @@
+.bi {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/*
+ * Sidebar
+ */
+
+#navbar-placeholder {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  #navbar-placeholder {
+    width: 25%;
+    position: sticky !important;
+    top: 48px !important;
+    height: calc(100vh - 48px) !important;
+    overflow-y: auto;
+    align-self: flex-start;
+    flex-shrink: 0;
+  }
+
+  #navbar-placeholder .offcanvas-md,
+  .sidebar .offcanvas-md,
+  .sidebar .offcanvas-lg {
+    position: relative;
+    height: 100% !important;
+    min-height: calc(100vh - 48px);
+  }
+
+  #navbar-placeholder .offcanvas-body {
+    min-height: calc(100vh - 48px) !important;
+    flex-grow: 1;
+  }
+
+  .navbar-search {
+    display: block;
+  }
+}
+
+@media (min-width: 992px) {
+  #navbar-placeholder {
+    width: 16.66666667%;
+    position: sticky !important;
+    top: 48px !important;
+    height: calc(100vh - 48px) !important;
+    overflow-y: auto;
+    align-self: flex-start;
+    flex-shrink: 0;
+  }
+}
+
+/*
+ * Nav links
+ */
+
+#navbar-placeholder .nav-link,
+.sidebar .nav-link {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+#navbar-placeholder .nav-link.active,
+.sidebar .nav-link.active {
+  color: #dc2424;
+}
+
+#navbar-placeholder .nav-link:hover,
+.sidebar .nav-link:hover {
+  background-color: rgba(253, 13, 13, 0.832);
+  color: #ededed;
+  border-radius: 5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-heading {
+  font-size: .75rem;
+}
+
+/*
+ * Navbar (header)
+ */
+
+.navbar-brand {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  background-color: rgba(0, 0, 0, .25);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+}
+
+.navbar .form-control {
+  padding: .75rem 1rem;
+}
+
+/* Header bar — sticky top */
+#header-placeholder {
+  position: sticky;
+  top: 0;
+  z-index: 1030; /* Bootstrap sticky z-index */
+}
