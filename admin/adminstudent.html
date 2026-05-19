@@ -1,0 +1,733 @@
+<!--admin-students-->
+<!doctype html>
+<html lang="th" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Students List · DroneBot Thailand</title>
+    <script src="../assets/js/color-modes.js"></script>
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../css/dashboard.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        if (sessionStorage.getItem("isLoggedIn") !== "true") {
+          window.location.replace("adminlog.html");
+        }
+      })();
+    </script>
+    <script src="../js/config.js"></script>
+    <style>
+      body { font-family: "Kanit", sans-serif; }
+      .sidebar, .navbar, .offcanvas { font-family: var(--bs-font-sans-serif) !important; }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .sidebar .nav-link.active { color: #dc2424; }
+      .bi { vertical-align: -0.125em; fill: currentColor; }
+
+      .btn-bd-primary {
+        --bd-violet-bg: #f92c2c;
+        --bs-btn-font-weight: 600;
+        --bs-btn-color: var(--bs-white);
+        --bs-btn-bg: var(--bd-violet-bg);
+        --bs-btn-border-color: var(--bd-violet-bg);
+        --bs-btn-hover-color: var(--bs-white);
+        --bs-btn-hover-bg: #6528e0;
+        --bs-btn-hover-border-color: #6528e0;
+      }
+      .bd-mode-toggle { z-index: 1500; }
+      .bd-mode-toggle .bi { width: 1em; height: 1em; }
+      .bd-mode-toggle .dropdown-menu .active .bi { display: block !important; }
+
+      /* ── Card Grid ── */
+      #stuGrid {
+        display: grid !important;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.5rem;
+      }
+      @media (min-width: 768px) { #stuGrid { grid-template-columns: repeat(2, 1fr); } }
+      @media (min-width: 1200px) { #stuGrid { grid-template-columns: repeat(3, 1fr); } }
+
+      .stu-card {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        height: 100%;
+      }
+      [data-bs-theme="dark"] .stu-card { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+      .stu-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px -10px rgba(15,23,42,0.22);
+        border-color: #fecaca;
+      }
+      [data-bs-theme="dark"] .stu-card:hover { border-color: rgba(220,36,36,0.4); }
+
+      /* ── Skeleton Loading ── */
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 300% 100%;
+        animation: shimmer 1.6s ease-in-out infinite;
+        border-radius: 4px;
+      }
+      @keyframes shimmer {
+        0%   { background-position: 100% 0; }
+        100% { background-position: -100% 0; }
+      }
+      [data-bs-theme="dark"] .skeleton {
+        background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+        background-size: 300% 100%;
+        animation: shimmer 1.6s ease-in-out infinite;
+      }
+
+      /* ── Avatar ── */
+      .stu-av {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: linear-gradient(135deg, #e63946 0%, #b91c1c 100%);
+        color: #fff; font-size: 13px; font-weight: 800;
+        display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      }
+
+      /* ── Type Badge ── */
+      .type-badge {
+        border-radius: 999px;
+        background-color: var(--bs-secondary-bg);
+        padding: 3px 12px;
+        font-size: 10px; font-weight: 900;
+        text-transform: uppercase; letter-spacing: 0.05em;
+        color: var(--bs-secondary-color); white-space: nowrap;
+      }
+
+      /* ── Age Badge ── */
+      .age-badge-card {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: #fef2f2; color: #e63946;
+        border: 1px solid #fecaca; border-radius: 999px;
+        padding: 2px 10px; font-size: 10px; font-weight: 700;
+      }
+      [data-bs-theme="dark"] .age-badge-card {
+        background: rgba(230,57,70,0.1); color: #fca5a5;
+        border-color: rgba(230,57,70,0.2);
+      }
+
+      /* ── Info Lines ── */
+      .stu-info-line {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 14px; font-weight: 500; color: var(--bs-secondary-color);
+      }
+      .stu-info-line i { width: 24px; text-align: center; color: var(--bs-tertiary-color); font-size: 14px; }
+
+      /* ── View Details ── */
+      .view-details-link {
+        font-size: 12px; font-weight: 700;
+        color: var(--bs-tertiary-color); transition: color 0.2s;
+      }
+      .view-details-link:hover { color: var(--bs-secondary-color); }
+
+      /* ── Chips ── */
+      .chip {
+        padding: 5px 14px; border-radius: 20px;
+        font-size: 12px; font-weight: 700;
+        border: 1px solid #e2e8f0; background: #fff; color: #64748b;
+        cursor: pointer; transition: all 0.2s;
+      }
+      .chip:hover { border-color: #fca5a5; color: #dc2424; }
+      .chip.on { background: #111827 !important; color: #fff !important; border-color: #111827 !important; }
+      [data-bs-theme="dark"] .chip { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #94a3b8; }
+      [data-bs-theme="dark"] .chip.on { background: #dc2424 !important; border-color: #dc2424 !important; color: #fff !important; }
+
+      /* ── Search ── */
+      .sw { position: relative; }
+      .sw i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; pointer-events: none; }
+      .sw input { padding: 10px 16px 10px 38px; border: 2px solid transparent; background: #f8fafc; border-radius: 24px; font-size: 14px; outline: none; width: 100%; transition: all 0.2s; }
+      .sw input:focus { border-color: #dc2424; background: #fff; }
+      [data-bs-theme="dark"] .sw input { background: rgba(255,255,255,0.06); color: #f1f5f9; }
+      [data-bs-theme="dark"] .sw input:focus { background: rgba(255,255,255,0.1); }
+
+      /* ── Modals ── */
+      #stuModal, #addModal {
+        display: none; position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+        align-items: center; justify-content: center;
+      }
+      .mbox {
+        background: #1a1a2e; border: 1px solid rgba(220,36,36,0.25);
+        border-radius: 22px; width: 100%; max-width: 520px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.6); margin: 16px; overflow: hidden;
+      }
+      .mred { height: 3px; background: #dc2424; }
+      .fl { display: block; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+      .fv { font-size: 13px; color: #cbd5e1; font-weight: 500; min-height: 20px; }
+      .ei { width: 100%; padding: 9px 13px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #f1f5f9; font-size: 13px; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+      .ei:focus { border-color: rgba(220,36,36,0.5); }
+      .vf { display: block; }
+      .ef { display: none; }
+      .em .vf { display: none; }
+      .em .ef { display: block; }
+
+      @media (max-width: 768px) {
+        .mbox { margin: 10px; border-radius: 16px; max-height: 95vh; }
+        #sm-form > div { grid-template-columns: 1fr !important; gap: 12px !important; }
+        #addModal .mbox > div:nth-child(3) > div { grid-template-columns: 1fr !important; gap: 12px !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="icons-placeholder"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+      <symbol id="check2" viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 1 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></symbol>
+      <symbol id="circle-half" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/></symbol>
+      <symbol id="moon-stars-fill" viewBox="0 0 16 16"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></symbol>
+      <symbol id="sun-fill" viewBox="0 0 16 16"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8z"/></symbol>
+    </svg>
+
+    <!-- Theme Toggle -->
+    <div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+      <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+        <svg class="bi my-1 theme-icon-active" aria-hidden="true"><use href="#circle-half"></use></svg>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false"><svg class="bi me-2 opacity-50" aria-hidden="true"><use href="#sun-fill"></use></svg>Light<svg class="bi ms-auto d-none" aria-hidden="true"><use href="#check2"></use></svg></button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false"><svg class="bi me-2 opacity-50" aria-hidden="true"><use href="#moon-stars-fill"></use></svg>Dark<svg class="bi ms-auto d-none" aria-hidden="true"><use href="#check2"></use></svg></button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto" aria-pressed="true"><svg class="bi me-2 opacity-50" aria-hidden="true"><use href="#circle-half"></use></svg>Auto<svg class="bi ms-auto d-none" aria-hidden="true"><use href="#check2"></use></svg></button></li>
+      </ul>
+    </div>
+
+    <div id="header-placeholder"></div>
+    <div class="container-fluid">
+      <div class="row">
+        <div id="navbar-placeholder" class="col-md-3 col-lg-2 p-0"></div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <!-- Page Header -->
+          <div style="padding:28px 0 20px;border-bottom:1px solid rgba(0,0,0,0.06);">
+            <div style="max-width:640px">
+              <h1 style="font-size:28px;font-weight:900;margin:0">Student List</h1>
+              <p style="margin:6px 0 20px;color:#94a3b8;font-size:14px">ข้อมูลนักเรียน Course และ Regular ทั้งหมด</p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <div class="sw" style="flex:1;min-width:200px">
+                  <i class="bi bi-search"></i>
+                  <input id="stuSearch" type="text" placeholder="Search by full name..." oninput="filterCards()" />
+                </div>
+                <button onclick="loadStudents(true)"
+                  style="padding:10px 22px;border-radius:24px;background:#111827;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s;"
+                  onmouseover="this.style.background='#dc2424'" onmouseout="this.style.background='#111827'">
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <h2 style="font-size:17px;font-weight:800;margin:0">
+                All Students
+                <span id="stu-count" style="font-size:13px;font-weight:400;color:#94a3b8;margin-left:4px;"></span>
+              </h2>
+              <div style="display:flex;gap:6px">
+                <button id="chip-all"     onclick="setChip('all')"     class="chip on">ทั้งหมด</button>
+                <button id="chip-course"  onclick="setChip('course')"  class="chip">Course</button>
+                <button id="chip-regular" onclick="setChip('regular')" class="chip">Regular</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="loadStudents(true)"
+                style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:16px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;"
+                onmouseover="this.style.borderColor='#fecaca';this.style.color='#dc2424'"
+                onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+              </button>
+              <button onclick="openAddModal()"
+                style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:16px;background:#111827;color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:background 0.2s;"
+                onmouseover="this.style.background='#dc2424'" onmouseout="this.style.background='#111827'">
+                <i class="bi bi-plus-lg"></i> New Student
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid -->
+          <div id="stuGrid" class="row g-4 mt-0"></div>
+        </main>
+      </div>
+
+      <!-- ══ DETAIL MODAL ══ -->
+      <div id="stuModal">
+        <div class="mbox">
+          <div class="mred"></div>
+          <div style="padding:22px 26px 0;display:flex;align-items:center;gap:14px;">
+            <div id="sm-av" class="stu-av" style="width:50px;height:50px;font-size:16px"></div>
+            <div style="flex:1">
+              <p id="sm-nm" style="color:#f1f5f9;font-size:18px;font-weight:800;margin:0"></p>
+              <span id="sm-bg"></span>
+            </div>
+            <button onclick="closeSM()" style="background:rgba(255,255,255,0.07);border:none;color:#64748b;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+          </div>
+          <div id="sm-form" style="padding:20px 26px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div style="grid-column:span 2">
+                <span class="fl">Student ID</span>
+                <span id="sm-id" class="fv" style="font-family:monospace"></span>
+              </div>
+              <div>
+                <span class="fl">ประเภท</span>
+                <span id="sm-vtype" class="vf fv"></span>
+                <select id="sm-etype" class="ef ei">
+                  <option value="Course">Course Class</option>
+                  <option value="Regular">Regular Class</option>
+                </select>
+              </div>
+              <div>
+                <span class="fl">วันเกิด</span>
+                <div class="vf d-flex align-items-center">
+                  <span id="sm-vdob" class="fv"></span>
+                  <span id="sm-vage-badge" class="badge rounded-pill text-bg-danger ms-2 d-none" style="font-size:10px"></span>
+                </div>
+                <input id="sm-edob" type="date" class="ef ei" />
+              </div>
+              <div>
+                <span class="fl">ชื่อ-นามสกุล (ไทย)</span>
+                <span id="sm-vname" class="vf fv"></span>
+                <input id="sm-ename" type="text" class="ef ei" placeholder="ชื่อ-นามสกุล" />
+              </div>
+              <div>
+                <span class="fl">ชื่อเล่น (ไทย)</span>
+                <span id="sm-vnick" class="vf fv"></span>
+                <input id="sm-enick" type="text" class="ef ei" placeholder="ชื่อเล่น" />
+              </div>
+              <div>
+                <span class="fl">ชื่อ (อังกฤษ)</span>
+                <span id="sm-vneng" class="vf fv"></span>
+                <input id="sm-eneng" type="text" class="ef ei" placeholder="English name" />
+              </div>
+              <div>
+                <span class="fl">ชื่อเล่น (อังกฤษ)</span>
+                <span id="sm-vneng2" class="vf fv"></span>
+                <input id="sm-eneng2" type="text" class="ef ei" placeholder="Nickname" />
+              </div>
+              <div style="grid-column:span 2">
+                <span class="fl">เบอร์โทร</span>
+                <span id="sm-vphone" class="vf fv"></span>
+                <input id="sm-ephone" type="text" class="ef ei" placeholder="0812345678" />
+              </div>
+            </div>
+            <div id="sm-st" style="display:none;margin-top:14px;padding:10px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;"></div>
+          </div>
+          <div style="padding:0 26px 22px;display:flex;gap:10px;justify-content:flex-end;">
+            <div id="sm-fv" style="display:flex;gap:10px">
+              <button onclick="closeSM()" style="padding:10px 20px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#9ca3af;font-size:13px;cursor:pointer;">ปิด</button>
+              <button onclick="enterEdit()" style="padding:10px 22px;background:#dc2424;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">✏️ แก้ไข</button>
+            </div>
+            <div id="sm-fe" style="display:none;gap:10px">
+              <button onclick="cancelEdit()" style="padding:10px 20px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#9ca3af;font-size:13px;cursor:pointer;">ยกเลิก</button>
+              <button id="sm-sb" onclick="saveEdit()" style="padding:10px 22px;background:#dc2424;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">💾 บันทึก</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADD MODAL ══ -->
+    <div id="addModal">
+      <div class="mbox" style="max-height:90vh;overflow-y:auto">
+        <div class="mred"></div>
+        <div style="padding:22px 26px 0;display:flex;align-items:center;justify-content:space-between;">
+          <h3 style="color:#f1f5f9;font-size:18px;font-weight:800;margin:0">เพิ่มนักเรียนใหม่</h3>
+          <button onclick="closeAM()" style="background:rgba(255,255,255,0.07);border:none;color:#64748b;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+        <div style="padding:20px 26px 26px">
+          <div style="margin-bottom:18px">
+            <span class="fl" style="display:block;margin-bottom:8px">ประเภทนักเรียน</span>
+            <div style="display:flex;gap:8px">
+              <button id="ab-c" onclick="setAT('Course')" style="flex:1;padding:9px;border-radius:10px;border:none;background:#dc2424;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Course Class</button>
+              <button id="ab-r" onclick="setAT('Regular')" style="flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:13px;font-weight:600;cursor:pointer;">Regular Class</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div style="grid-column:span 2">
+              <span class="fl">ชื่อ-นามสกุล (ไทย) *</span>
+              <input id="an" type="text" placeholder="ชื่อ-นามสกุล" class="ei" />
+            </div>
+            <div>
+              <span class="fl">ชื่อเล่น (ไทย)</span>
+              <input id="ank" type="text" placeholder="ชื่อเล่น" class="ei" />
+            </div>
+            <div>
+              <span class="fl">วันเกิด</span>
+              <input id="adob" type="date" class="ei" />
+            </div>
+            <div>
+              <span class="fl">ชื่อ (อังกฤษ)</span>
+              <input id="ane" type="text" placeholder="English name" class="ei" />
+            </div>
+            <div>
+              <span class="fl">ชื่อเล่น (อังกฤษ)</span>
+              <input id="ane2" type="text" placeholder="Nickname" class="ei" />
+            </div>
+            <div style="grid-column:span 2">
+              <span class="fl">เบอร์โทร</span>
+              <input id="aph" type="text" placeholder="0812345678" class="ei" />
+            </div>
+            <div id="acw" style="grid-column:span 2">
+              <span class="fl">คอร์ส *</span>
+              <select id="acid" class="ei"><option value="">— เลือกคอร์ส —</option></select>
+            </div>
+          </div>
+          <div id="ast" style="display:none;margin-top:14px;padding:10px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;"></div>
+        </div>
+        <div style="padding:0 26px 22px;display:flex;gap:10px;justify-content:flex-end;">
+          <button onclick="closeAM()" style="padding:10px 20px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#9ca3af;font-size:13px;cursor:pointer;">ยกเลิก</button>
+          <button id="asb" onclick="submitAdd()" style="padding:10px 22px;background:#dc2424;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">+ เพิ่มนักเรียน</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="admin-common.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof loadAdminShell === "function") loadAdminShell();
+      });
+    </script>
+
+    <script>
+      var _stu = [], _fil = [], _cur = null, _at = "Course", _chip = "all";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadStudents();
+      });
+
+      /* ── Age / Date helpers ── */
+      function calcAge(dobStr) {
+        if (!dobStr) return null;
+        var dob = new Date(dobStr);
+        if (isNaN(dob)) return null;
+        var today = new Date();
+        var age = today.getFullYear() - dob.getFullYear();
+        var m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+        return age < 0 ? 0 : age;
+      }
+
+      function formatDob(dobStr) {
+        if (!dobStr) return "-";
+        var d = new Date(dobStr);
+        if (isNaN(d)) return dobStr;
+        return d.toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" });
+      }
+
+      /* ── Skeleton card template ── */
+      function skCard() {
+        return `
+          <article class="stu-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="skeleton" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;"></div>
+                <div>
+                  <div class="skeleton" style="height:14px;width:130px;margin-bottom:8px;border-radius:4px;"></div>
+                  <div style="display:flex;gap:6px;">
+                    <div class="skeleton" style="height:10px;width:80px;border-radius:4px;"></div>
+                    <div class="skeleton" style="height:10px;width:40px;border-radius:999px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="skeleton" style="height:20px;width:80px;border-radius:999px;flex-shrink:0;"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="skeleton" style="width:14px;height:14px;border-radius:50%;flex-shrink:0;"></div>
+                <div class="skeleton" style="height:12px;width:65%;border-radius:4px;"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="skeleton" style="width:14px;height:14px;border-radius:50%;flex-shrink:0;"></div>
+                <div class="skeleton" style="height:12px;width:80%;border-radius:4px;"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="skeleton" style="width:14px;height:14px;border-radius:50%;flex-shrink:0;"></div>
+                <div class="skeleton" style="height:12px;width:55%;border-radius:4px;"></div>
+              </div>
+            </div>
+            <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--bs-border-color);display:flex;justify-content:flex-end;">
+              <div class="skeleton" style="height:11px;width:80px;border-radius:4px;"></div>
+            </div>
+          </article>`;
+      }
+
+      /* ── Load Students ── */
+      function loadStudents(reset) {
+        if (reset) document.getElementById("stuSearch").value = "";
+        var g = document.getElementById("stuGrid");
+
+        // Show skeleton (6 cards)
+        g.innerHTML = [0, 0.08, 0.16, 0.24, 0.32, 0.40].map(function(delay) {
+          return '<div style="animation-delay:' + delay + 's">' + skCard() + '</div>';
+        }).join("");
+
+        var url = (typeof scriptURL !== "undefined" && scriptURL) ? scriptURL : "";
+        if (!url) {
+          g.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;border:2px dashed #fecaca;border-radius:20px;color:#ef4444;">⚠️ scriptURL not defined — ตรวจสอบ config.js</div>';
+          return;
+        }
+
+        Promise.all([
+          fetch(url, { method: "POST", body: JSON.stringify({ action: "getStudentsByType", type: "course", courseId: "" }) }).then(function(r) { return r.json(); }),
+          fetch(url, { method: "POST", body: JSON.stringify({ action: "getStudentsByType", type: "regular", courseId: "" }) }).then(function(r) { return r.json(); })
+        ])
+        .then(function(r) {
+          var seen = {};
+          _stu = (r[0].data || [])
+            .map(function(s) { return Object.assign({}, s, { type: s.type || "Course" }); })
+            .concat((r[1].data || []).map(function(s) { return Object.assign({}, s, { type: s.type || "Regular" }); }))
+            .filter(function(s) {
+              var k = s.studentId || (s.name + s.phone);
+              if (seen[k]) return false;
+              seen[k] = true;
+              return true;
+            });
+          _fil = _stu.slice();
+          renderCards();
+        })
+        .catch(function(e) {
+          g.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;border:2px dashed #fecaca;border-radius:20px;color:#ef4444;">เกิดข้อผิดพลาด: ' + e.message + '</div>';
+        });
+      }
+
+      /* ── Filter / Chip ── */
+      function setChip(c) {
+        _chip = c;
+        ["all", "course", "regular"].forEach(function(id) {
+          document.getElementById("chip-" + id).classList.toggle("on", id === c);
+        });
+        filterCards();
+      }
+
+      function filterCards() {
+        var q = (document.getElementById("stuSearch").value || "").toLowerCase();
+        _fil = _stu.filter(function(s) {
+          var tx = [s.name||"", s.nickname||"", s.nameEng||"", s.nicknameEng||"", s.studentId||"", s.phone||""].join(" ").toLowerCase();
+          return (!q || tx.includes(q)) && (_chip === "all" || (s.type||"").toLowerCase() === _chip);
+        });
+        renderCards();
+      }
+
+      /* ── Render Cards ── */
+      function renderCards() {
+        var el = document.getElementById("stu-count");
+        if (el) el.textContent = "(" + _fil.length + " คน)";
+        var g = document.getElementById("stuGrid");
+        if (!_fil.length) {
+          g.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;border:2px dashed #e2e8f0;border-radius:20px;color:#94a3b8;font-size:14px;">ไม่พบข้อมูลนักเรียน</div>';
+          return;
+        }
+        g.innerHTML = _fil.map(function(s, i) {
+          var nm = s.name || "-";
+          var ini = nm !== "-" ? nm.slice(0, 2) : "??";
+          var ne = s.nameEng || "-";
+          var isR = (s.type || "").toLowerCase() === "regular";
+          var typeLabel = isR ? "Regular Class" : "Course Class";
+          var age = calcAge(s.dob);
+          var agePill = age !== null
+            ? '<span class="age-badge-card"><i class="bi bi-cake-fill" style="font-size:9px;"></i>' + age + ' ปี</span>'
+            : "";
+          return `
+            <article class="stu-card col-12" onclick="openSM(${i})">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="stu-av">${ini}</div>
+                  <div>
+                    <h3 style="font-size:16px;font-weight:900;margin:0;color:var(--bs-body-color);">${nm}</h3>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                      ${ne && ne !== "-" ? '<p style="font-size:13px;font-weight:500;color:#e63946;margin:0;">' + ne + '</p>' : ""}
+                      ${agePill}
+                    </div>
+                  </div>
+                </div>
+                <span class="type-badge">${typeLabel}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div class="stu-info-line"><i class="bi bi-person-badge"></i>${s.studentId || "-"}</div>
+                <div class="stu-info-line"><i class="bi bi-tag"></i>${s.nickname || "-"} (${s.nicknameEng || "-"})</div>
+                <div class="stu-info-line"><i class="bi bi-telephone"></i>${s.phone && s.phone !== "-" ? s.phone : "ไม่มีเบอร์โทร"}</div>
+              </div>
+              <div style="margin-top:20px;padding-top:12px;border-top:1px solid var(--bs-border-color);display:flex;justify-content:flex-end;">
+                <span class="view-details-link"><i class="bi bi-chevron-right me-1" style="font-size:10px;"></i>View Details</span>
+              </div>
+            </article>`;
+        }).join("");
+      }
+
+      /* ── Detail Modal ── */
+      function openSM(i) {
+        var s = _fil[i];
+        if (!s) return;
+        _cur = s;
+        var nm = s.name || "-";
+        var ini = nm !== "-" ? nm.slice(0, 2) : "??";
+        var isR = (s.type || "").toLowerCase() === "regular";
+        document.getElementById("sm-av").textContent = ini;
+        document.getElementById("sm-nm").textContent = nm;
+        document.getElementById("sm-bg").innerHTML = isR
+          ? '<span class="type-badge">REGULAR CLASS</span>'
+          : '<span class="type-badge">COURSE CLASS</span>';
+        document.getElementById("sm-id").textContent = s.studentId || "-";
+        document.getElementById("sm-vtype").textContent = isR ? "Regular Class" : "Course Class";
+        document.getElementById("sm-vdob").textContent = s.dob ? formatDob(s.dob) : "-";
+        var age = calcAge(s.dob);
+        var ageBadge = document.getElementById("sm-vage-badge");
+        if (age !== null) { ageBadge.textContent = age + " ปี"; ageBadge.classList.remove("d-none"); }
+        else { ageBadge.classList.add("d-none"); }
+        document.getElementById("sm-vname").textContent = s.name || "-";
+        document.getElementById("sm-vnick").textContent = s.nickname || "-";
+        document.getElementById("sm-vneng").textContent = s.nameEng || "-";
+        document.getElementById("sm-vneng2").textContent = s.nicknameEng || "-";
+        document.getElementById("sm-vphone").textContent = (s.phone && s.phone !== "-") ? s.phone : "—";
+        document.getElementById("sm-etype").value = s.type || "Course";
+        document.getElementById("sm-edob").value = s.dob || "";
+        document.getElementById("sm-ename").value = s.name || "";
+        document.getElementById("sm-enick").value = s.nickname || "";
+        document.getElementById("sm-eneng").value = s.nameEng || "";
+        document.getElementById("sm-eneng2").value = s.nicknameEng || "";
+        document.getElementById("sm-ephone").value = s.phone || "";
+        exitEdit();
+        hideST("sm-st");
+        document.getElementById("stuModal").style.display = "flex";
+      }
+
+      function closeSM() { document.getElementById("stuModal").style.display = "none"; _cur = null; }
+      function enterEdit() { document.getElementById("sm-form").classList.add("em"); document.getElementById("sm-fv").style.display = "none"; document.getElementById("sm-fe").style.display = "flex"; }
+      function cancelEdit() { exitEdit(); hideST("sm-st"); }
+      function exitEdit() { document.getElementById("sm-form").classList.remove("em"); document.getElementById("sm-fv").style.display = "flex"; document.getElementById("sm-fe").style.display = "none"; }
+      function hideST(id) { document.getElementById(id).style.display = "none"; }
+      function showST(id, ok, msg) {
+        var el = document.getElementById(id);
+        el.style.cssText = "display:block;margin-top:14px;padding:10px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;" +
+          (ok ? "background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.2);"
+              : "background:rgba(220,36,36,0.12);color:#fca5a5;border:1px solid rgba(220,36,36,0.2);");
+        el.textContent = msg;
+      }
+
+      function saveEdit() {
+        if (!_cur) return;
+        var btn = document.getElementById("sm-sb");
+        btn.textContent = "กำลังบันทึก..."; btn.disabled = true;
+        var p = {
+          action: "updateStudent",
+          studentId: _cur.studentId,
+          name: document.getElementById("sm-ename").value.trim(),
+          nickname: document.getElementById("sm-enick").value.trim(),
+          dob: document.getElementById("sm-edob").value,
+          nameEng: document.getElementById("sm-eneng").value.trim(),
+          nicknameEng: document.getElementById("sm-eneng2").value.trim(),
+          phone: document.getElementById("sm-ephone").value.trim(),
+          type: document.getElementById("sm-etype").value
+        };
+        fetch(scriptURL, { method: "POST", body: JSON.stringify(p) })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            btn.textContent = "💾 บันทึก"; btn.disabled = false;
+            if (res.status === "success") {
+              showST("sm-st", true, "✓ บันทึกสำเร็จ!");
+              Object.assign(_cur, p);
+              document.getElementById("sm-vname").textContent = p.name;
+              document.getElementById("sm-vnick").textContent = p.nickname || "-";
+              document.getElementById("sm-vdob").textContent = p.dob ? formatDob(p.dob) : "-";
+              var age = calcAge(p.dob);
+              var ageBadge = document.getElementById("sm-vage-badge");
+              if (age !== null) { ageBadge.textContent = age + " ปี"; ageBadge.classList.remove("d-none"); } else { ageBadge.classList.add("d-none"); }
+              document.getElementById("sm-vneng").textContent = p.nameEng || "-";
+              document.getElementById("sm-vneng2").textContent = p.nicknameEng || "-";
+              document.getElementById("sm-vphone").textContent = p.phone || "—";
+              document.getElementById("sm-vtype").textContent = p.type === "Regular" ? "Regular Class" : "Course Class";
+              document.getElementById("sm-nm").textContent = p.name;
+              exitEdit();
+              loadStudents();
+            } else {
+              showST("sm-st", false, "✕ " + (res.message || "เกิดข้อผิดพลาด"));
+            }
+          })
+          .catch(function() { btn.textContent = "💾 บันทึก"; btn.disabled = false; showST("sm-st", false, "✕ Connection error"); });
+      }
+
+      document.getElementById("stuModal").addEventListener("click", function(e) { if (e.target === this) closeSM(); });
+
+      /* ── Add Modal ── */
+      function openAddModal() {
+        _at = "Course";
+        ["an","ank","adob","ane","ane2","aph"].forEach(function(id) { document.getElementById(id).value = ""; });
+        document.getElementById("acid").value = "";
+        setAT("Course");
+        hideST("ast");
+        loadCourses();
+        document.getElementById("addModal").style.display = "flex";
+      }
+
+      function closeAM() { document.getElementById("addModal").style.display = "none"; }
+
+      function setAT(t) {
+        _at = t;
+        var ic = t === "Course";
+        document.getElementById("ab-c").style.cssText = ic
+          ? "flex:1;padding:9px;border-radius:10px;border:none;background:#dc2424;color:#fff;font-size:13px;font-weight:700;cursor:pointer;"
+          : "flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:13px;font-weight:600;cursor:pointer;";
+        document.getElementById("ab-r").style.cssText = !ic
+          ? "flex:1;padding:9px;border-radius:10px;border:none;background:#dc2424;color:#fff;font-size:13px;font-weight:700;cursor:pointer;"
+          : "flex:1;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:13px;font-weight:600;cursor:pointer;";
+        document.getElementById("acw").style.display = ic ? "block" : "none";
+      }
+
+      function loadCourses() {
+        fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getCourseData" }) })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            var sel = document.getElementById("acid");
+            sel.innerHTML = '<option value="">— เลือกคอร์ส —</option>';
+            (res.data || []).forEach(function(c) {
+              var o = document.createElement("option");
+              o.value = c.id; o.textContent = c.name;
+              sel.appendChild(o);
+            });
+          });
+      }
+
+      function submitAdd() {
+        var nm = document.getElementById("an").value.trim();
+        if (!nm) { showST("ast", false, "กรุณากรอกชื่อนักเรียน"); return; }
+        if (_at === "Course" && !document.getElementById("acid").value) { showST("ast", false, "กรุณาเลือกคอร์ส"); return; }
+        if (!confirm("ยืนยันการเพิ่มนักเรียน?\n\nชื่อ: " + nm + "\nประเภท: " + _at + " Class")) return;
+        var btn = document.getElementById("asb");
+        btn.textContent = "กำลังเพิ่ม..."; btn.disabled = true;
+        var p = {
+          action: _at === "Course" ? "addStudentWithCourse" : "addStudent",
+          name: nm,
+          nickname: document.getElementById("ank").value.trim(),
+          dob: document.getElementById("adob").value,
+          nameEng: document.getElementById("ane").value.trim(),
+          nicknameEng: document.getElementById("ane2").value.trim(),
+          phone: document.getElementById("aph").value.trim(),
+          type: _at,
+          courseId: _at === "Course" ? document.getElementById("acid").value : ""
+        };
+        fetch(scriptURL, { method: "POST", body: JSON.stringify(p) })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            btn.textContent = "+ เพิ่มนักเรียน"; btn.disabled = false;
+            if (res.status === "success") {
+              showST("ast", true, "✓ เพิ่มนักเรียนสำเร็จ!");
+              setTimeout(function() { closeAM(); loadStudents(true); }, 1200);
+            } else {
+              showST("ast", false, "✕ " + (res.message || "เกิดข้อผิดพลาด"));
+            }
+          })
+          .catch(function() { btn.textContent = "+ เพิ่มนักเรียน"; btn.disabled = false; showST("ast", false, "✕ Connection error"); });
+      }
+
+      document.getElementById("addModal").addEventListener("click", function(e) { if (e.target === this) closeAM(); });
+    </script>
+  </body>
+</html>
