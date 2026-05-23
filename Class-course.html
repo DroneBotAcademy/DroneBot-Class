@@ -10,8 +10,10 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
-
-    /* ── Skeleton ── */
+    .sidebar-active { background: linear-gradient(135deg, #e63946 0%, #b91c1c 100%); color: white !important; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3); }
+    .tab-active { background-color: #e63946; color: white; }
+    .student-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
+    .student-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-color: #e63946; }
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200% 100%;
@@ -38,10 +40,34 @@
     .badge-green  { background: linear-gradient(135deg,#22c55e,#16a34a); color:white; }
     .badge-yellow { background: linear-gradient(135deg,#f59e0b,#d97706); color:white; }
 
-    /* ── Course Dropdown ── */
-    .custom-select-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
-    .custom-select-wrapper .select-icon  { position:absolute; left:14px; color:#e63946; font-size:13px; pointer-events:none; z-index:1; }
-    .custom-select-wrapper .chevron-icon { position:absolute; right:14px; color:#94a3b8; font-size:11px; pointer-events:none; z-index:1; }
+    /* ── Completed Card ── */
+    .card-completed {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+      border: 2px solid #86efac !important;
+    }
+    .card-completed:hover {
+      border-color: #22c55e !important;
+      box-shadow: 0 10px 25px -5px rgba(34,197,94,0.2) !important;
+    }
+    .card-completed .progress-done {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      box-shadow: 0 0 10px rgba(34,197,94,0.6);
+    }
+    .completed-badge {
+      position: absolute; top: 0; left: 0;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 0 0 1.25rem 0;
+      font-size: 10px; font-weight: 900;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      box-shadow: 2px 2px 8px rgba(22,163,74,0.3);
+    }
+
+    .custom-select-wrapper { position: relative; display: inline-flex; align-items: center; }
+    .custom-select-wrapper .select-icon { position: absolute; left: 16px; color: #e63946; font-size: 14px; pointer-events: none; z-index: 1; }
+    .custom-select-wrapper .chevron-icon { position: absolute; right: 14px; color: #94a3b8; font-size: 11px; pointer-events: none; z-index: 1; }
+    
     #courseDropdown {
       appearance: none; -webkit-appearance: none;
       padding: 12px 40px 12px 40px;
@@ -145,6 +171,39 @@
       .page-pad   { padding: 12px !important; }
       .top-bar    { margin-bottom: 12px !important; gap: 8px !important; }
     }
+    #courseDropdown:focus { border-color: #e63946; box-shadow: 0 0 0 4px rgba(230,57,70,0.1), 0 2px 8px rgba(0,0,0,0.05); }
+    #courseDropdown:hover { border-color: #fca5a5; }
+    .btn-complete { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #loadingOverlay.show { display: flex; }
+    .loading-box {
+      background: white;
+      border-radius: 2rem;
+      padding: 2.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .spinner-ring {
+      width: 52px; height: 52px;
+      border: 5px solid #fee2e2;
+      border-top-color: #e63946;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <style>body { visibility: hidden; }</style>
 </head>
@@ -152,11 +211,11 @@
   <script src="./js/auth-guard.js"></script>
   <div id="main-navbar"></div>
 
-  <!-- Loading Overlay -->
+  <!-- Global Loading Overlay -->
   <div id="loadingOverlay">
     <div class="loading-box">
       <div class="spinner-ring"></div>
-      <p class="text-gray-700 font-bold text-sm" id="loadingText">กำลังบันทึก...</p>
+      <p class="text-gray-700 font-bold text-base" id="loadingText">กำลังบันทึก...</p>
     </div>
   </div>
 
@@ -334,29 +393,19 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════
-       Add Student Modal
-  ════════════════════════════════════════ -->
-  <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="modal-inner bg-white w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl">
-      <div class="p-6 sm:p-8">
-        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
-        <h2 class="text-xl font-black text-gray-900 mb-5">เพิ่มนักเรียนเข้าคอร์ส</h2>
-        <div class="flex flex-col gap-4 mb-5">
-          <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-1.5">นักเรียน</p>
-            <select id="new-student-select"
-              class="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 font-[Kanit] text-sm">
-              <option value="">— เลือกนักเรียน —</option>
-            </select>
-          </div>
-          <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-1.5">คอร์ส</p>
-            <select id="new-student-course"
-              class="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 font-[Kanit] text-sm">
-              <option value="">— เลือกคอร์ส —</option>
-            </select>
-          </div>
+  <!-- Add Student Modal -->
+  <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl">
+      <h2 class="text-2xl font-black text-gray-900 mb-6">Add Student to Course</h2>
+      <div class="flex flex-col gap-4 mb-6">
+
+        <!-- เลือกนักเรียน -->
+        <div>
+          <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Student</p>
+          <select id="new-student-select"
+            class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 transition-all font-[Kanit] text-sm">
+            <option value="">— Select Student —</option>
+          </select>
         </div>
         <div class="flex gap-3">
           <button id="btnSaveStudent" onclick="submitAddStudent()"
@@ -365,6 +414,14 @@
           </button>
           <button onclick="closeModal('addStudentModal')" class="flex-1 py-3.5 bg-gray-100 text-gray-700 rounded-2xl font-bold text-sm">ยกเลิก</button>
         </div>
+
+      </div>
+      <div class="flex gap-4">
+        <!-- ✅ แก้แล้ว: ใช้ id เพื่อหา button ตอน loading -->
+        <button id="btnSaveStudent" onclick="submitAddStudent()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-lg">
+          <i class="fas fa-save mr-2"></i>Save
+        </button>
+        <button onclick="closeModal('addStudentModal')" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">Cancel</button>
       </div>
     </div>
   </div>
@@ -387,14 +444,16 @@
       document.querySelector('[data-filter="all"]').classList.add('active-all');
     };
 
-    /* ── Loading ── */
-    function showLoading(t) {
-      document.getElementById('loadingText').innerText = t || 'กำลังบันทึก...';
+    /* ─── Loading Overlay ─── */
+    function showLoading(text) {
+      document.getElementById('loadingText').innerText = text || 'กำลังบันทึก...';
       document.getElementById('loadingOverlay').classList.add('show');
     }
-    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('show');
+    }
 
-    /* ── Course Dropdown ── */
+    /* ─── โหลดรายการคอร์สลง Dropdown หลัก ─── */
     function fetchCourseList() {
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
         .then(r => r.json()).then(res => {
@@ -463,89 +522,53 @@
       }
 
       students.forEach(s => {
-        const p       = Number(s.progress) || 0;
+        const p        = s.progress !== undefined ? Number(s.progress) : 0;
         const isCourse = currentTab === 'course';
-        const isDone  = p >= 6;
-        const hasCert = (s.certificate || '').toLowerCase() === 'received';
-
-        let cardClass = 'bg-white student-card';
-        let badge     = '';
-        let barClass  = 'progress-done-green';
-        let nameCol   = 'text-gray-800';
-        let nickCol   = 'text-red-500';
-        let metaCol   = 'text-gray-400';
-        let tagStyle  = 'background:#fff1f2;color:#e63946;';
-        let idStyle   = 'background:#f8fafc;color:#94a3b8;';
-        let btnUpd    = 'background:#f8fafc;color:#1f2937;';
-        let btnRem    = 'background:#fff1f2;color:#e63946;';
-
-        if (isDone && hasCert) {
-          cardClass = 'card-green student-card';
-          badge     = `<div class="badge-corner badge-green"><i class="fas fa-graduation-cap mr-1"></i>Certificate</div>`;
-          nameCol   = 'text-green-900'; nickCol = 'text-green-600'; metaCol = 'text-green-700';
-          tagStyle  = 'background:#dcfce7;color:#15803d;';
-          idStyle   = 'background:#dcfce7;color:#15803d;';
-          btnUpd    = 'background:#22c55e;color:white;';
-          btnRem    = 'background:#dcfce7;color:#15803d;';
-        } else if (isDone && !hasCert) {
-          cardClass = 'card-yellow student-card';
-          badge     = `<div class="badge-corner badge-yellow"><i class="fas fa-clock mr-1"></i>Cert Pending</div>`;
-          barClass  = 'progress-done-yellow';
-          nameCol   = 'text-yellow-900'; nickCol = 'text-yellow-700'; metaCol = 'text-yellow-700';
-          tagStyle  = 'background:#fef3c7;color:#b45309;';
-          idStyle   = 'background:#fef3c7;color:#b45309;';
-          btnUpd    = 'background:#f59e0b;color:white;';
-          btnRem    = 'background:#fef3c7;color:#b45309;';
-        }
-
-        const safeName = (s.name || '').replace(/'/g,"\\'");
+        const isDone   = p >= 6;
 
         grid.innerHTML += `
-          <div class="card-inner ${cardClass} p-5 rounded-[20px] md:rounded-[2rem] shadow-sm relative overflow-hidden" style="border: ${isDone ? '' : '1px solid #f1f5f9'}">
-            ${badge}
+          <div class="student-card ${isDone ? 'card-completed' : 'bg-white'} p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
 
-            <!-- Course tag -->
-            <div class="absolute top-0 right-0 px-3 py-1.5 rounded-bl-2xl text-[9px] font-bold uppercase tracking-wider" style="${tagStyle}">
-              <i class="fas fa-book-open mr-1"></i>${s.courseName || '-'}
-            </div>
+            ${isDone ? `<div class="completed-badge"><i class="fas fa-graduation-cap mr-1"></i> Completed</div>` : ''}
 
-            <!-- Name row -->
-            <div class="flex items-start justify-between mt-2 mb-4">
-              <div class="pr-2">
-                <h3 class="card-name font-bold text-lg ${nameCol} leading-tight">${s.nickname || '-'}</h3>
-                <p class="text-sm ${nickCol} font-medium">${s.name || '-'}</p>
+            <div class="absolute top-0 right-0">
+              <div class="${isDone ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-50 text-red-600 border-red-100'} px-4 py-2 rounded-bl-2xl text-[10px] font-bold uppercase tracking-wider shadow-sm border-l border-b">
+                <i class="fas fa-book-open mr-1"></i> ${s.courseName || '-'}
               </div>
-              <span class="text-[10px] font-black rounded-full px-2.5 py-1 shrink-0 mt-0.5" style="${idStyle}">${s.studentId}</span>
             </div>
 
-            <!-- Meta -->
-            <div class="card-meta flex flex-col gap-1.5 mb-4 text-xs ${metaCol} font-medium">
-              <div class="flex items-center gap-2"><i class="fas fa-tag w-4 text-center"></i><span>${s.nameEng || '-'}</span></div>
-              <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center"></i><span>${s.phone || '-'}</span></div>
+            <div class="flex justify-between items-start mb-6 mt-2">
+              <div>
+                <h3 class="text-xl font-bold ${isDone ? 'text-green-900' : 'text-gray-800'}">${s.nickname || '-'}</h3>
+                <p class="text-sm ${isDone ? 'text-green-600' : 'text-red-500'} font-medium tracking-wide">${s.name || '-'}</p>
+              </div>
+              <div class="${isDone ? 'bg-green-100 text-green-700' : 'bg-gray-50 text-gray-400'} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">${s.studentId}</div>
+            </div>
+
+            <div class="space-y-3 mb-8 text-xs ${isDone ? 'text-green-700' : 'text-gray-400'} font-medium">
+              <div><i class="fas fa-tag w-5"></i> ${s.nameEng || '-'}</div>
+              <div><i class="fas fa-phone w-5"></i> ${s.phone || '-'}</div>
             </div>
 
             <!-- Progress -->
             ${isCourse ? `
-              <div class="mb-4">
-                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 ${isDone && hasCert ? 'text-green-500' : isDone ? 'text-yellow-500' : 'text-gray-300'}">
-                  <span>PROGRESS</span><span>${p}/6</span>
+              <div class="border-t ${isDone ? 'border-green-200' : 'border-gray-50'} pt-6">
+                <div class="flex justify-between text-[10px] font-black uppercase mb-3 tracking-widest ${isDone ? 'text-green-500' : 'text-gray-300'}">
+                  <span>PROGRESS</span>
+                  <span>${p}/6 COMPLETED</span>
                 </div>
                 <div class="grid grid-cols-6 gap-1">
                   ${Array.from({length:6},(_,i)=>`<div class="progress-step ${p>i?barClass:''}"></div>`).join('')}
                 </div>
               </div>` : ''}
 
-            <!-- Buttons -->
-            <button onclick="openProgressModal('${safeName}',${p},'${s.studentId}','${s.courseId||''}','${s.certificate||'Pending'}')"
-              class="w-full py-3 rounded-2xl font-bold text-sm mb-2 transition-all"
-              style="${btnUpd}">
-              ${isDone ? '<i class="fas fa-graduation-cap mr-1"></i>ดู / แก้ไข' : 'อัปเดต Progress'}
-              <i class="fas fa-chevron-right ml-1 text-[10px]"></i>
+            <button onclick="openProgressModal('${(s.name || '').replace(/'/g, "\\'")}', ${p}, '${s.studentId}', '${s.courseId || ''}')"
+              class="mt-8 w-full py-4 ${isDone ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-gray-50 text-gray-800 group-hover:bg-red-600 group-hover:text-white'} rounded-2xl font-bold transition-all shadow-sm">
+              ${isDone ? '<i class="fas fa-graduation-cap mr-2"></i>View / Edit' : 'Update Progress'} <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
             </button>
-            <button onclick="deleteEnrollment('${s.studentId}','${s.courseId}')"
-              class="w-full py-2.5 rounded-2xl font-bold text-sm transition-all"
-              style="${btnRem}">
-              <i class="fas fa-trash mr-1"></i> ลบออกจากคอร์ส
+            <button onclick="deleteEnrollment('${s.studentId}', '${s.courseId}')"
+              class="mt-3 w-full py-3 ${isDone ? 'bg-green-100 text-green-700 hover:bg-red-500 hover:text-white' : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white'} rounded-2xl font-bold transition-all shadow-sm">
+              <i class="fas fa-trash mr-2"></i> Remove from Course
             </button>
           </div>`;
       });
@@ -575,29 +598,9 @@
             </div>
           </div>`;
       }
-      document.getElementById('sessionList').innerHTML = html;
-      document.getElementById('btnFinishNow').style.display = tempProgress >= 6 ? 'none' : 'flex';
-    }
-
-    function renderCertToggle() {
-      const row = document.getElementById('certToggleRow');
-      const iw  = document.getElementById('certIconWrap');
-      const ic  = document.getElementById('certIcon');
-      const lb  = document.getElementById('certLabel');
-      const sl  = document.getElementById('certSubLabel');
-      if (tempCertificate) {
-        row.classList.add('cert-on');
-        iw.style.background = '#dcfce7';
-        ic.className = 'fas fa-graduation-cap text-green-500';
-        lb.innerText = 'รับเกียรติบัตรแล้ว ✓'; lb.style.color = '#15803d';
-        sl.innerText = 'แตะเพื่อยกเลิก';
-      } else {
-        row.classList.remove('cert-on');
-        iw.style.background = '#fef9c3';
-        ic.className = 'fas fa-graduation-cap text-yellow-500';
-        lb.innerText = 'รับเกียรติบัตรแล้ว'; lb.style.color = '#374151';
-        sl.innerText = 'แตะเพื่อยืนยันการรับ';
-      }
+      const isDone       = tempProgress >= 6;
+      const btnFinishNow = document.getElementById('btnFinishNow');
+      if (btnFinishNow) btnFinishNow.style.display = isDone ? 'none' : 'block';
     }
 
     function toggleCertificate() { tempCertificate = !tempCertificate; renderCertToggle(); }
@@ -610,23 +613,23 @@
     function saveProgressData() {
       const btn = document.getElementById('btnSaveProgress');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>กำลังบันทึก...';
-      showLoading('กำลังบันทึก...');
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Saving...';
 
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"updateProgress", studentId:currentStudentId, courseId:currentCourseId, newProgress:tempProgress }) })
-        .then(r => r.json())
-        .then(() => fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"updateCertificate", studentId:currentStudentId, courseId:currentCourseId, received:tempCertificate }) }))
-        .then(r => r.json())
-        .then(res => {
-          if (res.status === 'success') { closeModal('progressModal'); loadStudents(); }
-          else alert(res.message || 'เกิดข้อผิดพลาด');
-        })
-        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
-        .finally(() => {
-          hideLoading();
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-save"></i> บันทึก';
-        });
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "updateProgress", studentId: currentStudentId, courseId: currentCourseId, newProgress: tempProgress })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") {
+          loadStudents();
+          closeModal('progressModal');
+        }
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      });
     }
 
     function finishCourseNow() {
@@ -650,15 +653,18 @@
 
     /* ── Add Student ── */
     function openAddStudentModal() {
-      const ss = document.getElementById('new-student-select');
-      const sc = document.getElementById('new-student-course');
-      ss.innerHTML = '<option value="">— กำลังโหลด... —</option>';
-      sc.innerHTML = '<option value="">— กำลังโหลด... —</option>';
+      const selStudent = document.getElementById('new-student-select');
+      const selCourse  = document.getElementById('new-student-course');
+      selStudent.innerHTML = '<option value="">— กำลังโหลด... —</option>';
+      selCourse.innerHTML  = '<option value="">— กำลังโหลด... —</option>';
+
       document.getElementById('addStudentModal').classList.remove('hidden');
 
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getAllStudents" }) })
-        .then(r => r.json()).then(res => {
-          ss.innerHTML = '<option value="">— เลือกนักเรียน —</option>';
+      // โหลดนักเรียนทั้งหมด
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents" }) })
+        .then(r => r.json())
+        .then(res => {
+          selStudent.innerHTML = '<option value="">— Select Student —</option>';
           (res.data || []).forEach(s => {
             const o = document.createElement('option');
             o.value = s.studentId;
@@ -667,9 +673,11 @@
           });
         });
 
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
-        .then(r => r.json()).then(res => {
-          sc.innerHTML = '<option value="">— เลือกคอร์ส —</option>';
+      // โหลดคอร์ส
+      fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getCourseData" }) })
+        .then(r => r.json())
+        .then(res => {
+          selCourse.innerHTML = '<option value="">— Select Course —</option>';
           (res.data || []).forEach(c => {
             const o = document.createElement('option');
             o.value = c.id; o.textContent = c.name;
@@ -678,35 +686,54 @@
         });
     }
 
+    /* ✅ แก้แล้ว: ใช้ enrollStudent แทน addStudent เพื่อเพิ่มเฉพาะใน CourseTracking */
     function submitAddStudent() {
       const studentId = document.getElementById('new-student-select').value;
       const courseId  = document.getElementById('new-student-course').value;
       if (!studentId) { alert('กรุณาเลือกนักเรียน'); return; }
       if (!courseId)  { alert('กรุณาเลือกคอร์ส');    return; }
 
+      // ── Loading ──
       const btn = document.getElementById('btnSaveStudent');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-1"></i>กำลังบันทึก...';
-      showLoading('กำลังเพิ่มนักเรียน...');
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>กำลังบันทึก...';
+      showLoading('กำลังเพิ่มนักเรียนเข้าคอร์ส...');
 
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"enrollStudent", studentId, courseId }) })
-        .then(r => r.json())
-        .then(res => {
-          if (res.status === 'success') { closeModal('addStudentModal'); loadStudents(); }
-          else alert(res.message || 'เกิดข้อผิดพลาด');
-        })
-        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
-        .finally(() => { hideLoading(); btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-1"></i>บันทึก'; });
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "enrollStudent", studentId, courseId })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") {
+          closeModal('addStudentModal');
+          loadStudents();
+        } else {
+          alert(res.message || "เกิดข้อผิดพลาด");
+        }
+      })
+      .catch(() => alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"))
+      .finally(() => {
+        hideLoading();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i>Save';
+      });
     }
 
     /* ── Delete Enrollment ── */
     function deleteEnrollment(studentId, courseId) {
-      if (!confirm('ต้องการลบออกจากคอร์สนี้ใช่ไหม?')) return;
+      if (!confirm("ต้องการลบออกจากคอร์สนี้ใช่ไหม?")) return;
       showLoading('กำลังลบข้อมูล...');
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"deleteEnrollment", studentId, courseId }) })
-        .then(r => r.json())
-        .then(res => { if (res.status === 'success') loadStudents(); else alert('ลบไม่สำเร็จ'); })
-        .finally(() => hideLoading());
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "deleteEnrollment", studentId, courseId })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") loadStudents();
+        else alert("ลบไม่สำเร็จ");
+      })
+      .finally(() => hideLoading());
     }
 
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
