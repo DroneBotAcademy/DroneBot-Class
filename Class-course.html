@@ -1,4 +1,4 @@
-﻿﻿﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -12,8 +12,8 @@
     .sidebar-active { background: linear-gradient(135deg, #e63946 0%, #b91c1c 100%); color: white !important; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3); }
     .tab-active { background-color: #e63946; color: white; }
     .student-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
-    .student-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-color: #e63946; }
-    /* Skeleton Loading */
+    .student-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200% 100%;
@@ -25,12 +25,37 @@
       100% { background-position: 200% 0; }
     }
     .progress-step { height: 8px; border-radius: 4px; background: #e2e8f0; transition: all 0.5s; }
-    .progress-done { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+    .progress-done-green { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+    .progress-done-yellow { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+
+    /* ── GREEN Card: Completed + Certificate Received ── */
+    .card-green {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+      border: 2px solid #86efac !important;
+    }
+    .card-green:hover { border-color: #22c55e !important; box-shadow: 0 10px 25px -5px rgba(34,197,94,0.2) !important; }
+
+    /* ── YELLOW Card: Completed but Certificate Pending ── */
+    .card-yellow {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+      border: 2px solid #fcd34d !important;
+    }
+    .card-yellow:hover { border-color: #f59e0b !important; box-shadow: 0 10px 25px -5px rgba(245,158,11,0.2) !important; }
+
+    .badge-corner {
+      position: absolute; top: 0; left: 0;
+      padding: 5px 14px;
+      border-radius: 0 0 1.25rem 0;
+      font-size: 10px; font-weight: 900;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .badge-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 2px 2px 8px rgba(22,163,74,0.3); }
+    .badge-yellow { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; box-shadow: 2px 2px 8px rgba(217,119,6,0.3); }
 
     .custom-select-wrapper { position: relative; display: inline-flex; align-items: center; }
     .custom-select-wrapper .select-icon { position: absolute; left: 16px; color: #e63946; font-size: 14px; pointer-events: none; z-index: 1; }
     .custom-select-wrapper .chevron-icon { position: absolute; right: 14px; color: #94a3b8; font-size: 11px; pointer-events: none; z-index: 1; }
-    
+
     #courseDropdown {
       appearance: none; -webkit-appearance: none; padding: 14px 44px 14px 44px;
       background: white; border: 2px solid #f1f5f9; border-radius: 999px;
@@ -40,13 +65,87 @@
     }
     #courseDropdown:focus { border-color: #e63946; box-shadow: 0 0 0 4px rgba(230,57,70,0.1), 0 2px 8px rgba(0,0,0,0.05); }
     #courseDropdown:hover { border-color: #fca5a5; }
-    .btn-complete { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+
+    /* ── Certificate Toggle ── */
+    .cert-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+      border-radius: 1rem;
+      border: 2px solid #e5e7eb;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: #f9fafb;
+      margin-top: 8px;
+      user-select: none;
+    }
+    .cert-toggle-row.cert-on {
+      background: #f0fdf4;
+      border-color: #4ade80;
+    }
+    .cert-switch {
+      width: 46px; height: 26px;
+      background: #d1d5db;
+      border-radius: 999px;
+      position: relative;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    .cert-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: white;
+      top: 3px; left: 3px;
+      transition: transform 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .cert-toggle-row.cert-on .cert-switch { background: #22c55e; }
+    .cert-toggle-row.cert-on .cert-switch::after { transform: translateX(20px); }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    #loadingOverlay.show { display: flex; }
+    .loading-box {
+      background: white;
+      border-radius: 2rem;
+      padding: 2.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .spinner-ring {
+      width: 52px; height: 52px;
+      border: 5px solid #fee2e2;
+      border-top-color: #e63946;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <style>body { visibility: hidden; }</style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen">
   <script src="./js/auth-guard.js"></script>
   <div id="main-navbar"></div>
+
+  <!-- Global Loading Overlay -->
+  <div id="loadingOverlay">
+    <div class="loading-box">
+      <div class="spinner-ring"></div>
+      <p class="text-gray-700 font-bold text-base" id="loadingText">กำลังบันทึก...</p>
+    </div>
+  </div>
 
   <main class="flex-1">
     <div class="p-10">
@@ -63,8 +162,8 @@
         <div class="flex flex-col md:flex-row gap-3 items-stretch w-full md:w-auto">
           <!-- Search Input -->
           <div class="relative w-full md:w-72">
-            <input 
-              type="text" 
+            <input
+              type="text"
               id="searchInput"
               onkeyup="if(event.key==='Enter') loadStudents()"
               placeholder="Search name, nickname..."
@@ -74,11 +173,11 @@
           </div>
 
           <!-- Search Button -->
-          <button 
+          <button
             onclick="loadStudents()"
             class="w-full md:w-auto bg-blue-600 text-white px-6 py-4 rounded-full font-bold text-sm hover:bg-blue-700 transition-all shadow-md flex items-center justify-center gap-2"
           >
-            <i class="fas fa-search"></i> 
+            <i class="fas fa-search"></i>
             <span class="hidden sm:inline">Search</span>
           </button>
         </div>
@@ -98,36 +197,36 @@
         </div>
       </div>
 
+      <!-- Legend -->
+      <div class="flex gap-4 mb-6 text-xs font-bold flex-wrap">
+        <div class="flex items-center gap-2 bg-white border border-gray-100 px-4 py-2 rounded-full shadow-sm">
+          <div class="w-3 h-3 rounded-full bg-gray-300"></div> In Progress
+        </div>
+        <div class="flex items-center gap-2 bg-yellow-50 border border-yellow-200 px-4 py-2 rounded-full shadow-sm text-yellow-700">
+          <div class="w-3 h-3 rounded-full bg-yellow-400"></div> Completed — รอรับเกียรติบัตร
+        </div>
+        <div class="flex items-center gap-2 bg-green-50 border border-green-200 px-4 py-2 rounded-full shadow-sm text-green-700">
+          <div class="w-3 h-3 rounded-full bg-green-500"></div> Completed — รับเกียรติบัตรแล้ว
+        </div>
+      </div>
+
       <div id="studentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- Skeleton Loading -->
-        <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
-          <div class="absolute top-0 right-0">
-            <div class="skeleton w-24 h-8 rounded-bl-2xl"></div>
-          </div>
-          <div class="flex justify-between items-start mb-6 mt-2">
-            <div class="flex-1">
-              <div class="skeleton h-6 w-3/4 mb-2"></div>
-              <div class="skeleton h-4 w-1/2"></div>
-            </div>
-            <div class="skeleton w-16 h-6 rounded-full"></div>
-          </div>
-          <div class="space-y-3 mb-8 text-xs">
-            <div class="skeleton h-4 w-full"></div>
-            <div class="skeleton h-4 w-5/6"></div>
-            <div class="skeleton h-4 w-2/3"></div>
-          </div>
-          <div class="border-t border-gray-50 pt-6">
-            <div class="skeleton h-4 w-full mb-3"></div>
-            <div class="grid grid-cols-6 gap-1"><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div></div>
-          </div>
-          <div class="skeleton h-12 w-full mt-8 rounded-2xl"></div>
-          <div class="skeleton h-10 w-full mt-3 rounded-2xl"></div>
+        <!-- Skeleton -->
+        <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm">
+          <div class="skeleton h-6 w-3/4 mb-4"></div>
+          <div class="skeleton h-4 w-1/2 mb-8"></div>
+          <div class="skeleton h-4 w-full mb-2"></div>
+          <div class="skeleton h-4 w-5/6 mb-8"></div>
+          <div class="skeleton h-12 w-full rounded-2xl mb-3"></div>
+          <div class="skeleton h-10 w-full rounded-2xl"></div>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Progress Modal -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- Progress + Certificate Modal                    -->
+  <!-- ═══════════════════════════════════════════════ -->
   <div id="progressModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl">
       <div class="text-center mb-8">
@@ -135,12 +234,27 @@
           <i class="fas fa-tasks"></i>
         </div>
         <h2 id="modalStudentName" class="text-2xl font-black text-gray-900"></h2>
-        <p class="text-gray-400 text-sm mt-1">Manage session progress</p>
+        <p class="text-gray-400 text-sm mt-1">Manage session progress & certificate</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 mb-8" id="sessionList"></div>
+      <!-- Session Checkboxes -->
+      <div class="grid grid-cols-2 gap-3 mb-6" id="sessionList"></div>
 
-      <div class="space-y-3">
+      <!-- Certificate Toggle -->
+      <div id="certToggleRow" class="cert-toggle-row" onclick="toggleCertificate()">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" id="certIconWrap" style="background:#fef9c3">
+            <i class="fas fa-graduation-cap text-yellow-500 text-lg" id="certIcon"></i>
+          </div>
+          <div>
+            <p class="font-bold text-sm text-gray-800" id="certLabel">รับเกียรติบัตรแล้ว</p>
+            <p class="text-[11px] text-gray-400" id="certSubLabel">แตะเพื่อเปลี่ยนสถานะ</p>
+          </div>
+        </div>
+        <div class="cert-switch" id="certSwitch"></div>
+      </div>
+
+      <div class="space-y-3 mt-6">
         <button id="btnSaveProgress" onclick="saveProgressData()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
           <i class="fas fa-save"></i> Save Changes
         </button>
@@ -167,13 +281,11 @@
     </div>
   </div>
 
-  <!-- Add Student Modal — เลือกนักเรียน + คอร์สเท่านั้น -->
+  <!-- Add Student Modal -->
   <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white p-10 rounded-[2.5rem] max-w-md w-full shadow-2xl">
       <h2 class="text-2xl font-black text-gray-900 mb-6">Add Student to Course</h2>
       <div class="flex flex-col gap-4 mb-6">
-
-        <!-- เลือกนักเรียน -->
         <div>
           <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Student</p>
           <select id="new-student-select"
@@ -181,8 +293,6 @@
             <option value="">— Select Student —</option>
           </select>
         </div>
-
-        <!-- เลือกคอร์ส -->
         <div>
           <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Course</p>
           <select id="new-student-course"
@@ -190,10 +300,11 @@
             <option value="">— Select Course —</option>
           </select>
         </div>
-
       </div>
       <div class="flex gap-4">
-        <button onclick="submitAddStudent()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-lg">Save</button>
+        <button id="btnSaveStudent" onclick="submitAddStudent()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-lg">
+          <i class="fas fa-save mr-2"></i>Save
+        </button>
         <button onclick="closeModal('addStudentModal')" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold">Cancel</button>
       </div>
     </div>
@@ -208,13 +319,23 @@
     let currentCourseId   = null;
     let currentProgress   = 0;
     let tempProgress      = 0;
+    let tempCertificate   = false;   // ✅ NEW: สถานะเกียรติบัตรชั่วคราวใน modal
 
     window.onload = () => {
       fetchCourseList();
       switchTab(currentTab);
     };
 
-    /* ─── โหลดรายการคอร์สลง Dropdown หลัก ─── */
+    /* ─── Loading Overlay ─── */
+    function showLoading(text) {
+      document.getElementById('loadingText').innerText = text || 'กำลังบันทึก...';
+      document.getElementById('loadingOverlay').classList.add('show');
+    }
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('show');
+    }
+
+    /* ─── Course List Dropdown ─── */
     function fetchCourseList() {
       fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getCourseData" }) })
         .then(r => r.json())
@@ -242,30 +363,14 @@
       const q        = document.getElementById('searchInput').value.trim();
       const courseId = document.getElementById('courseDropdown').value;
       const grid     = document.getElementById('studentGrid');
-      // Display skeleton loading
       grid.innerHTML = `
-        <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
-          <div class="absolute top-0 right-0">
-            <div class="skeleton w-24 h-8 rounded-bl-2xl"></div>
-          </div>
-          <div class="flex justify-between items-start mb-6 mt-2">
-            <div class="flex-1">
-              <div class="skeleton h-6 w-3/4 mb-2"></div>
-              <div class="skeleton h-4 w-1/2"></div>
-            </div>
-            <div class="skeleton w-16 h-6 rounded-full"></div>
-          </div>
-          <div class="space-y-3 mb-8 text-xs">
-            <div class="skeleton h-4 w-full"></div>
-            <div class="skeleton h-4 w-5/6"></div>
-            <div class="skeleton h-4 w-2/3"></div>
-          </div>
-          <div class="border-t border-gray-50 pt-6">
-            <div class="skeleton h-4 w-full mb-3"></div>
-            <div class="grid grid-cols-6 gap-1"><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div></div>
-          </div>
-          <div class="skeleton h-12 w-full mt-8 rounded-2xl"></div>
-          <div class="skeleton h-10 w-full mt-3 rounded-2xl"></div>
+        <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm">
+          <div class="skeleton h-6 w-3/4 mb-4"></div>
+          <div class="skeleton h-4 w-1/2 mb-8"></div>
+          <div class="skeleton h-4 w-full mb-2"></div>
+          <div class="skeleton h-4 w-5/6 mb-8"></div>
+          <div class="skeleton h-12 w-full rounded-2xl mb-3"></div>
+          <div class="skeleton h-10 w-full rounded-2xl"></div>
         </div>
       `;
 
@@ -277,6 +382,12 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════
+       renderCards — logic 3 สถานะ
+       1. In Progress   → การ์ดขาวปกติ
+       2. Completed + Cert Pending  → การ์ดเหลือง
+       3. Completed + Cert Received → การ์ดเขียว
+    ═══════════════════════════════════════════════════════ */
     function renderCards(students) {
       const grid = document.getElementById('studentGrid');
       grid.innerHTML = '';
@@ -286,61 +397,127 @@
       }
 
       students.forEach(s => {
-        const p       = s.progress !== undefined ? Number(s.progress) : 0;
-        const isCourse = currentTab === 'course';
-        const isDone  = p >= 6;
+        const p         = Number(s.progress) || 0;
+        const isCourse  = currentTab === 'course';
+        const isDone    = p >= 6;
+        const hasCert   = (s.certificate || "").toString().trim().toLowerCase() === "received";
+
+        /* card style */
+        let cardClass   = 'bg-white student-card';
+        let badgeHtml   = '';
+        let progressDoneClass = 'progress-done-green';
+        let nameColor   = 'text-gray-800';
+        let nickColor   = 'text-red-500';
+        let metaColor   = 'text-gray-400';
+        let tagBg       = 'bg-red-50 text-red-600 border-red-100';
+        let idBg        = 'bg-gray-50 text-gray-400';
+        let borderHover = 'hover:border-red-400';
+
+        if (isDone && hasCert) {
+          cardClass         = 'card-green student-card';
+          badgeHtml         = `<div class="badge-corner badge-green"><i class="fas fa-graduation-cap mr-1"></i> Certificate</div>`;
+          progressDoneClass = 'progress-done-green';
+          nameColor         = 'text-green-900';
+          nickColor         = 'text-green-600';
+          metaColor         = 'text-green-700';
+          tagBg             = 'bg-green-100 text-green-700 border-green-200';
+          idBg              = 'bg-green-100 text-green-700';
+          borderHover       = '';
+        } else if (isDone && !hasCert) {
+          cardClass         = 'card-yellow student-card';
+          badgeHtml         = `<div class="badge-corner badge-yellow"><i class="fas fa-clock mr-1"></i> Cert Pending</div>`;
+          progressDoneClass = 'progress-done-yellow';
+          nameColor         = 'text-yellow-900';
+          nickColor         = 'text-yellow-600';
+          metaColor         = 'text-yellow-700';
+          tagBg             = 'bg-yellow-100 text-yellow-700 border-yellow-200';
+          idBg              = 'bg-yellow-100 text-yellow-700';
+          borderHover       = '';
+        }
+
+        /* button colors */
+        let btnUpdateClass = isDone && hasCert
+          ? 'bg-green-500 text-white hover:bg-green-600'
+          : isDone
+          ? 'bg-yellow-400 text-white hover:bg-yellow-500'
+          : 'bg-gray-50 text-gray-800 group-hover:bg-red-600 group-hover:text-white';
+
+        let btnRemoveClass = isDone && hasCert
+          ? 'bg-green-100 text-green-700 hover:bg-red-500 hover:text-white'
+          : isDone
+          ? 'bg-yellow-100 text-yellow-700 hover:bg-red-500 hover:text-white'
+          : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white';
+
+        const safeName = (s.name || '').replace(/'/g, "\\'");
 
         grid.innerHTML += `
-          <div class="student-card bg-white p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
+          <div class="${cardClass} p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group ${borderHover}">
+
+            ${badgeHtml}
+
+            <!-- Course tag top-right -->
             <div class="absolute top-0 right-0">
-              <div class="bg-red-50 text-red-600 px-4 py-2 rounded-bl-2xl text-[10px] font-bold uppercase tracking-wider shadow-sm border-l border-b border-red-100">
+              <div class="${tagBg} px-4 py-2 rounded-bl-2xl text-[10px] font-bold uppercase tracking-wider shadow-sm border-l border-b">
                 <i class="fas fa-book-open mr-1"></i> ${s.courseName || '-'}
               </div>
             </div>
+
+            <!-- Name -->
             <div class="flex justify-between items-start mb-6 mt-2">
               <div>
-                <h3 class="text-xl font-bold text-gray-800">${s.nickname || '-'}</h3>
-                <p class="text-sm text-red-500 font-medium tracking-wide">${s.name || '-'}</p>
+                <h3 class="text-xl font-bold ${nameColor}">${s.nickname || '-'}</h3>
+                <p class="text-sm ${nickColor} font-medium tracking-wide">${s.name || '-'}</p>
               </div>
-              <div class="bg-gray-50 px-3 py-1 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-tighter">${s.studentId}</div>
+              <div class="${idBg} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">${s.studentId}</div>
             </div>
 
-            <div class="space-y-3 mb-8 text-xs text-gray-400 font-medium">
+            <!-- Meta -->
+            <div class="space-y-3 mb-8 text-xs ${metaColor} font-medium">
               <div><i class="fas fa-tag w-5"></i> ${s.nameEng || '-'}</div>
-              <div><i class="fas fa-user w-5"></i> อายุ: ${s.age || '-'}</div>
               <div><i class="fas fa-phone w-5"></i> ${s.phone || '-'}</div>
             </div>
 
+            <!-- Progress bar -->
             ${isCourse ? `
-              <div class="border-t border-gray-50 pt-6">
-                <div class="flex justify-between text-[10px] font-black uppercase text-gray-300 mb-3 tracking-widest">
+              <div class="border-t ${isDone && hasCert ? 'border-green-200' : isDone ? 'border-yellow-200' : 'border-gray-50'} pt-6">
+                <div class="flex justify-between text-[10px] font-black uppercase mb-3 tracking-widest ${isDone && hasCert ? 'text-green-500' : isDone ? 'text-yellow-500' : 'text-gray-300'}">
                   <span>PROGRESS</span>
-                  <span class="${isDone ? 'text-green-500' : ''}">${p}/6 COMPLETED</span>
+                  <span>${p}/6 COMPLETED</span>
                 </div>
                 <div class="grid grid-cols-6 gap-1">
-                  ${Array.from({length: 6}, (_, i) => `<div class="progress-step ${p > i ? 'progress-done' : ''}"></div>`).join('')}
+                  ${Array.from({length: 6}, (_, i) =>
+                    `<div class="progress-step ${p > i ? progressDoneClass : ''}"></div>`
+                  ).join('')}
                 </div>
               </div>` : ''}
 
-            <button onclick="openProgressModal('${(s.name || '').replace(/'/g, "\\'")}', ${p}, '${s.studentId}', '${s.courseId || ''}')"
-              class="mt-8 w-full py-4 bg-gray-50 text-gray-800 rounded-2xl font-bold group-hover:bg-red-600 group-hover:text-white transition-all shadow-sm">
-              ${isCourse ? 'Update Progress' : 'View Profile'} <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+            <!-- Buttons -->
+            <button onclick="openProgressModal('${safeName}', ${p}, '${s.studentId}', '${s.courseId || ''}', '${s.certificate || 'Pending'}')"
+              class="mt-8 w-full py-4 ${btnUpdateClass} rounded-2xl font-bold transition-all shadow-sm">
+              ${isDone ? '<i class="fas fa-graduation-cap mr-2"></i>View / Edit' : 'Update Progress'}
+              <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
             </button>
             <button onclick="deleteEnrollment('${s.studentId}', '${s.courseId}')"
-              class="mt-3 w-full py-3 bg-red-50 text-red-600 rounded-2xl font-bold hover:bg-red-600 hover:text-white transition-all shadow-sm">
+              class="mt-3 w-full py-3 ${btnRemoveClass} rounded-2xl font-bold transition-all shadow-sm">
               <i class="fas fa-trash mr-2"></i> Remove from Course
             </button>
           </div>`;
       });
     }
 
-    /* ─── Progress Modal ─── */
-    function openProgressModal(name, progress, studentId, studentCourseId) {
+    /* ═══════════════════════════════════════════════════
+       Progress Modal
+    ═══════════════════════════════════════════════════ */
+    function openProgressModal(name, progress, studentId, studentCourseId, certificate) {
       currentStudentId = studentId;
       currentCourseId  = studentCourseId;
       tempProgress     = Number(progress);
+      // ✅ ตั้งค่า certificate เริ่มต้นจากข้อมูล DB
+      tempCertificate  = (certificate || "").toString().trim().toLowerCase() === "received";
+
       document.getElementById('modalStudentName').innerText = name;
       renderSessionCheckboxes();
+      renderCertToggle();
       document.getElementById('progressModal').classList.remove('hidden');
     }
 
@@ -353,15 +530,44 @@
           <div onclick="toggleSession(${i})" class="flex items-center justify-between p-4 ${isSelected ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-transparent'} rounded-2xl cursor-pointer border-2 transition-all">
             <span class="font-bold ${isSelected ? 'text-green-700' : 'text-gray-500'}">S${i}</span>
             <div class="w-6 h-6 border-2 ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'} rounded-full flex items-center justify-center shadow-sm">
-              <i class="fas fa-check text-[10px] text-white ${isSelected ? 'scale-100' : 'scale-0'} transition-transform"></i>
+              <i class="fas fa-check text-[10px] text-white ${isSelected ? '' : 'opacity-0'} transition-transform"></i>
             </div>
           </div>`;
       }
-      const isDone = tempProgress >= 6;
-      const certStatus  = document.getElementById('certStatus');
+      const isDone       = tempProgress >= 6;
       const btnFinishNow = document.getElementById('btnFinishNow');
-      if (certStatus)   certStatus.className = isDone ? "block p-4 bg-green-50 border border-green-100 rounded-2xl mb-6 text-center text-green-600 font-bold text-sm" : "hidden";
-      if (btnFinishNow) btnFinishNow.style.display = isDone ? 'none' : 'block';
+      if (btnFinishNow) btnFinishNow.style.display = isDone ? 'none' : 'flex';
+    }
+
+    /* ✅ NEW: render certificate toggle */
+    function renderCertToggle() {
+      const row      = document.getElementById('certToggleRow');
+      const iconWrap = document.getElementById('certIconWrap');
+      const icon     = document.getElementById('certIcon');
+      const label    = document.getElementById('certLabel');
+      const sublabel = document.getElementById('certSubLabel');
+
+      if (tempCertificate) {
+        row.classList.add('cert-on');
+        iconWrap.style.background = '#dcfce7';
+        icon.className = 'fas fa-graduation-cap text-green-500 text-lg';
+        label.innerText    = 'รับเกียรติบัตรแล้ว ✓';
+        label.style.color  = '#15803d';
+        sublabel.innerText = 'แตะเพื่อยกเลิก';
+      } else {
+        row.classList.remove('cert-on');
+        iconWrap.style.background = '#fef9c3';
+        icon.className = 'fas fa-graduation-cap text-yellow-500 text-lg';
+        label.innerText    = 'รับเกียรติบัตรแล้ว';
+        label.style.color  = '#374151';
+        sublabel.innerText = 'แตะเพื่อยืนยันการรับ';
+      }
+    }
+
+    /* ✅ NEW: toggle certificate state (เฉพาะ UI ก่อน ยังไม่ save) */
+    function toggleCertificate() {
+      tempCertificate = !tempCertificate;
+      renderCertToggle();
     }
 
     function toggleSession(step) {
@@ -369,23 +575,48 @@
       renderSessionCheckboxes();
     }
 
+    /* ✅ Save Progress + Certificate พร้อมกัน */
     function saveProgressData() {
       const btn = document.getElementById('btnSaveProgress');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Saving...';
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Saving...';
+      showLoading('กำลังบันทึก...');
 
+      // 1. save progress
       fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify({ action: "updateProgress", studentId: currentStudentId, courseId: currentCourseId, newProgress: tempProgress })
+        body: JSON.stringify({
+          action: "updateProgress",
+          studentId: currentStudentId,
+          courseId: currentCourseId,
+          newProgress: tempProgress
+        })
+      })
+      .then(r => r.json())
+      .then(() => {
+        // 2. save certificate
+        return fetch(scriptURL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "updateCertificate",
+            studentId: currentStudentId,
+            courseId: currentCourseId,
+            received: tempCertificate
+          })
+        });
       })
       .then(r => r.json())
       .then(res => {
         if (res.status === "success") {
-          loadStudents();
           closeModal('progressModal');
+          loadStudents();
+        } else {
+          alert(res.message || "เกิดข้อผิดพลาด");
         }
       })
+      .catch(() => alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"))
       .finally(() => {
+        hideLoading();
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
       });
@@ -394,6 +625,7 @@
     function finishCourseNow() {
       if (!confirm("ต้องการบันทึกจบหลักสูตรทันทีใช่หรือไม่?")) return;
       tempProgress = 6;
+      renderSessionCheckboxes();
       saveProgressData();
     }
 
@@ -420,13 +652,15 @@
     function openAddStudentModal() {
       const selStudent = document.getElementById('new-student-select');
       const selCourse  = document.getElementById('new-student-course');
-      selStudent.innerHTML = '<option value="">— Select Student —</option>';
-      selCourse.innerHTML  = '<option value="">— Select Course —</option>';
+      selStudent.innerHTML = '<option value="">— กำลังโหลด... —</option>';
+      selCourse.innerHTML  = '<option value="">— กำลังโหลด... —</option>';
 
-      // โหลดนักเรียนทั้งหมด
+      document.getElementById('addStudentModal').classList.remove('hidden');
+
       fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents" }) })
         .then(r => r.json())
         .then(res => {
+          selStudent.innerHTML = '<option value="">— Select Student —</option>';
           (res.data || []).forEach(s => {
             const opt = document.createElement('option');
             opt.value       = s.studentId;
@@ -435,10 +669,10 @@
           });
         });
 
-      // โหลดคอร์ส
       fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getCourseData" }) })
         .then(r => r.json())
         .then(res => {
+          selCourse.innerHTML = '<option value="">— Select Course —</option>';
           (res.data || []).forEach(c => {
             const opt = document.createElement('option');
             opt.value       = c.id;
@@ -446,8 +680,6 @@
             selCourse.appendChild(opt);
           });
         });
-
-      document.getElementById('addStudentModal').classList.remove('hidden');
     }
 
     function submitAddStudent() {
@@ -457,9 +689,14 @@
       if (!studentId) { alert('กรุณาเลือกนักเรียน'); return; }
       if (!courseId)  { alert('กรุณาเลือกคอร์ส');    return; }
 
+      const btn = document.getElementById('btnSaveStudent');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>กำลังบันทึก...';
+      showLoading('กำลังเพิ่มนักเรียนเข้าคอร์ส...');
+
       fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify({ action: "addStudent", studentId, courseId, type: "Course" })
+        body: JSON.stringify({ action: "enrollStudent", studentId, courseId })
       })
       .then(r => r.json())
       .then(res => {
@@ -469,12 +706,19 @@
         } else {
           alert(res.message || "เกิดข้อผิดพลาด");
         }
+      })
+      .catch(() => alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"))
+      .finally(() => {
+        hideLoading();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i>Save';
       });
     }
 
     /* ─── Delete Enrollment ─── */
     function deleteEnrollment(studentId, courseId) {
       if (!confirm("ต้องการลบออกจากคอร์สนี้ใช่ไหม?")) return;
+      showLoading('กำลังลบข้อมูล...');
       fetch(scriptURL, {
         method: "POST",
         body: JSON.stringify({ action: "deleteEnrollment", studentId, courseId })
@@ -483,7 +727,8 @@
       .then(res => {
         if (res.status === "success") loadStudents();
         else alert("ลบไม่สำเร็จ");
-      });
+      })
+      .finally(() => hideLoading());
     }
 
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
