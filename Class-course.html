@@ -138,6 +138,49 @@
       .top-bar    { margin-bottom: 12px !important; gap: 8px !important; }
     }
 
+    /* ── Live Search Dropdown ── */
+    .search-live-wrapper { position: relative; flex: 1; }
+    .search-live-results {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      background: white;
+      border: 2px solid #f1f5f9;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 300;
+      overflow: hidden;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .search-live-results.open { display: block; }
+    .search-live-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .search-live-item:last-child { border-bottom: none; }
+    .search-live-item:hover { background: #fff1f2; }
+    .search-live-item .sli-name { font-size: 14px; font-weight: 700; color: #1f2937; }
+    .search-live-item .sli-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+    .search-live-item .sli-tag  {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 10px; font-weight: 700;
+      background: #fff1f2; color: #e63946;
+      border-radius: 999px; padding: 2px 8px;
+    }
+    .search-live-empty {
+      padding: 20px 16px;
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
     /* ══════════════════════════════════════
        Searchable Dropdown (Custom)
     ══════════════════════════════════════ */
@@ -278,17 +321,21 @@
           </div>
         </div>
 
-        <!-- Row 2: Search -->
+        <!-- Row 2: Search (Live) -->
         <div class="flex gap-2">
-          <div class="relative flex-1">
+          <div class="search-live-wrapper">
             <input type="text" id="searchInput"
-              onkeyup="if(event.key==='Enter') loadStudents()"
+              oninput="onSearchInput()"
+              onkeyup="if(event.key==='Enter'){ closeLiveResults(); loadStudents(); }"
               placeholder="ค้นหาชื่อ, ชื่อเล่น..."
+              autocomplete="off"
               class="w-full py-3 pl-10 pr-4 bg-white border-2 border-gray-100 rounded-full outline-none focus:border-red-500 transition-all shadow-sm text-sm font-medium"
             >
-            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm" style="pointer-events:none;"></i>
+            <!-- Live results dropdown -->
+            <div id="liveResults" class="search-live-results"></div>
           </div>
-          <button onclick="loadStudents()"
+          <button onclick="closeLiveResults(); loadStudents()"
             class="bg-red-600 text-white px-5 py-3 rounded-full font-bold text-sm hover:bg-red-700 transition-all shadow-md flex items-center gap-2 shrink-0">
             <i class="fas fa-search"></i>
             <span class="hidden sm:inline">ค้นหา</span>
@@ -446,7 +493,6 @@
                 <div class="search-select-empty" id="studentEmpty">ไม่พบข้อมูล</div>
               </div>
             </div>
-            <!-- hidden value -->
             <input type="hidden" id="selectedStudentId">
           </div>
 
@@ -474,7 +520,6 @@
                 <div class="search-select-empty" id="courseEmpty">ไม่พบข้อมูล</div>
               </div>
             </div>
-            <!-- hidden value -->
             <input type="hidden" id="selectedCourseId">
           </div>
 
@@ -502,21 +547,24 @@
     let tempCertificate  = false;
     let currentFilter    = 'all';
     let allStudentsCache = [];
+    let liveSearchTimer  = null;
 
     // ── Searchable dropdown state ──
-    let studentOptions = []; // { id, label, sub }
-    let courseOptions  = []; // { id, label }
-    let activeDropdown = null; // 'student' | 'course' | null
+    let studentOptions = [];
+    let courseOptions  = [];
+    let activeDropdown = null;
 
     window.onload = () => {
       fetchCourseList();
       switchTab(currentTab);
       document.querySelector('[data-filter="all"]').classList.add('active-all');
 
-      // Close dropdowns when clicking outside
       document.addEventListener('click', (e) => {
         if (!e.target.closest('#studentSelectWrapper') && !e.target.closest('#courseSelectWrapper')) {
           closeAllDropdowns();
+        }
+        if (!e.target.closest('.search-live-wrapper')) {
+          closeLiveResults();
         }
       });
     };
@@ -528,6 +576,74 @@
     }
     function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
 
+    /* ══════════════════════════════════════
+       LIVE SEARCH
+    ══════════════════════════════════════ */
+    function onSearchInput() {
+      clearTimeout(liveSearchTimer);
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) { closeLiveResults(); loadStudents(); return; }
+      liveSearchTimer = setTimeout(() => {
+        showLiveResults(q);
+      }, 250);
+    }
+
+    function showLiveResults(q) {
+      const lower = q.toLowerCase();
+      const matched = allStudentsCache.filter(s =>
+        (s.name || '').toLowerCase().includes(lower) ||
+        (s.nickname || '').toLowerCase().includes(lower) ||
+        (s.nameEng || '').toLowerCase().includes(lower)
+      );
+
+      const box = document.getElementById('liveResults');
+      if (!matched.length) {
+        box.innerHTML = `<div class="search-live-empty">ไม่พบ "${q}"</div>`;
+      } else {
+        box.innerHTML = matched.slice(0, 8).map(s => {
+          const p = Number(s.progress) || 0;
+          const isDone = p >= 6;
+          const hasCert = (s.certificate || '').toLowerCase() === 'received';
+          let tagText = isDone && hasCert ? 'รับแล้ว' : isDone ? 'รอเกียรติบัตร' : `${p}/6`;
+          return `
+            <div class="search-live-item" onclick="pickLiveResult('${(s.name||'').replace(/'/g,"\\'")}')">
+              <div>
+                <div class="sli-name">${s.nickname || '-'} <span style="font-weight:400;color:#6b7280;">${s.name || ''}</span></div>
+                <div class="sli-sub">${s.courseName || '-'} · ${s.studentId || ''}</div>
+              </div>
+              <span class="sli-tag">${tagText}</span>
+            </div>`;
+        }).join('');
+      }
+      box.classList.add('open');
+      // Also filter the grid live
+      renderLiveFilter(q);
+    }
+
+    function renderLiveFilter(q) {
+      const lower = q.toLowerCase();
+      const matched = allStudentsCache.filter(s =>
+        (s.name || '').toLowerCase().includes(lower) ||
+        (s.nickname || '').toLowerCase().includes(lower) ||
+        (s.nameEng || '').toLowerCase().includes(lower)
+      );
+      let filtered = matched;
+      if (currentFilter === 'inprogress') filtered = filtered.filter(s => Number(s.progress) < 6);
+      else if (currentFilter === 'pending')   filtered = filtered.filter(s => Number(s.progress) >= 6 && (s.certificate||'').toLowerCase() !== 'received');
+      else if (currentFilter === 'received')  filtered = filtered.filter(s => Number(s.progress) >= 6 && (s.certificate||'').toLowerCase() === 'received');
+      renderCards(filtered);
+    }
+
+    function pickLiveResult(name) {
+      document.getElementById('searchInput').value = name;
+      closeLiveResults();
+      loadStudents();
+    }
+
+    function closeLiveResults() {
+      document.getElementById('liveResults').classList.remove('open');
+    }
+
     /* ── Course Dropdown (top bar) ── */
     function fetchCourseList() {
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
@@ -535,8 +651,6 @@
           const dd = document.getElementById('courseDropdown');
           dd.innerHTML = '<option value="">— เลือกคอร์ส (ทั้งหมด) —</option>';
           (res.data || []).forEach(c => dd.innerHTML += `<option value="${c.id}">${c.name}</option>`);
-
-          // Also populate modal course options
           courseOptions = (res.data || []).map(c => ({ id: c.id, label: c.name }));
         });
     }
@@ -856,7 +970,6 @@
 
     /* ── Add Student Modal ── */
     function openAddStudentModal() {
-      // Reset state
       document.getElementById('selectedStudentId').value = '';
       document.getElementById('selectedCourseId').value = '';
       document.getElementById('studentTriggerText').textContent = '— เลือกนักเรียน —';
@@ -869,7 +982,6 @@
 
       document.getElementById('addStudentModal').classList.remove('hidden');
 
-      // Load students
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getAllStudents" }) })
         .then(r => r.json()).then(res => {
           studentOptions = (res.data || []).map(s => ({
@@ -879,7 +991,6 @@
           }));
         });
 
-      // Load courses (already in courseOptions from fetchCourseList, but refresh just in case)
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
         .then(r => r.json()).then(res => {
           courseOptions = (res.data || []).map(c => ({ id: c.id, label: c.name }));
