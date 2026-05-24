@@ -127,14 +127,6 @@
       border: none; cursor: pointer; transition: all 0.2s;
     }
     .fab-btn:active { transform: scale(0.92); }
-    .fab-label {
-      position: absolute; right: 60px;
-      background: #1f2937; color: white;
-      font-size: 11px; font-weight: 700;
-      padding: 4px 10px; border-radius: 6px;
-      white-space: nowrap; font-family: 'Kanit', sans-serif;
-      pointer-events: none;
-    }
 
     /* ── Card grid responsive ── */
     @media (max-width: 640px) {
@@ -144,6 +136,103 @@
       .card-meta  { font-size: 11px !important; }
       .page-pad   { padding: 12px !important; }
       .top-bar    { margin-bottom: 12px !important; gap: 8px !important; }
+    }
+
+    /* ══════════════════════════════════════
+       Searchable Dropdown (Custom)
+    ══════════════════════════════════════ */
+    .search-select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    .search-select-trigger {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+      font-size: 14px;
+      color: #374151;
+      transition: border-color 0.2s;
+      user-select: none;
+    }
+    .search-select-trigger:hover,
+    .search-select-trigger.open { border-color: #e63946; background: white; }
+    .search-select-trigger .trigger-text { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .search-select-trigger .trigger-chevron { color: #94a3b8; font-size: 11px; margin-left: 8px; transition: transform 0.2s; flex-shrink: 0; }
+    .search-select-trigger.open .trigger-chevron { transform: rotate(180deg); }
+
+    .search-select-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0; right: 0;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 200;
+      overflow: hidden;
+    }
+    .search-select-dropdown.open { display: block; }
+
+    .search-select-input-wrap {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-select-input-wrap i { color: #94a3b8; font-size: 13px; flex-shrink: 0; }
+    .search-select-input {
+      border: none;
+      outline: none;
+      font-family: 'Kanit', sans-serif;
+      font-size: 13px;
+      width: 100%;
+      color: #374151;
+      background: transparent;
+    }
+    .search-select-input::placeholder { color: #cbd5e1; }
+
+    .search-select-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 4px 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .search-select-list::-webkit-scrollbar { width: 4px; }
+    .search-select-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+    .search-select-option {
+      padding: 10px 14px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 13px;
+      color: #374151;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-select-option:hover { background: #fff1f2; color: #e63946; }
+    .search-select-option.selected { background: #fff1f2; color: #e63946; font-weight: 700; }
+    .search-select-option.placeholder-opt { color: #94a3b8; font-style: italic; }
+    .search-select-option .opt-sub { font-size: 11px; color: #94a3b8; margin-left: auto; }
+    .search-select-option.selected .opt-sub { color: #fca5a5; }
+
+    .search-select-empty {
+      padding: 16px 14px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      font-family: 'Kanit', sans-serif;
+      display: none;
     }
   </style>
   <style>body { visibility: hidden; }</style>
@@ -209,7 +298,6 @@
         <!-- Row 3: Title + Filter Buttons -->
         <div class="flex flex-col sm:flex-row sm:items-center gap-2">
           <h2 id="currentTabText" class="text-base font-bold text-gray-800 shrink-0">Course Class Students</h2>
-          <!-- Filter scroll -->
           <div class="filter-scroll">
             <button onclick="setFilter('all')" data-filter="all"
               class="filter-btn active-all flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold border-2 border-gray-300 bg-gray-100 text-gray-600">
@@ -234,7 +322,6 @@
 
       <!-- ── CARD GRID ── -->
       <div id="studentGrid" class="card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <!-- Skeleton -->
         <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
           <div class="skeleton h-5 w-3/4 mb-3"></div>
           <div class="skeleton h-3 w-1/2 mb-6"></div>
@@ -250,13 +337,11 @@
   <!-- ── FAB Floating Action Buttons (mobile only) ── -->
   <div class="fab-area">
     <div class="relative flex items-center">
-     
       <button onclick="openAddCourseModal()" class="fab-btn bg-white text-gray-700 border-2 border-gray-200">
         <i class="fas fa-plus"></i>
       </button>
     </div>
     <div class="relative flex items-center">
-     
       <button onclick="openAddStudentModal()" class="fab-btn bg-gray-900 text-white">
         <i class="fas fa-user-plus"></i>
       </button>
@@ -269,9 +354,7 @@
   <div id="progressModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="modal-inner bg-white w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl">
       <div class="p-6 sm:p-8">
-        <!-- Handle bar mobile -->
         <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
-
         <div class="text-center mb-6">
           <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
             <i class="fas fa-tasks"></i>
@@ -279,11 +362,7 @@
           <h2 id="modalStudentName" class="text-xl font-black text-gray-900"></h2>
           <p class="text-gray-400 text-xs mt-1">จัดการ Progress & เกียรติบัตร</p>
         </div>
-
-        <!-- Session Grid -->
         <div class="grid grid-cols-3 gap-2 mb-4" id="sessionList"></div>
-
-        <!-- Certificate Toggle -->
         <div id="certToggleRow" class="cert-toggle-row mt-3" onclick="toggleCertificate()">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" id="certIconWrap" style="background:#fef9c3">
@@ -296,8 +375,6 @@
           </div>
           <div class="cert-switch" id="certSwitch"></div>
         </div>
-
-        <!-- Action Buttons -->
         <div class="space-y-2 mt-5">
           <button id="btnSaveProgress" onclick="saveProgressData()"
             class="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm">
@@ -335,29 +412,74 @@
   </div>
 
   <!-- ════════════════════════════════════════
-       Add Student Modal
+       Add Student Modal — Searchable Dropdowns
   ════════════════════════════════════════ -->
   <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="modal-inner bg-white w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl">
       <div class="p-6 sm:p-8">
         <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
         <h2 class="text-xl font-black text-gray-900 mb-5">เพิ่มนักเรียนเข้าคอร์ส</h2>
-        <div class="flex flex-col gap-4 mb-5">
+
+        <div class="flex flex-col gap-5 mb-5">
+
+          <!-- ── Searchable Student Dropdown ── -->
           <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-1.5">นักเรียน</p>
-            <select id="new-student-select"
-              class="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 font-[Kanit] text-sm">
-              <option value="">— เลือกนักเรียน —</option>
-            </select>
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">นักเรียน</p>
+            <div class="search-select-wrapper" id="studentSelectWrapper">
+              <div class="search-select-trigger" id="studentTrigger" onclick="toggleDropdown('student')">
+                <span class="trigger-text" id="studentTriggerText">— เลือกนักเรียน —</span>
+                <i class="fas fa-chevron-down trigger-chevron"></i>
+              </div>
+              <div class="search-select-dropdown" id="studentDropdown">
+                <div class="search-select-input-wrap">
+                  <i class="fas fa-search"></i>
+                  <input
+                    type="text"
+                    class="search-select-input"
+                    id="studentSearchInput"
+                    placeholder="พิมพ์ชื่อหรือชื่อเล่น..."
+                    oninput="filterOptions('student')"
+                    autocomplete="off"
+                  >
+                </div>
+                <div class="search-select-list" id="studentOptionList"></div>
+                <div class="search-select-empty" id="studentEmpty">ไม่พบข้อมูล</div>
+              </div>
+            </div>
+            <!-- hidden value -->
+            <input type="hidden" id="selectedStudentId">
           </div>
+
+          <!-- ── Searchable Course Dropdown ── -->
           <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-1.5">คอร์ส</p>
-            <select id="new-student-course"
-              class="w-full p-3.5 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-red-500 font-[Kanit] text-sm">
-              <option value="">— เลือกคอร์ส —</option>
-            </select>
+            <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">คอร์ส</p>
+            <div class="search-select-wrapper" id="courseSelectWrapper">
+              <div class="search-select-trigger" id="courseTrigger" onclick="toggleDropdown('course')">
+                <span class="trigger-text" id="courseTriggerText">— เลือกคอร์ส —</span>
+                <i class="fas fa-chevron-down trigger-chevron"></i>
+              </div>
+              <div class="search-select-dropdown" id="courseDropdownModal">
+                <div class="search-select-input-wrap">
+                  <i class="fas fa-search"></i>
+                  <input
+                    type="text"
+                    class="search-select-input"
+                    id="courseSearchInput"
+                    placeholder="พิมพ์ชื่อคอร์ส..."
+                    oninput="filterOptions('course')"
+                    autocomplete="off"
+                  >
+                </div>
+                <div class="search-select-list" id="courseOptionList"></div>
+                <div class="search-select-empty" id="courseEmpty">ไม่พบข้อมูล</div>
+              </div>
+            </div>
+            <!-- hidden value -->
+            <input type="hidden" id="selectedCourseId">
           </div>
+
         </div>
+
         <div class="flex gap-3">
           <button id="btnSaveStudent" onclick="submitAddStudent()"
             class="flex-1 py-3.5 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-md text-sm">
@@ -381,10 +503,22 @@
     let currentFilter    = 'all';
     let allStudentsCache = [];
 
+    // ── Searchable dropdown state ──
+    let studentOptions = []; // { id, label, sub }
+    let courseOptions  = []; // { id, label }
+    let activeDropdown = null; // 'student' | 'course' | null
+
     window.onload = () => {
       fetchCourseList();
       switchTab(currentTab);
       document.querySelector('[data-filter="all"]').classList.add('active-all');
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#studentSelectWrapper') && !e.target.closest('#courseSelectWrapper')) {
+          closeAllDropdowns();
+        }
+      });
     };
 
     /* ── Loading ── */
@@ -394,13 +528,16 @@
     }
     function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
 
-    /* ── Course Dropdown ── */
+    /* ── Course Dropdown (top bar) ── */
     function fetchCourseList() {
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
         .then(r => r.json()).then(res => {
           const dd = document.getElementById('courseDropdown');
           dd.innerHTML = '<option value="">— เลือกคอร์ส (ทั้งหมด) —</option>';
           (res.data || []).forEach(c => dd.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+
+          // Also populate modal course options
+          courseOptions = (res.data || []).map(c => ({ id: c.id, label: c.name }));
         });
     }
 
@@ -503,13 +640,9 @@
         grid.innerHTML += `
           <div class="card-inner ${cardClass} p-5 rounded-[20px] md:rounded-[2rem] shadow-sm relative overflow-hidden" style="border: ${isDone ? '' : '1px solid #f1f5f9'}">
             ${badge}
-
-            <!-- Course tag -->
             <div class="absolute top-0 right-0 px-3 py-1.5 rounded-bl-2xl text-[9px] font-bold uppercase tracking-wider" style="${tagStyle}">
               <i class="fas fa-book-open mr-1"></i>${s.courseName || '-'}
             </div>
-
-            <!-- Name row -->
             <div class="flex items-start justify-between mt-2 mb-4">
               <div class="pr-2">
                 <h3 class="card-name font-bold text-lg ${nameCol} leading-tight">${s.nickname || '-'}</h3>
@@ -517,14 +650,10 @@
               </div>
               <span class="text-[10px] font-black rounded-full px-2.5 py-1 shrink-0 mt-0.5" style="${idStyle}">${s.studentId}</span>
             </div>
-
-            <!-- Meta -->
             <div class="card-meta flex flex-col gap-1.5 mb-4 text-xs ${metaCol} font-medium">
               <div class="flex items-center gap-2"><i class="fas fa-tag w-4 text-center"></i><span>${s.nameEng || '-'}</span></div>
               <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center"></i><span>${s.phone || '-'}</span></div>
             </div>
-
-            <!-- Progress -->
             ${isCourse ? `
               <div class="mb-4">
                 <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 ${isDone && hasCert ? 'text-green-500' : isDone ? 'text-yellow-500' : 'text-gray-300'}">
@@ -534,8 +663,6 @@
                   ${Array.from({length:6},(_,i)=>`<div class="progress-step ${p>i?barClass:''}"></div>`).join('')}
                 </div>
               </div>` : ''}
-
-            <!-- Buttons -->
             <button onclick="openProgressModal('${safeName}',${p},'${s.studentId}','${s.courseId||''}','${s.certificate||'Pending'}')"
               class="w-full py-3 rounded-2xl font-bold text-sm mb-2 transition-all"
               style="${btnUpd}">
@@ -645,42 +772,123 @@
       const name = document.getElementById('newCourseName').value.trim();
       if (!name) return;
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"addNewCourse", courseName:name }) })
-        .then(r => r.json()).then(res => { if (res.status === 'success') { closeModal('addCourseModal'); fetchCourseList(); } });
+        .then(r => r.json()).then(res => {
+          if (res.status === 'success') { closeModal('addCourseModal'); fetchCourseList(); }
+        });
     }
 
-    /* ── Add Student ── */
+    /* ════════════════════════════════════════
+       Searchable Dropdown Logic
+    ════════════════════════════════════════ */
+    function toggleDropdown(type) {
+      const isOpen = document.getElementById(type === 'student' ? 'studentDropdown' : 'courseDropdownModal').classList.contains('open');
+      closeAllDropdowns();
+      if (!isOpen) openDropdown(type);
+    }
+
+    function openDropdown(type) {
+      const dropdown = document.getElementById(type === 'student' ? 'studentDropdown' : 'courseDropdownModal');
+      const trigger  = document.getElementById(type === 'student' ? 'studentTrigger' : 'courseTrigger');
+      const input    = document.getElementById(type === 'student' ? 'studentSearchInput' : 'courseSearchInput');
+      dropdown.classList.add('open');
+      trigger.classList.add('open');
+      activeDropdown = type;
+      renderDropdownOptions(type, '');
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function closeAllDropdowns() {
+      ['studentDropdown','courseDropdownModal'].forEach(id => {
+        document.getElementById(id).classList.remove('open');
+      });
+      ['studentTrigger','courseTrigger'].forEach(id => {
+        document.getElementById(id).classList.remove('open');
+      });
+      activeDropdown = null;
+    }
+
+    function filterOptions(type) {
+      const q = document.getElementById(type === 'student' ? 'studentSearchInput' : 'courseSearchInput').value;
+      renderDropdownOptions(type, q);
+    }
+
+    function renderDropdownOptions(type, query) {
+      const listEl  = document.getElementById(type === 'student' ? 'studentOptionList' : 'courseOptionList');
+      const emptyEl = document.getElementById(type === 'student' ? 'studentEmpty' : 'courseEmpty');
+      const opts    = type === 'student' ? studentOptions : courseOptions;
+      const selId   = type === 'student'
+        ? document.getElementById('selectedStudentId').value
+        : document.getElementById('selectedCourseId').value;
+
+      const q = (query || '').toLowerCase();
+      const filtered = q
+        ? opts.filter(o => o.label.toLowerCase().includes(q) || (o.sub || '').toLowerCase().includes(q))
+        : opts;
+
+      if (!filtered.length) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+
+      listEl.innerHTML = filtered.map(o => `
+        <div class="search-select-option ${o.id === selId ? 'selected' : ''}"
+          onclick="selectOption('${type}','${o.id}','${(o.label).replace(/'/g,"\\'")}')">
+          <span>${o.label}</span>
+          ${o.sub ? `<span class="opt-sub">${o.sub}</span>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function selectOption(type, id, label) {
+      if (type === 'student') {
+        document.getElementById('selectedStudentId').value = id;
+        document.getElementById('studentTriggerText').textContent = label;
+        document.getElementById('studentTriggerText').style.color = '#111827';
+      } else {
+        document.getElementById('selectedCourseId').value = id;
+        document.getElementById('courseTriggerText').textContent = label;
+        document.getElementById('courseTriggerText').style.color = '#111827';
+      }
+      closeAllDropdowns();
+    }
+
+    /* ── Add Student Modal ── */
     function openAddStudentModal() {
-      const ss = document.getElementById('new-student-select');
-      const sc = document.getElementById('new-student-course');
-      ss.innerHTML = '<option value="">— กำลังโหลด... —</option>';
-      sc.innerHTML = '<option value="">— กำลังโหลด... —</option>';
+      // Reset state
+      document.getElementById('selectedStudentId').value = '';
+      document.getElementById('selectedCourseId').value = '';
+      document.getElementById('studentTriggerText').textContent = '— เลือกนักเรียน —';
+      document.getElementById('studentTriggerText').style.color = '';
+      document.getElementById('courseTriggerText').textContent = '— เลือกคอร์ส —';
+      document.getElementById('courseTriggerText').style.color = '';
+      document.getElementById('studentSearchInput').value = '';
+      document.getElementById('courseSearchInput').value = '';
+      studentOptions = [];
+
       document.getElementById('addStudentModal').classList.remove('hidden');
 
+      // Load students
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getAllStudents" }) })
         .then(r => r.json()).then(res => {
-          ss.innerHTML = '<option value="">— เลือกนักเรียน —</option>';
-          (res.data || []).forEach(s => {
-            const o = document.createElement('option');
-            o.value = s.studentId;
-            o.textContent = `${s.name || '-'} (${s.nickname || s.studentId})`;
-            ss.appendChild(o);
-          });
+          studentOptions = (res.data || []).map(s => ({
+            id: s.studentId,
+            label: `${s.name || '-'} (${s.nickname || s.studentId})`,
+            sub: s.studentId
+          }));
         });
 
+      // Load courses (already in courseOptions from fetchCourseList, but refresh just in case)
       fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
         .then(r => r.json()).then(res => {
-          sc.innerHTML = '<option value="">— เลือกคอร์ส —</option>';
-          (res.data || []).forEach(c => {
-            const o = document.createElement('option');
-            o.value = c.id; o.textContent = c.name;
-            sc.appendChild(o);
-          });
+          courseOptions = (res.data || []).map(c => ({ id: c.id, label: c.name }));
         });
     }
 
     function submitAddStudent() {
-      const studentId = document.getElementById('new-student-select').value;
-      const courseId  = document.getElementById('new-student-course').value;
+      const studentId = document.getElementById('selectedStudentId').value;
+      const courseId  = document.getElementById('selectedCourseId').value;
       if (!studentId) { alert('กรุณาเลือกนักเรียน'); return; }
       if (!courseId)  { alert('กรุณาเลือกคอร์ส');    return; }
 
@@ -709,7 +917,10 @@
         .finally(() => hideLoading());
     }
 
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+      closeAllDropdowns();
+    }
   </script>
 </body>
 </html>
