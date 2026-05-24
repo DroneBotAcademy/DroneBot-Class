@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -62,6 +62,59 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   font-weight: 700;
 }
 
+/* Session badge */
+.session-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.session-badge.sat-morning  { background: #fef3c7; color: #d97706; }
+.session-badge.sun-morning  { background: #dcfce7; color: #16a34a; }
+.session-badge.sun-evening  { background: #ede9fe; color: #7c3aed; }
+.session-badge.other        { background: #f1f5f9; color: #64748b; }
+
+/* Session filter tabs */
+.session-tab {
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  border: 2px solid #f1f5f9;
+  background: white;
+  color: #94a3b8;
+  transition: all .2s;
+  font-family: 'Kanit', sans-serif;
+  white-space: nowrap;
+}
+.session-tab:hover { border-color: #fecaca; color: #e63946; }
+.session-tab.active {
+  background: #e63946;
+  color: white;
+  border-color: #e63946;
+  box-shadow: 0 4px 12px rgba(230,57,70,.3);
+}
+
+/* Session section header */
+.session-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  margin-top: 32px;
+}
+.session-section-header:first-child { margin-top: 0; }
+.session-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 #saveLoadingOverlay {
   display: none;
   position: fixed;
@@ -114,7 +167,7 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 #progressModal .modal-inner {
   width: 100%;
   max-width: 480px;
-  max-height: 92dvh;        /* ไม่เกิน viewport */
+  max-height: 92dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: 2rem;
@@ -126,7 +179,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   #progressModal .modal-inner { padding: 32px; }
 }
 
-/* step card layout */
 .step-card {
   border-radius: 14px;
   padding: 12px;
@@ -135,7 +187,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 .step-card.done { background: #fff1f2; border: 1.5px solid #fecaca; }
 .step-card.pending { background: #f8fafc; border: 1.5px solid #f1f5f9; }
 
-/* step top row — S-btn + select side by side, wrap กันบนจอเล็ก */
 .step-top {
   display: flex;
   align-items: center;
@@ -186,6 +237,22 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   box-sizing: border-box;
 }
 .step-input:focus { border-color: #fca5a5; }
+
+/* Session select in modal */
+.session-select-modal {
+  width: 100%;
+  border: 1.5px solid #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-family: 'Kanit', sans-serif;
+  background: white;
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+.session-select-modal:focus { border-color: #f87171; }
 </style>
 <style>body { visibility: hidden; }</style>
 </head>
@@ -208,10 +275,11 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     <p class="text-gray-400 text-sm mt-1">จัดการนักเรียนและความคืบหน้าการเรียน</p>
   </div>
 
-  <div class="flex flex-col md:flex-row justify-between gap-4 mb-8">
+  <!-- Filter Row -->
+  <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
     <div class="flex gap-3 items-center">
       <i class="fas fa-chalkboard-teacher text-gray-300 text-lg"></i>
-      <select id="instructorDropdown" onchange="loadStudents()" class="select-pill">
+      <select id="instructorDropdown" onchange="filterAndRender()" class="select-pill">
         <option value="">ครูทั้งหมด</option>
       </select>
     </div>
@@ -222,22 +290,43 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
         <input
           id="searchInput"
           placeholder="ค้นหาชื่อนักเรียน..."
-          onkeyup="if(event.key==='Enter') loadStudents()"
+          onkeyup="filterAndRender()"
           class="search-bar pl-10 w-full">
       </div>
       <button
         onclick="loadStudents()"
         class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2">
-        <i class="fas fa-search"></i>
-        <span class="hidden sm:inline">ค้นหา</span>
+        <i class="fas fa-rotate-right"></i>
+        <span class="hidden sm:inline">รีโหลด</span>
       </button>
     </div>
   </div>
 
+  <!-- Session Filter Tabs -->
+  <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-1">
+    <button class="session-tab active" onclick="setSessionFilter('')" id="tab-all">
+      <i class="fas fa-users text-xs mr-1"></i> ทั้งหมด
+    </button>
+    <button class="session-tab" onclick="setSessionFilter('เสาร์เช้า')" id="tab-sat-morning">
+      🌅 เสาร์เช้า
+    </button>
+    <button class="session-tab" onclick="setSessionFilter('อาทิตย์เช้า')" id="tab-sun-morning">
+      ☀️ อาทิตย์เช้า
+    </button>
+    <button class="session-tab" onclick="setSessionFilter('อาทิตย์บ่าย')" id="tab-sun-evening">
+      🌤️ อาทิตย์บ่าย
+    </button>
+    <button class="session-tab" onclick="setSessionFilter('__other__')" id="tab-other">
+      📋 ยังไม่ระบุ
+    </button>
+  </div>
+
+  <!-- Count badge -->
   <div class="flex justify-between items-center mb-6">
     <div class="flex items-center gap-3">
       <div class="w-1 h-6 bg-red-500 rounded-full"></div>
       <h2 class="text-lg font-black text-gray-800">รายชื่อนักเรียน</h2>
+      <span id="studentCount" class="bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1 rounded-full"></span>
     </div>
     <button onclick="openAddStudentModal()"
       class="bg-gray-900 hover:bg-red-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm transition-all shadow-md flex items-center gap-2">
@@ -245,23 +334,26 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     </button>
   </div>
 
-  <div id="studentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div id="studentGrid" class="space-y-8">
     <!-- Skeleton Loading -->
-    <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
-      <div class="flex justify-between items-start mb-4">
-        <div class="flex-1">
-          <div class="skeleton h-6 w-3/4 mb-2"></div>
-          <div class="skeleton h-4 w-1/2"></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex-1">
+            <div class="skeleton h-6 w-3/4 mb-2"></div>
+            <div class="skeleton h-4 w-1/2"></div>
+          </div>
+          <div class="skeleton w-16 h-6 rounded-full"></div>
         </div>
-        <div class="skeleton w-16 h-6 rounded-full"></div>
+        <div class="grid grid-cols-4 gap-1.5 mb-5">
+          <div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div>
+        </div>
+        <div class="skeleton h-10 w-full mb-2 rounded-2xl"></div>
+        <div class="skeleton h-10 w-full rounded-2xl"></div>
       </div>
-      <div class="grid grid-cols-4 gap-1.5 mb-5">
-        <div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div>
-      </div>
-      <div class="skeleton h-10 w-full mb-2 rounded-2xl"></div>
-      <div class="skeleton h-10 w-full rounded-2xl"></div>
     </div>
   </div>
+
 </div>
 </main>
 
@@ -275,6 +367,17 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       </div>
       <h2 id="modalName" class="text-lg font-black text-gray-900"></h2>
       <p class="text-gray-400 text-xs mt-1">บันทึกความคืบหน้าการเรียน</p>
+    </div>
+
+    <!-- Session selector in modal -->
+    <div class="mb-4">
+      <label class="text-xs font-bold text-gray-400 mb-2 block">📅 วันเรียน</label>
+      <select id="modalSessionSelect" class="session-select-modal">
+        <option value="">-- ยังไม่ระบุ --</option>
+        <option value="เสาร์เช้า">🌅 เสาร์เช้า</option>
+        <option value="อาทิตย์เช้า">☀️ อาทิตย์เช้า</option>
+        <option value="อาทิตย์บ่าย">🌤️ อาทิตย์บ่าย</option>
+      </select>
     </div>
 
     <div id="steps" class="flex flex-col gap-3 mb-5"></div>
@@ -321,6 +424,15 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
     <input id="new-phone" placeholder="เบอร์โทร"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
+
+    <!-- วันเรียน dropdown -->
+    <select id="new-session"
+      class="col-span-2 p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all font-[Kanit] text-sm cursor-pointer">
+      <option value="">📅 เลือกวันเรียน (ถ้ามี)</option>
+      <option value="เสาร์เช้า">🌅 เสาร์เช้า</option>
+      <option value="อาทิตย์เช้า">☀️ อาทิตย์เช้า</option>
+      <option value="อาทิตย์บ่าย">🌤️ อาทิตย์บ่าย</option>
+    </select>
   </div>
 
   <button onclick="addStudent()"
@@ -341,13 +453,31 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 let allData = [];
 let instructors = [];
 let allStudentsCache = [];
+let activeSession = "";
 
 let currentStudentId = "";
 let currentCourseId = "";
 let tempProgress = 0;
 let currentWeeks = [];
 let currentInstructorsWeek = [];
+let currentClassSession = "";
 
+// ── Session config ──
+const SESSION_CONFIG = {
+  'เสาร์เช้า':  { cls: 'sat-morning',  emoji: '🌅', color: '#d97706', dot: '#fbbf24' },
+  'อาทิตย์เช้า': { cls: 'sun-morning',  emoji: '☀️', color: '#16a34a', dot: '#4ade80' },
+  'อาทิตย์บ่าย': { cls: 'sun-evening',  emoji: '🌤️', color: '#7c3aed', dot: '#a78bfa' },
+};
+
+function getSessionCls(session) {
+  return SESSION_CONFIG[session]?.cls || 'other';
+}
+
+function getSessionEmoji(session) {
+  return SESSION_CONFIG[session]?.emoji || '📋';
+}
+
+// ── Load Instructors ──
 function loadInstructors() {
   fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getInstructors" }) })
     .then(r => r.json())
@@ -361,69 +491,174 @@ function loadInstructors() {
     });
 }
 
+// ── Load Students ──
 function loadStudents() {
-  const q = document.getElementById("searchInput").value.toLowerCase();
-  const instructor = document.getElementById("instructorDropdown").value;
   fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getStudentCoursesRegular" }) })
     .then(r => r.json())
     .then(res => {
       allData = res.data || [];
-      let data = allData.filter(x =>
-        (!instructor || x.instructor == instructor) &&
-        x.name.toLowerCase().includes(q)
-      );
-      render(data);
+      filterAndRender();
     });
 }
 
-function render(data) {
+// ── Session Filter ──
+function setSessionFilter(session) {
+  activeSession = session;
+  const tabMap = {
+    '': 'tab-all',
+    'เสาร์เช้า': 'tab-sat-morning',
+    'อาทิตย์เช้า': 'tab-sun-morning',
+    'อาทิตย์บ่าย': 'tab-sun-evening',
+    '__other__': 'tab-other'
+  };
+  document.querySelectorAll('.session-tab').forEach(btn => btn.classList.remove('active'));
+  const activeTab = document.getElementById(tabMap[session] || 'tab-all');
+  if (activeTab) activeTab.classList.add('active');
+  filterAndRender();
+}
+
+// ── Filter & Render ──
+function filterAndRender() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const instructor = document.getElementById("instructorDropdown").value;
+
+  let data = allData.filter(x => {
+    const matchInstructor = !instructor || x.instructor == instructor;
+    const matchSearch = x.name.toLowerCase().includes(q);
+    let matchSession = true;
+    if (activeSession === '__other__') {
+      matchSession = !x.classSession || x.classSession.trim() === '';
+    } else if (activeSession !== '') {
+      matchSession = x.classSession === activeSession;
+    }
+    return matchInstructor && matchSearch && matchSession;
+  });
+
+  // Update count
+  document.getElementById("studentCount").textContent = data.length + " คน";
+
+  // If "ทั้งหมด" → group by session; else flat grid
+  if (activeSession === '') {
+    renderGrouped(data);
+  } else {
+    renderFlat(data);
+  }
+}
+
+// ── Render Grouped by Session ──
+function renderGrouped(data) {
   const grid = document.getElementById("studentGrid");
   grid.innerHTML = '';
+
   if (!data || data.length === 0) {
-    grid.innerHTML = `
-      <div class="col-span-3 text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-gray-100">
-        <i class="fas fa-user-graduate text-gray-100 text-5xl mb-4"></i>
-        <p class="text-gray-300 font-medium">ไม่พบข้อมูลนักเรียน</p>
-      </div>`;
+    grid.innerHTML = emptyState();
     return;
   }
+
+  const groups = {};
+  const ORDER = ['เสาร์เช้า', 'อาทิตย์เช้า', 'อาทิตย์บ่าย', '__other__'];
+
   data.forEach(s => {
-    const p = Number(s.progress) || 0;
+    const key = (s.classSession && s.classSession.trim()) ? s.classSession : '__other__';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
+  });
+
+  ORDER.forEach(sessionKey => {
+    if (!groups[sessionKey]) return;
+    const students = groups[sessionKey];
+    const cfg = SESSION_CONFIG[sessionKey];
+    const label = sessionKey === '__other__' ? 'ยังไม่ระบุวันเรียน' : sessionKey;
+    const emoji = sessionKey === '__other__' ? '📋' : (cfg?.emoji || '');
+    const dotColor = sessionKey === '__other__' ? '#94a3b8' : (cfg?.dot || '#94a3b8');
+
     grid.innerHTML += `
-      <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
-          </div>
-          <span class="progress-badge"><i class="fas fa-check-circle text-[10px]"></i> ${p}/4 S</span>
+      <div>
+        <div class="session-section-header">
+          <div class="session-dot" style="background:${dotColor}"></div>
+          <h3 class="font-black text-gray-700 text-base">${emoji} ${label}</h3>
+          <span class="bg-gray-100 text-gray-400 text-xs font-bold px-2.5 py-0.5 rounded-full">${students.length} คน</span>
         </div>
-        <div class="grid grid-cols-4 gap-1.5 mb-5">
-          ${[1,2,3,4].map(i => `
-            <div class="flex flex-col items-center gap-1">
-              <div class="progress-step w-full ${p >= i ? 'progress-done' : ''}"></div>
-              <span class="text-[9px] font-bold ${p >= i ? 'text-red-500' : 'text-gray-300'}">S${i}</span>
-            </div>`).join("")}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          ${students.map(s => renderCard(s)).join('')}
         </div>
-        <button onclick='openProgress("${s.studentId}","${s.courseId}","${s.name}",${p},${JSON.stringify(s.weeks || [])},${JSON.stringify(s.instructorsWeek || [])})'
-          class="w-full bg-gray-50 hover:bg-red-600 hover:text-white text-gray-700 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2">
-          <i class="fas fa-pen-to-square mr-1 text-xs"></i> อัปเดต Progress
-        </button>
-        <button onclick='deleteStudentRegular("${s.studentId}")'
-          class="w-full bg-red-50 hover:bg-red-600 hover:text-white text-red-500 py-2.5 rounded-2xl font-bold text-sm transition-all">
-          <i class="fas fa-trash mr-1 text-xs"></i> ลบออกจากคลาส
-        </button>
-      </div>`;
+      </div>
+    `;
   });
 }
 
-function openProgress(id, courseId, name, p, weeks = [], insWeek = []) {
+// ── Render Flat Grid ──
+function renderFlat(data) {
+  const grid = document.getElementById("studentGrid");
+  grid.innerHTML = '';
+
+  if (!data || data.length === 0) {
+    grid.innerHTML = emptyState();
+    return;
+  }
+
+  grid.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      ${data.map(s => renderCard(s)).join('')}
+    </div>
+  `;
+}
+
+// ── Single Card HTML ──
+function renderCard(s) {
+  const p = Number(s.progress) || 0;
+  const sessionCls = getSessionCls(s.classSession);
+  const sessionLabel = s.classSession
+    ? `<span class="session-badge ${sessionCls}">${getSessionEmoji(s.classSession)} ${s.classSession}</span>`
+    : `<span class="session-badge other">📋 ยังไม่ระบุ</span>`;
+
+  return `
+    <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
+      <div class="flex justify-between items-start mb-1">
+        <div>
+          <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
+          <p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
+          ${sessionLabel}
+        </div>
+        <span class="progress-badge"><i class="fas fa-check-circle text-[10px]"></i> ${p}/4 S</span>
+      </div>
+      <div class="grid grid-cols-4 gap-1.5 mb-5 mt-4">
+        ${[1,2,3,4].map(i => `
+          <div class="flex flex-col items-center gap-1">
+            <div class="progress-step w-full ${p >= i ? 'progress-done' : ''}"></div>
+            <span class="text-[9px] font-bold ${p >= i ? 'text-red-500' : 'text-gray-300'}">S${i}</span>
+          </div>`).join("")}
+      </div>
+      <button onclick='openProgress("${s.studentId}","${s.courseId}","${s.name}",${p},${JSON.stringify(s.weeks || [])},${JSON.stringify(s.instructorsWeek || [])},"${s.classSession || ''}")'
+        class="w-full bg-gray-50 hover:bg-red-600 hover:text-white text-gray-700 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2">
+        <i class="fas fa-pen-to-square mr-1 text-xs"></i> อัปเดต Progress
+      </button>
+      <button onclick='deleteStudentRegular("${s.studentId}")'
+        class="w-full bg-red-50 hover:bg-red-600 hover:text-white text-red-500 py-2.5 rounded-2xl font-bold text-sm transition-all">
+        <i class="fas fa-trash mr-1 text-xs"></i> ลบออกจากคลาส
+      </button>
+    </div>`;
+}
+
+function emptyState() {
+  return `
+    <div class="col-span-3 text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-gray-100">
+      <i class="fas fa-user-graduate text-gray-100 text-5xl mb-4"></i>
+      <p class="text-gray-300 font-medium">ไม่พบข้อมูลนักเรียน</p>
+    </div>`;
+}
+
+// ── Open Progress Modal ──
+function openProgress(id, courseId, name, p, weeks = [], insWeek = [], classSession = '') {
   currentStudentId = id;
   currentCourseId = courseId;
   tempProgress = p;
   currentWeeks = weeks;
   currentInstructorsWeek = insWeek;
+  currentClassSession = classSession;
+
   document.getElementById("modalName").innerText = name;
+  document.getElementById("modalSessionSelect").value = classSession || '';
   renderSteps();
   document.getElementById("progressModal").classList.remove("hidden");
 }
@@ -468,19 +703,23 @@ function toggle(i) {
 function showLoading() { document.getElementById("saveLoadingOverlay").classList.add("show"); }
 function hideLoading() { document.getElementById("saveLoadingOverlay").classList.remove("show"); }
 
+// ── Save Progress ──
 function saveProgress() {
   showLoading();
+  const selectedSession = document.getElementById("modalSessionSelect").value;
   let weekData = [];
   let instructorData = [];
   for (let i = 1; i <= 4; i++) {
     weekData.push(document.getElementById("week" + i).value);
     instructorData.push(document.getElementById("ins" + i).value);
   }
+
   fetch(scriptURL, { method: "POST", body: JSON.stringify({
     action: "updateWeekAndInstructor",
     studentId: currentStudentId,
     weekData,
-    instructorData
+    instructorData,
+    classSession: selectedSession
   })})
   .then(() => {
     fetch(scriptURL, { method: "POST", body: JSON.stringify({
@@ -493,6 +732,7 @@ function saveProgress() {
   .catch(() => { hideLoading(); });
 }
 
+// ── Delete Student ──
 function deleteStudentRegular(studentId) {
   if (!confirm("ต้องการลบนักเรียนคนนี้ออกจาก Regular Class ใช่ไหม?")) return;
   showLoading();
@@ -517,6 +757,7 @@ function closeModal(id) {
   document.getElementById(id).classList.add("hidden");
 }
 
+// ── Open Add Student Modal ──
 function openAddStudentModal() {
   document.getElementById("studentSelect").value = "";
   document.getElementById("new-name").value = "";
@@ -525,6 +766,7 @@ function openAddStudentModal() {
   document.getElementById("new-nicknameEng").value = "";
   document.getElementById("new-age").value = "";
   document.getElementById("new-phone").value = "";
+  document.getElementById("new-session").value = "";
 
   fetch(scriptURL, { method: "POST", body: JSON.stringify({
     action: "getStudentsByType", type: "Regular", courseId: "", query: ""
@@ -556,16 +798,21 @@ function fillFromExisting() {
   }
 }
 
+// ── Add Student ──
 function addStudent() {
   const existingId = document.getElementById("studentSelect").value;
   const name = document.getElementById("new-name").value.trim();
+  const classSession = document.getElementById("new-session").value;
+
   if (!name) { alert("กรุณากรอกชื่อ"); return; }
 
   showLoading();
 
   if (existingId) {
     fetch(scriptURL, { method: "POST", body: JSON.stringify({
-      action: "addStudentToCourseRegular", studentId: existingId
+      action: "addStudentToCourseRegular",
+      studentId: existingId,
+      classSession: classSession
     })})
     .then(r => r.json())
     .then(() => { hideLoading(); closeModal('addStudentModal'); loadStudents(); })
@@ -591,7 +838,9 @@ function addStudent() {
             const newStudent = (res2.data || []).find(s => s.name === name);
             if (newStudent) {
               fetch(scriptURL, { method: "POST", body: JSON.stringify({
-                action: "addStudentToCourseRegular", studentId: newStudent.studentId
+                action: "addStudentToCourseRegular",
+                studentId: newStudent.studentId,
+                classSession: classSession
               })})
               .then(() => { hideLoading(); closeModal('addStudentModal'); loadStudents(); });
             } else {
