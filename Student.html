@@ -29,7 +29,6 @@
           border-color: #fecaca;
         }
 
-        /* Modal animation */
         #detailModal,
         #addStudentModal {
           transition: opacity 0.2s ease;
@@ -40,12 +39,10 @@
           pointer-events: none;
         }
 
-        /* Avatar gradient */
         .avatar-circle {
           background: linear-gradient(135deg, #e63946 0%, #b91c1c 100%);
         }
 
-        /* Edit mode toggle */
         .view-field { display: block; }
         .edit-field { display: none; }
         .edit-mode .view-field { display: none; }
@@ -67,7 +64,6 @@
           background: white;
         }
 
-        /* Age badge */
         .age-badge {
           display: inline-flex;
           align-items: center;
@@ -81,7 +77,6 @@
           font-weight: 700;
         }
 
-        /* Photo upload */
         #photoDropZone {
           transition: all 0.2s ease;
           cursor: pointer;
@@ -111,7 +106,6 @@
           100% { background-position: 200% 0; }
         }
 
-        /* ── Count stats ── */
         .stat-pill {
           display: inline-flex;
           align-items: center;
@@ -130,14 +124,12 @@
           font-size: 15px;
         }
 
-        /* ── MOBILE: modal safe area ── */
         @supports (padding-bottom: env(safe-area-inset-bottom)) {
           .modal-footer-safe {
             padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
           }
         }
 
-        /* ── MOBILE: footer buttons stack ── */
         @media (max-width: 480px) {
           .modal-footer-btns {
             flex-direction: column-reverse;
@@ -160,6 +152,61 @@
             padding: 0.75rem 1.25rem 1.25rem !important;
           }
         }
+
+        /* ── Live Search Dropdown ── */
+        .search-live-wrapper { position: relative; flex: 1; }
+        .search-live-results {
+          display: none;
+          position: absolute;
+          top: calc(100% + 6px);
+          left: 0; right: 0;
+          background: white;
+          border: 2px solid #f1f5f9;
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+          z-index: 300;
+          overflow: hidden;
+          max-height: 320px;
+          overflow-y: auto;
+        }
+        .search-live-results.open { display: block; }
+        .search-live-item {
+          padding: 12px 16px;
+          cursor: pointer;
+          transition: background 0.15s;
+          border-bottom: 1px solid #f8fafc;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .search-live-item:last-child { border-bottom: none; }
+        .search-live-item:hover { background: #fff1f2; }
+        .sli-avatar {
+          width: 36px; height: 36px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #e63946, #b91c1c);
+          color: white;
+          font-size: 12px;
+          font-weight: 900;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          overflow: hidden;
+        }
+        .sli-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .sli-name { font-size: 14px; font-weight: 700; color: #1f2937; }
+        .sli-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+        .sli-tag  {
+          margin-left: auto; flex-shrink: 0;
+          font-size: 10px; font-weight: 700;
+          background: #f1f5f9; color: #64748b;
+          border-radius: 999px; padding: 2px 8px;
+        }
+        .search-live-empty {
+          padding: 20px 16px;
+          text-align: center;
+          font-size: 13px;
+          color: #94a3b8;
+        }
       </style>
       <style>body { visibility: hidden; }</style>
     </head>
@@ -180,17 +227,23 @@
 
           <div class="mt-6 max-w-3xl">
             <div class="flex flex-col sm:flex-row gap-3">
-              <div class="relative flex-1 group">
+              <!-- Live Search Wrapper -->
+              <div class="search-live-wrapper">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" style="pointer-events:none; z-index:1;"></i>
                 <input
                   type="text"
                   id="studentSearchInput"
                   placeholder="Search by full name..."
+                  oninput="onSearchInput()"
+                  onkeyup="if(event.key==='Enter'){ closeLiveResults(); loadStudentList(); }"
+                  autocomplete="off"
                   class="w-full rounded-[2rem] border-2 border-transparent bg-gray-50 p-4 pl-12 text-sm md:p-5 md:pl-14 md:text-base outline-none transition-all focus:border-red-500 focus:bg-white"
                 />
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-red-500"></i>
+                <!-- Live dropdown -->
+                <div id="liveResults" class="search-live-results"></div>
               </div>
               <button
-                onclick="loadStudentList()"
+                onclick="closeLiveResults(); loadStudentList()"
                 class="rounded-[1.5rem] bg-gray-900 px-6 py-3 md:px-8 md:py-4 font-bold text-white text-sm md:text-base transition-all hover:bg-red-600"
               >
                 Search
@@ -203,7 +256,6 @@
           <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex flex-col gap-2">
               <h2 class="text-xl font-bold text-gray-800">All Students</h2>
-              <!-- ✅ Stats row -->
               <div id="studentStats" class="flex flex-wrap gap-2">
                 <span class="stat-pill">
                   <i class="fas fa-users text-gray-300 text-xs"></i>
@@ -258,9 +310,6 @@
               </div>
               <div class="skeleton h-10 w-full mt-6 rounded-2xl"></div>
             </div>
-            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 hidden md:block"></div>
-            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 hidden xl:block"></div>
-            <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 hidden xl:block"></div>
           </div>
         </section>
       </main>
@@ -272,7 +321,6 @@
       >
         <div class="modal-inner bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full sm:max-w-2xl overflow-hidden flex flex-col"
              style="max-height: 95dvh; max-height: 95vh;">
-          <!-- Modal Header -->
           <div class="modal-header bg-gray-900 px-6 py-5 md:px-8 md:py-6 flex items-center justify-between flex-shrink-0">
             <h2 class="text-white font-black text-lg md:text-xl">Student Details</h2>
             <button
@@ -283,10 +331,8 @@
             </button>
           </div>
 
-          <!-- Modal Body (scrollable) -->
           <div class="modal-body p-5 md:p-8 overflow-y-auto flex-1 -webkit-overflow-scrolling-touch">
 
-            <!-- Avatar + Photo Upload -->
             <div class="flex items-start gap-4 md:gap-6 mb-6 md:mb-8">
               <div class="flex-shrink-0 relative">
                 <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
@@ -331,16 +377,13 @@
               </div>
             </div>
 
-            <!-- Info grid -->
             <div id="modal-form" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-4 md:gap-y-5">
 
-              <!-- Student ID -->
               <div class="col-span-1 sm:col-span-1">
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Student ID</p>
                 <p id="view-studentId" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
               </div>
 
-              <!-- Type -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Type</p>
                 <p id="view-type" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
@@ -350,42 +393,36 @@
                 </select>
               </div>
 
-              <!-- Full Name Thai -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Full Name (Thai)</p>
                 <p id="view-name" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
                 <input id="edit-name" type="text" class="edit-field edit-input" placeholder="ชื่อ-นามสกุล" />
               </div>
 
-              <!-- Nickname Thai -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Nickname (Thai)</p>
                 <p id="view-nickname" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
                 <input id="edit-nickname" type="text" class="edit-field edit-input" placeholder="ชื่อเล่น" />
               </div>
 
-              <!-- English Name -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Name</p>
                 <p id="view-nameEng" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
                 <input id="edit-nameEng" type="text" class="edit-field edit-input" placeholder="English name" />
               </div>
 
-              <!-- English Nickname -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Nickname</p>
                 <p id="view-nicknameEng" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
                 <input id="edit-nicknameEng" type="text" class="edit-field edit-input" placeholder="English nickname" />
               </div>
 
-              <!-- Phone -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Phone</p>
                 <p id="view-phone" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
                 <input id="edit-phone" type="text" inputmode="tel" class="edit-field edit-input" placeholder="Phone number" />
               </div>
 
-              <!-- Date of Birth -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Date of Birth</p>
                 <div class="view-field flex items-center gap-2 flex-wrap">
@@ -403,11 +440,9 @@
 
             </div>
 
-            <!-- Save status -->
             <div id="save-status" class="hidden mt-4 p-3 rounded-xl text-sm font-bold text-center"></div>
           </div>
 
-          <!-- Modal Footer -->
           <div class="modal-footer px-5 pb-6 pt-4 md:px-8 md:pb-8 border-t border-gray-50 flex-shrink-0">
             <div id="footer-view" class="modal-footer-btns flex gap-3 justify-end">
               <button
@@ -450,7 +485,6 @@
         <div class="modal-inner bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full sm:max-w-2xl overflow-hidden flex flex-col"
              style="max-height: 95dvh; max-height: 95vh;">
 
-          <!-- Header -->
           <div class="modal-header bg-gray-900 px-6 py-5 md:px-8 md:py-6 flex items-center justify-between flex-shrink-0">
             <h2 class="text-white font-black text-lg md:text-xl">Add New Student</h2>
             <button
@@ -461,10 +495,8 @@
             </button>
           </div>
 
-          <!-- Body -->
           <div class="modal-body p-5 md:p-8 overflow-y-auto flex-1 -webkit-overflow-scrolling-touch">
 
-            <!-- Student Type Toggle -->
             <div class="mb-5 md:mb-6">
               <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Student Type</p>
               <div class="flex gap-3">
@@ -487,42 +519,36 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-4 md:gap-y-5">
 
-              <!-- Full Name Thai — full width -->
               <div class="col-span-1 sm:col-span-2">
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Full Name (Thai) *</p>
                 <input id="add-name" type="text" placeholder="ชื่อ-นามสกุล"
                   class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-red-500 focus:bg-white transition-all" />
               </div>
 
-              <!-- Nickname Thai -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Nickname (Thai)</p>
                 <input id="add-nickname" type="text" placeholder="ชื่อเล่น"
                   class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-red-500 focus:bg-white transition-all" />
               </div>
 
-              <!-- English Name -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Name</p>
                 <input id="add-nameEng" type="text" placeholder="Full name"
                   class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-red-500 focus:bg-white transition-all" />
               </div>
 
-              <!-- English Nickname -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Nickname</p>
                 <input id="add-nicknameEng" type="text" placeholder="Nickname"
                   class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-red-500 focus:bg-white transition-all" />
               </div>
 
-              <!-- Phone -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Phone</p>
                 <input id="add-phone" type="text" inputmode="tel" placeholder="0812345678"
                   class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-red-500 focus:bg-white transition-all" />
               </div>
 
-              <!-- Date of Birth -->
               <div>
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Date of Birth</p>
                 <input id="add-dob" type="date"
@@ -530,7 +556,6 @@
                 <p id="add-age-preview" class="mt-1 text-xs text-gray-400 font-medium"></p>
               </div>
 
-              <!-- Course — full width on mobile -->
               <div id="add-course-field" class="col-span-1 sm:col-span-2 md:col-span-1">
                 <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Course</p>
                 <select id="add-courseId"
@@ -543,7 +568,6 @@
             <div id="add-save-status" class="hidden mt-4 p-3 rounded-xl text-sm font-bold text-center"></div>
           </div>
 
-          <!-- Footer -->
           <div class="modal-footer px-5 pb-6 pt-4 md:px-8 md:pb-8 border-t border-gray-50 flex-shrink-0">
             <div class="modal-footer-btns flex gap-3 justify-end">
               <button onclick="closeAddStudentModal()"
@@ -564,11 +588,73 @@
       <script>
         let currentStudentData = null;
         let studentsCache = [];
+        let liveSearchTimer = null;
 
         document.addEventListener("DOMContentLoaded", () => {
           loadStudentList();
           document.getElementById("edit-dob").addEventListener("change", updateEditAgePreview);
+
+          // Close live results on outside click
+          document.addEventListener("click", (e) => {
+            if (!e.target.closest('.search-live-wrapper')) closeLiveResults();
+          });
         });
+
+        /* ══════════════════════════════════════
+           LIVE SEARCH
+        ══════════════════════════════════════ */
+        function onSearchInput() {
+          clearTimeout(liveSearchTimer);
+          const q = document.getElementById("studentSearchInput").value.trim();
+          if (!q) {
+            closeLiveResults();
+            loadStudentList(true);
+            return;
+          }
+          liveSearchTimer = setTimeout(() => {
+            showLiveResults(q);
+            loadStudentList(); // also update the grid live
+          }, 300);
+        }
+
+        function showLiveResults(q) {
+          const lower = q.toLowerCase();
+          const matched = studentsCache.filter(s =>
+            (s.name || s.fullNameThai || '').toLowerCase().includes(lower) ||
+            (s.nameEng || '').toLowerCase().includes(lower) ||
+            (s.nickname || '').toLowerCase().includes(lower)
+          );
+
+          const box = document.getElementById('liveResults');
+          if (!matched.length) {
+            box.innerHTML = `<div class="search-live-empty">No results for "${q}"</div>`;
+          } else {
+            box.innerHTML = matched.slice(0, 8).map((s, idx) => {
+              const fullName = s.name || s.fullNameThai || '-';
+              const initials = fullName !== '-' ? fullName.slice(0, 2) : '??';
+              const typeLabel = getStudentTypeLabel(s.type);
+              const realIdx = studentsCache.indexOf(s);
+              const avatarHtml = s.photoUrl
+                ? `<img src="${s.photoUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+                : initials;
+
+              return `
+                <div class="search-live-item" onclick="closeLiveResults(); openDetailModal(${realIdx})">
+                  <div class="sli-avatar">${avatarHtml}</div>
+                  <div>
+                    <div class="sli-name">${fullName}</div>
+                    <div class="sli-sub">${s.nameEng || '-'} · ${s.studentId || ''}</div>
+                  </div>
+                  <span class="sli-tag">${typeLabel}</span>
+                </div>`;
+            }).join('');
+          }
+          box.classList.add('open');
+        }
+
+        function closeLiveResults() {
+          document.getElementById('liveResults').classList.remove('open');
+        }
 
         /* ─── Age helpers ─── */
         function calcAge(dobStr) {
@@ -615,7 +701,6 @@
           });
         }
 
-        /* ✅ Update count pills */
         function updateCounts(students) {
           const total   = students.length;
           const course  = students.filter(s => (s.type || "").toLowerCase() === "course").length;
@@ -685,8 +770,6 @@
             return;
           }
           studentsCache = students;
-
-          // ✅ อัปเดต count
           updateCounts(students);
 
           list.innerHTML = students.map((s, idx) => {
@@ -884,7 +967,6 @@
               event.target.value = "";
             })
             .catch(err => {
-              console.error("Upload error:", err);
               document.getElementById("uploadProgressText").innerText = "❌ Connection error. Please try again.";
               document.getElementById("uploadProgressBar").style.background = "#ef4444";
               setTimeout(() => {
@@ -905,14 +987,12 @@
           el.innerText = age !== null ? `อายุปัจจุบัน: ${age} ปี` : "";
         }
 
-        /* ─── Modal: close ─── */
         function closeDetailModal() {
           document.getElementById("detailModal").classList.add("hidden");
           document.body.style.overflow = "";
           currentStudentData = null;
         }
 
-        /* ─── Edit mode UI ─── */
         function enterEditMode() {
           document.getElementById("modal-form").classList.add("edit-mode");
           document.getElementById("footer-view").classList.add("hidden");
@@ -938,7 +1018,6 @@
           el.className = "hidden mt-4 p-3 rounded-xl text-sm font-bold text-center";
         }
 
-        /* ─── Save to Google Sheets ─── */
         function saveStudentEdit() {
           if (!currentStudentData) return;
           const btn = document.getElementById("save-btn");
