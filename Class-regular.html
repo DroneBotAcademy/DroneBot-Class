@@ -308,16 +308,16 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       <i class="fas fa-users text-xs mr-1"></i> ทั้งหมด
     </button>
     <button class="session-tab" onclick="setSessionFilter('เสาร์เช้า')" id="tab-sat-morning">
-      🌅 เสาร์เช้า
+       เสาร์เช้า
     </button>
     <button class="session-tab" onclick="setSessionFilter('อาทิตย์เช้า')" id="tab-sun-morning">
-      ☀️ อาทิตย์เช้า
+       อาทิตย์เช้า
     </button>
     <button class="session-tab" onclick="setSessionFilter('อาทิตย์บ่าย')" id="tab-sun-evening">
-      🌤️ อาทิตย์บ่าย
+       อาทิตย์บ่าย
     </button>
     <button class="session-tab" onclick="setSessionFilter('__other__')" id="tab-other">
-      📋 ยังไม่ระบุ
+       ยังไม่ระบุ
     </button>
   </div>
 
@@ -374,9 +374,9 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       <label class="text-xs font-bold text-gray-400 mb-2 block">📅 วันเรียน</label>
       <select id="modalSessionSelect" class="session-select-modal">
         <option value="">-- ยังไม่ระบุ --</option>
-        <option value="เสาร์เช้า">🌅 เสาร์เช้า</option>
-        <option value="อาทิตย์เช้า">☀️ อาทิตย์เช้า</option>
-        <option value="อาทิตย์บ่าย">🌤️ อาทิตย์บ่าย</option>
+        <option value="เสาร์เช้า"> เสาร์เช้า</option>
+        <option value="อาทิตย์เช้า"> อาทิตย์เช้า</option>
+        <option value="อาทิตย์บ่าย"> อาทิตย์บ่าย</option>
       </select>
     </div>
 
@@ -464,9 +464,9 @@ let currentClassSession = "";
 
 // ── Session config ──
 const SESSION_CONFIG = {
-  'เสาร์เช้า':  { cls: 'sat-morning',  emoji: '🌅', color: '#d97706', dot: '#fbbf24' },
-  'อาทิตย์เช้า': { cls: 'sun-morning',  emoji: '☀️', color: '#16a34a', dot: '#4ade80' },
-  'อาทิตย์บ่าย': { cls: 'sun-evening',  emoji: '🌤️', color: '#7c3aed', dot: '#a78bfa' },
+  'เสาร์เช้า':  { cls: 'sat-morning',   color: '#d97706', dot: '#fbbf24' },
+  'อาทิตย์เช้า': { cls: 'sun-morning',   color: '#16a34a', dot: '#4ade80' },
+  'อาทิตย์บ่าย': { cls: 'sun-evening',   color: '#7c3aed', dot: '#a78bfa' },
 };
 
 function getSessionCls(session) {
