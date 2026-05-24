@@ -253,6 +253,21 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   cursor: pointer;
 }
 .session-select-modal:focus { border-color: #f87171; }
+
+/* Reset modal input */
+.reset-input {
+  width: 100%;
+  border: 2px solid #fed7aa;
+  background: #fff7ed;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: 'Kanit', sans-serif;
+  outline: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+.reset-input:focus { border-color: #f97316; }
 </style>
 <style>body { visibility: hidden; }</style>
 </head>
@@ -393,6 +408,38 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   </div>
 </div>
 
+<!-- ══ RESET MODAL ══ -->
+<div id="resetModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  <div class="bg-white p-8 rounded-[2rem] w-full max-w-sm shadow-2xl text-center">
+    <div class="w-14 h-14 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-rotate-left text-orange-500 text-xl"></i>
+    </div>
+    <h2 class="text-lg font-black text-gray-900 mb-1">Reset รอบใหม่</h2>
+    <p id="resetStudentName" class="text-gray-400 text-sm mb-5"></p>
+
+    <label class="text-xs font-bold text-gray-400 mb-2 block text-left">📅 บันทึกประวัติรอบนี้ว่าเป็นเดือน...</label>
+    <input
+      id="resetMonthInput"
+      placeholder="เช่น พ.ค. 2568"
+      class="reset-input mb-5">
+
+    <div class="bg-orange-50 rounded-2xl p-3 mb-5 text-left">
+      <p class="text-xs text-orange-700">
+        ⚠️ ข้อมูล <strong>Week 1–4, Instructor และ Progress</strong> จะถูกเซฟลง <strong>CourseHistory</strong> แล้ว reset กลับเป็น 0 อัตโนมัติ
+      </p>
+    </div>
+
+    <button onclick="confirmReset()"
+      class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-2xl font-bold mb-2 transition-all flex items-center justify-center gap-2">
+      <i class="fas fa-check text-sm"></i> ยืนยัน Reset
+    </button>
+    <button onclick="closeModal('resetModal')"
+      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">
+      ยกเลิก
+    </button>
+  </div>
+</div>
+
 <!-- ══ ADD STUDENT MODAL ══ -->
 <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 <div class="bg-white p-8 rounded-[2rem] w-full max-w-lg shadow-2xl">
@@ -461,6 +508,9 @@ let tempProgress = 0;
 let currentWeeks = [];
 let currentInstructorsWeek = [];
 let currentClassSession = "";
+
+// ── Reset modal state ──
+let resetTargetId = "";
 
 // ── Session config ──
 const SESSION_CONFIG = {
@@ -534,10 +584,8 @@ function filterAndRender() {
     return matchInstructor && matchSearch && matchSession;
   });
 
-  // Update count
   document.getElementById("studentCount").textContent = data.length + " คน";
 
-  // If "ทั้งหมด" → group by session; else flat grid
   if (activeSession === '') {
     renderGrouped(data);
   } else {
@@ -612,6 +660,11 @@ function renderCard(s) {
     ? `<span class="session-badge ${sessionCls}">${getSessionEmoji(s.classSession)} ${s.classSession}</span>`
     : `<span class="session-badge other">📋 ยังไม่ระบุ</span>`;
 
+  // สีปุ่ม Reset ตาม progress: ถ้าครบ 4 จะเด่นขึ้น
+  const resetBtnClass = p >= 4
+    ? "w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-2xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-1"
+    : "w-full bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-400 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-1";
+
   return `
     <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
       <div class="flex justify-between items-start mb-1">
@@ -632,6 +685,10 @@ function renderCard(s) {
       <button onclick='openProgress("${s.studentId}","${s.courseId}","${s.name}",${p},${JSON.stringify(s.weeks || [])},${JSON.stringify(s.instructorsWeek || [])},"${s.classSession || ''}")'
         class="w-full bg-gray-50 hover:bg-red-600 hover:text-white text-gray-700 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2">
         <i class="fas fa-pen-to-square mr-1 text-xs"></i> อัปเดต Progress
+      </button>
+      <button onclick='openResetModal("${s.studentId}", "${s.name.replace(/'/g, "\\'")}")'
+        class="${resetBtnClass}">
+        <i class="fas fa-rotate-left text-xs"></i> Reset รอบใหม่${p >= 4 ? ' ✓' : ''}
       </button>
       <button onclick='deleteStudentRegular("${s.studentId}")'
         class="w-full bg-red-50 hover:bg-red-600 hover:text-white text-red-500 py-2.5 rounded-2xl font-bold text-sm transition-all">
@@ -730,6 +787,49 @@ function saveProgress() {
     .then(() => { hideLoading(); closeModal('progressModal'); loadStudents(); });
   })
   .catch(() => { hideLoading(); });
+}
+
+// ── Open Reset Modal ──
+function openResetModal(studentId, name) {
+  resetTargetId = studentId;
+  document.getElementById("resetStudentName").textContent = name;
+
+  // Auto-fill เดือนปัจจุบันเป็น พ.ศ. ไทย
+  const now = new Date();
+  const thMonth = now.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
+  document.getElementById("resetMonthInput").value = thMonth;
+
+  document.getElementById("resetModal").classList.remove("hidden");
+}
+
+// ── Confirm Reset & Archive ──
+function confirmReset() {
+  const month = document.getElementById("resetMonthInput").value.trim();
+  if (!month) { alert("กรุณาระบุเดือน เช่น พ.ค. 2568"); return; }
+
+  showLoading();
+  fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "archiveAndResetStudent",
+      studentId: resetTargetId,
+      month: month
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    hideLoading();
+    if (res.status === "success") {
+      closeModal("resetModal");
+      loadStudents();
+    } else {
+      alert("เกิดข้อผิดพลาด: " + (res.message || "ไม่ทราบสาเหตุ"));
+    }
+  })
+  .catch(() => {
+    hideLoading();
+    alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+  });
 }
 
 // ── Delete Student ──
