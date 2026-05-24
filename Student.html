@@ -111,6 +111,25 @@
           100% { background-position: 200% 0; }
         }
 
+        /* ── Count stats ── */
+        .stat-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: white;
+          border: 1.5px solid #f1f5f9;
+          border-radius: 999px;
+          padding: 6px 16px;
+          font-size: 13px;
+          font-weight: 700;
+          color: #64748b;
+          box-shadow: 0 1px 4px rgba(0,0,0,.04);
+        }
+        .stat-pill .num {
+          color: #e63946;
+          font-size: 15px;
+        }
+
         /* ── MOBILE: modal safe area ── */
         @supports (padding-bottom: env(safe-area-inset-bottom)) {
           .modal-footer-safe {
@@ -182,7 +201,24 @@
 
         <section class="p-4 md:p-10">
           <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-xl font-bold text-gray-800">All Students</h2>
+            <div class="flex flex-col gap-2">
+              <h2 class="text-xl font-bold text-gray-800">All Students</h2>
+              <!-- ✅ Stats row -->
+              <div id="studentStats" class="flex flex-wrap gap-2">
+                <span class="stat-pill">
+                  <i class="fas fa-users text-gray-300 text-xs"></i>
+                  ทั้งหมด <span class="num" id="countTotal">-</span> คน
+                </span>
+                <span class="stat-pill">
+                  <i class="fas fa-graduation-cap text-gray-300 text-xs"></i>
+                  Course <span class="num" id="countCourse">-</span> คน
+                </span>
+                <span class="stat-pill">
+                  <i class="fas fa-chalkboard text-gray-300 text-xs"></i>
+                  Regular <span class="num" id="countRegular">-</span> คน
+                </span>
+              </div>
+            </div>
             <div class="flex items-center gap-3">
               <button
                 onclick="loadStudentList(true)"
@@ -579,6 +615,16 @@
           });
         }
 
+        /* ✅ Update count pills */
+        function updateCounts(students) {
+          const total   = students.length;
+          const course  = students.filter(s => (s.type || "").toLowerCase() === "course").length;
+          const regular = students.filter(s => (s.type || "").toLowerCase() === "regular").length;
+          document.getElementById("countTotal").innerText   = total;
+          document.getElementById("countCourse").innerText  = course;
+          document.getElementById("countRegular").innerText = regular;
+        }
+
         function loadStudentList(forceAll = false) {
           const query = document.getElementById("studentSearchInput").value.trim();
           const list = document.getElementById("studentList");
@@ -616,10 +662,11 @@
             fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getStudentsByType", type: "regular", courseId: "" }) }).then((r) => r.json()),
           ])
             .then(([cr, rr]) => {
-              renderStudents(uniqueStudents([
+              const all = uniqueStudents([
                 ...normalizeStudents(cr.data, "course"),
                 ...normalizeStudents(rr.data, "regular"),
-              ]));
+              ]);
+              renderStudents(all);
             })
             .catch(showStudentError);
         }
@@ -634,9 +681,14 @@
           const list = document.getElementById("studentList");
           if (!students || students.length === 0) {
             list.innerHTML = `<div class="col-span-full rounded-[2rem] border-2 border-dashed border-gray-100 bg-white py-16 text-center text-gray-300">No students found</div>`;
+            updateCounts([]);
             return;
           }
           studentsCache = students;
+
+          // ✅ อัปเดต count
+          updateCounts(students);
+
           list.innerHTML = students.map((s, idx) => {
             const fullName    = s.name || s.fullNameThai || "-";
             const englishName = s.nameEng || "-";
