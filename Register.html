@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DroneBot – สมัครเรียน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:    #e63946;
+      --red2:   #c1121f;
+      --dark:   #1a1a2e;
+      --gray:   #f8fafc;
+      --border: #e5e7eb;
+      --text:   #1f2937;
+      --muted:  #94a3b8;
+    }
+
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 60px;
+    }
+
+    /* ── Hero Header ── */
+    .hero {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .hero-logo {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: white;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 32px rgba(230,57,70,0.35);
+      animation: popIn 0.5s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .hero h1 {
+      font-size: 26px; font-weight: 900; color: var(--text);
+      line-height: 1.2; margin-bottom: 6px;
+    }
+    .hero h1 span { color: var(--red); }
+    .hero p { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+    /* ── Card ── */
+    .card {
+      width: 100%; max-width: 480px;
+      background: white;
+      border-radius: 28px;
+      padding: 28px 24px 32px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      animation: slideUp 0.45s cubic-bezier(.22,.61,.36,1) 0.1s both;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 9px; font-weight: 900;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+
+    /* ── Field Group ── */
+    .field-group { margin-bottom: 18px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+
+    /* ── Input ── */
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 13px; pointer-events: none;
+      transition: color 0.2s;
+    }
+    .input-wrap input {
+      width: 100%; padding: 13px 14px 13px 38px;
+      background: #f8fafc; border: 2px solid var(--border);
+      border-radius: 14px; font-family: 'Kanit', sans-serif;
+      font-size: 14px; color: var(--text); outline: none;
+      transition: all 0.2s;
+    }
+    .input-wrap input:focus { border-color: var(--red); background: white; }
+    .input-wrap input:focus + i,
+    .input-wrap input:focus ~ i { color: var(--red); }
+    .input-wrap input::placeholder { color: #cbd5e1; }
+
+    /* icon left trick (icon before input in DOM won't work with ~ sibling) */
+    .input-wrap input:focus { border-color: var(--red); background: white; }
+    .input-wrap:focus-within i { color: var(--red); }
+
+    /* ── Custom Select ── */
+    .select-wrap { position: relative; }
+    .select-wrap i.sel-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 13px; pointer-events: none;
+      transition: color 0.2s; z-index: 1;
+    }
+    .select-wrap i.chev {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 11px; pointer-events: none; z-index: 1;
+      transition: transform 0.2s;
+    }
+    .select-wrap select {
+      width: 100%; padding: 13px 38px 13px 38px;
+      background: #f8fafc; border: 2px solid var(--border);
+      border-radius: 14px; font-family: 'Kanit', sans-serif;
+      font-size: 14px; color: var(--text); outline: none;
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .select-wrap select:focus { border-color: var(--red); background: white; }
+    .select-wrap:focus-within i { color: var(--red); }
+    .select-wrap select option { color: var(--text); }
+    .select-wrap select option[value=""] { color: var(--muted); }
+
+    /* ── Type Toggle ── */
+    .type-toggle {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-bottom: 18px;
+    }
+    .type-btn {
+      padding: 11px 8px; border-radius: 14px;
+      border: 2px solid var(--border); background: #f8fafc;
+      font-family: 'Kanit', sans-serif; font-size: 13px; font-weight: 600;
+      color: var(--muted); cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .type-btn.active {
+      background: #fff1f2; border-color: var(--red); color: var(--red);
+    }
+    .type-btn i { font-size: 14px; }
+
+    /* ── Course section (hidden by default) ── */
+    #courseSection {
+      overflow: hidden; max-height: 0;
+      transition: max-height 0.4s cubic-bezier(.22,.61,.36,1), opacity 0.3s;
+      opacity: 0;
+    }
+    #courseSection.show { max-height: 200px; opacity: 1; }
+
+    /* ── Divider ── */
+    .divider {
+      border: none; border-top: 2px dashed #f1f5f9;
+      margin: 20px 0;
+    }
+
+    /* ── Submit Button ── */
+    .btn-submit {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: white; border: none; border-radius: 16px;
+      font-family: 'Kanit', sans-serif; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(230,57,70,0.35);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      position: relative; overflow: hidden;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(230,57,70,0.45); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+    /* ── Success State ── */
+    #successCard {
+      display: none;
+      width: 100%; max-width: 480px;
+      background: white; border-radius: 28px;
+      padding: 48px 24px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+      text-align: center;
+      animation: slideUp 0.45s cubic-bezier(.22,.61,.36,1) both;
+    }
+    .success-icon {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 36px; color: white; margin: 0 auto 20px;
+      box-shadow: 0 8px 32px rgba(34,197,94,0.35);
+      animation: popIn 0.5s cubic-bezier(.175,.885,.32,1.275) 0.2s both;
+    }
+    #successCard h2 { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+    #successCard p  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .student-id-badge {
+      display: inline-block; margin-top: 16px;
+      background: #f0fdf4; border: 2px solid #86efac;
+      color: #15803d; font-weight: 900; font-size: 20px;
+      padding: 10px 28px; border-radius: 999px;
+      letter-spacing: 0.05em;
+    }
+    .btn-register-again {
+      margin-top: 24px; padding: 13px 32px;
+      background: #f8fafc; border: 2px solid var(--border);
+      border-radius: 14px; font-family: 'Kanit', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--text);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-register-again:hover { border-color: var(--red); color: var(--red); background: #fff1f2; }
+
+    /* ── Error msg ── */
+    .err-msg {
+      display: none; color: var(--red); font-size: 12px;
+      font-weight: 600; margin-top: 6px; padding-left: 4px;
+    }
+    .err-msg.show { display: block; }
+
+    /* ── Loading spinner ── */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid rgba(255,255,255,0.4);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Global alert ── */
+    #alertBar {
+      display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      background: #1f2937; color: white; padding: 12px 24px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; z-index: 999;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      animation: fadeSlide 0.3s ease;
+    }
+    @keyframes fadeSlide {
+      from { opacity:0; transform: translateX(-50%) translateY(-8px); }
+      to   { opacity:1; transform: translateX(-50%) translateY(0); }
+    }
+    #alertBar.error { background: var(--red); }
+    #alertBar.success { background: #22c55e; }
+
+    /* ── Required asterisk ── */
+    .req { color: var(--red); margin-left: 2px; }
+
+    /* ── Footer note ── */
+    .footer-note {
+      margin-top: 20px; font-size: 11px; color: var(--muted);
+      text-align: center; line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="alertBar"></div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-logo"><i class="fas fa-helicopter"></i></div>
+    <h1>สมัครเรียน <span>DroneBot</span></h1>
+    <p>กรอกข้อมูลให้ครบแล้วกด "ยืนยันสมัคร" ได้เลยครับ</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card" id="formCard">
+
+    <!-- ชื่อ-นามสกุล -->
+    <div class="field-group">
+      <p class="section-label">ชื่อ-นามสกุล <span class="req">*</span></p>
+      <div class="input-wrap">
+        <i class="fas fa-user"></i>
+        <input type="text" id="name" placeholder="เช่น สมชาย ใจดี" autocomplete="off">
+      </div>
+      <p class="err-msg" id="nameErr">กรุณากรอกชื่อ-นามสกุล</p>
+    </div>
+
+    <!-- ชื่อเล่น ไทย / ENG -->
+    <div class="field-row">
+      <div>
+        <p class="section-label">ชื่อเล่น (ไทย) <span class="req">*</span></p>
+        <div class="input-wrap">
+          <i class="fas fa-tag"></i>
+          <input type="text" id="nickname" placeholder="เช่น น้องโดม" autocomplete="off">
+        </div>
+        <p class="err-msg" id="nickErr">กรุณากรอกชื่อเล่น</p>
+      </div>
+      <div>
+        <p class="section-label">ชื่อเล่น (ENG)</p>
+        <div class="input-wrap">
+          <i class="fas fa-tag"></i>
+          <input type="text" id="nicknameEng" placeholder="e.g. Dome" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <!-- Name ENG / อายุ -->
+    <div class="field-row">
+      <div>
+        <p class="section-label">Name (ENG)</p>
+        <div class="input-wrap">
+          <i class="fas fa-font"></i>
+          <input type="text" id="nameEng" placeholder="e.g. SOMCHAI" autocomplete="off">
+        </div>
+      </div>
+      <div>
+        <p class="section-label">อายุ</p>
+        <div class="input-wrap">
+          <i class="fas fa-birthday-cake"></i>
+          <input type="number" id="age" placeholder="ปี" min="1" max="99" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <!-- เบอร์โทร -->
+    <div class="field-group">
+      <p class="section-label">เบอร์โทรศัพท์</p>
+      <div class="input-wrap">
+        <i class="fas fa-phone"></i>
+        <input type="tel" id="phone" placeholder="0XX-XXX-XXXX" autocomplete="off">
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ประเภท -->
+    <div class="field-group">
+      <p class="section-label">ประเภทการเรียน <span class="req">*</span></p>
+      <div class="type-toggle">
+        <button class="type-btn active" id="btnCourse" onclick="setType('Course')">
+          <i class="fas fa-graduation-cap"></i> Course
+        </button>
+        <button class="type-btn" id="btnRegular" onclick="setType('Regular')">
+          <i class="fas fa-calendar-alt"></i> Regular
+        </button>
+      </div>
+    </div>
+
+    <!-- คอร์ส (แสดงเฉพาะ Course) -->
+    <div id="courseSection" class="show">
+      <div class="field-group">
+        <p class="section-label">คอร์สที่สมัคร <span class="req">*</span></p>
+        <div class="select-wrap">
+          <i class="fas fa-layer-group sel-icon"></i>
+          <select id="courseSelect">
+            <option value="">— กำลังโหลดคอร์ส... —</option>
+          </select>
+          <i class="fas fa-chevron-down chev"></i>
+        </div>
+        <p class="err-msg" id="courseErr">กรุณาเลือกคอร์ส</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Submit -->
+    <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+      <div class="spinner" id="spinner"></div>
+      <i class="fas fa-paper-plane" id="submitIcon"></i>
+      <span id="submitText">ยืนยันสมัคร</span>
+    </button>
+
+    <p class="footer-note">
+      ข้อมูลของท่านจะถูกบันทึกลงระบบ DroneBot โดยตรง<br>
+      ไม่มีการเผยแพร่ข้อมูลส่วนตัวใดๆ
+    </p>
+  </div>
+
+  <!-- Success Card -->
+  <div id="successCard">
+    <div class="success-icon"><i class="fas fa-check"></i></div>
+    <h2>สมัครสำเร็จแล้ว! 🎉</h2>
+    <p>ระบบได้บันทึกข้อมูลของคุณเรียบร้อยแล้ว<br>กรุณาจดรหัสนักเรียนเอาไว้</p>
+    <div class="student-id-badge" id="newStudentId">—</div>
+    <br>
+    <button class="btn-register-again" onclick="resetForm()">
+      <i class="fas fa-plus mr-1"></i> สมัครนักเรียนเพิ่ม
+    </button>
+  </div>
+
+  <script>
+    // ══════════════════════════════════
+    // ⚙️ CONFIG — แก้ตรงนี้อย่างเดียว
+    // ══════════════════════════════════
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTUXQyfcacNjPY4AcbU22_ccmhFDEcGpQtVOu4L6CXqa5CMy9XECweaGdvAnniUSoO/exec";
+    // ══════════════════════════════════
+
+    let selectedType = "Course";
+
+    /* ── Load Courses ── */
+    async function loadCourses() {
+      try {
+        const res  = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "getCourseData" })
+        });
+        const data = await res.json();
+        const sel  = document.getElementById("courseSelect");
+        sel.innerHTML = '<option value="">— เลือกคอร์ส —</option>';
+        (data.data || []).forEach(c => {
+          sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+      } catch(e) {
+        document.getElementById("courseSelect").innerHTML =
+          '<option value="">โหลดไม่สำเร็จ ลองรีเฟรช</option>';
+      }
+    }
+
+    /* ── Type Toggle ── */
+    function setType(type) {
+      selectedType = type;
+      document.getElementById("btnCourse").classList.toggle("active",  type === "Course");
+      document.getElementById("btnRegular").classList.toggle("active", type === "Regular");
+      const sec = document.getElementById("courseSection");
+      if (type === "Course") sec.classList.add("show");
+      else                   sec.classList.remove("show");
+    }
+
+    /* ── Validate ── */
+    function validate() {
+      let ok = true;
+      const name     = document.getElementById("name").value.trim();
+      const nickname = document.getElementById("nickname").value.trim();
+      const course   = document.getElementById("courseSelect").value;
+
+      document.getElementById("nameErr").classList.toggle("show",   !name);
+      document.getElementById("nickErr").classList.toggle("show",   !nickname);
+      document.getElementById("courseErr").classList.toggle("show", selectedType === "Course" && !course);
+
+      if (!name || !nickname) ok = false;
+      if (selectedType === "Course" && !course) ok = false;
+      return ok;
+    }
+
+    /* ── Submit ── */
+    async function submitForm() {
+      if (!validate()) return;
+
+      const btn     = document.getElementById("btnSubmit");
+      const spinner = document.getElementById("spinner");
+      const icon    = document.getElementById("submitIcon");
+      const text    = document.getElementById("submitText");
+
+      btn.disabled = true;
+      spinner.style.display = "block";
+      icon.style.display    = "none";
+      text.textContent      = "กำลังบันทึก...";
+
+      const payload = {
+        action:      "addStudent",
+        name:        document.getElementById("name").value.trim(),
+        nickname:    document.getElementById("nickname").value.trim(),
+        nicknameEng: document.getElementById("nicknameEng").value.trim(),
+        nameEng:     document.getElementById("nameEng").value.trim(),
+        age:         document.getElementById("age").value.trim(),
+        phone:       document.getElementById("phone").value.trim(),
+        type:        selectedType,
+        courseId:    selectedType === "Course" ? document.getElementById("courseSelect").value : ""
+      };
+
+      try {
+        const res  = await fetch(SCRIPT_URL, { method:"POST", body: JSON.stringify(payload) });
+        const data = await res.json();
+
+        if (data.status === "success") {
+          document.getElementById("newStudentId").textContent = data.studentId || "—";
+          document.getElementById("formCard").style.display   = "none";
+          document.getElementById("successCard").style.display = "block";
+          showAlert("บันทึกสำเร็จ!", "success");
+        } else {
+          showAlert(data.message || "เกิดข้อผิดพลาด", "error");
+          resetBtn();
+        }
+      } catch(e) {
+        showAlert("ไม่สามารถเชื่อมต่อได้ กรุณาลองใหม่", "error");
+        resetBtn();
+      }
+
+      function resetBtn() {
+        btn.disabled = false;
+        spinner.style.display = "none";
+        icon.style.display    = "inline";
+        text.textContent      = "ยืนยันสมัคร";
+      }
+    }
+
+    /* ── Reset ── */
+    function resetForm() {
+      ["name","nickname","nicknameEng","nameEng","age","phone"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      document.getElementById("courseSelect").value = "";
+      ["nameErr","nickErr","courseErr"].forEach(id => {
+        document.getElementById(id).classList.remove("show");
+      });
+      setType("Course");
+      document.getElementById("successCard").style.display = "none";
+      document.getElementById("formCard").style.display    = "block";
+    }
+
+    /* ── Alert Toast ── */
+    function showAlert(msg, type = "") {
+      const bar = document.getElementById("alertBar");
+      bar.textContent = msg;
+      bar.className   = type;
+      bar.style.display = "block";
+      setTimeout(() => { bar.style.display = "none"; }, 3000);
+    }
+
+    /* ── Init ── */
+    loadCourses();
+  </script>
+</body>
+</html>
