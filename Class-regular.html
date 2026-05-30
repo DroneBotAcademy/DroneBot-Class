@@ -724,6 +724,7 @@ function openProgress(id, courseId, name, p, weeks = [], insWeek = [], classSess
   document.getElementById("progressModal").classList.remove("hidden");
 }
 
+// ── แทน function renderSteps เดิม ──
 function renderSteps() {
   const box = document.getElementById("steps");
   box.innerHTML = '';
@@ -734,9 +735,9 @@ function renderSteps() {
     ).join('');
 
     box.innerHTML += `
-      <div class="step-card ${done ? 'done' : 'pending'}">
+      <div id="stepCard${i}" class="step-card ${done ? 'done' : 'pending'}">
         <div class="step-top">
-          <button class="step-sbtn ${done ? 'done' : 'pending'}" onclick="toggle(${i})">
+          <button id="stepBtn${i}" class="step-sbtn ${done ? 'done' : 'pending'}" onclick="toggle(${i})">
             S${i}
           </button>
           <select id="ins${i}" class="step-select">${insOptions}</select>
@@ -750,15 +751,39 @@ function renderSteps() {
   }
 }
 
-function autoTickStep(i) {
-  const val = document.getElementById("week" + i).value.trim();
-  if (val && tempProgress < i) { tempProgress = i; renderSteps(); }
-  else if (!val && tempProgress === i) { tempProgress = i - 1; renderSteps(); }
+// ── เพิ่ม function ใหม่สำหรับ update style โดยไม่ re-render ──
+function updateStepStyles() {
+  for (let i = 1; i <= 4; i++) {
+    const done = tempProgress >= i;
+    const card = document.getElementById("stepCard" + i);
+    const btn  = document.getElementById("stepBtn" + i);
+    if (card) {
+      card.className = "step-card " + (done ? "done" : "pending");
+    }
+    if (btn) {
+      btn.className = "step-sbtn " + (done ? "done" : "pending");
+    }
+  }
 }
 
+// ── แทน function autoTickStep เดิม ──
+function autoTickStep(i) {
+  // นับ progress จาก step ที่มีข้อความ (ต่อเนื่องจาก S1)
+  let newProgress = 0;
+  for (let j = 1; j <= 4; j++) {
+    const el = document.getElementById("week" + j);
+    if (el && el.value.trim()) {
+      newProgress = j;
+    }
+  }
+  tempProgress = newProgress;
+  updateStepStyles();
+}
+
+// ── แทน function toggle เดิม ──
 function toggle(i) {
   tempProgress = (i === tempProgress) ? i - 1 : i;
-  renderSteps();
+  updateStepStyles();
 }
 
 function showLoading() { document.getElementById("saveLoadingOverlay").classList.add("show"); }
