@@ -208,9 +208,28 @@
           color: #94a3b8;
         }
         /* Prevent iOS auto-zoom on input focus */
-input, select, textarea {
-  font-size: 16px !important;
-}
+        input, select, textarea {
+          font-size: 16px !important;
+        }
+
+        /* ── Delete Confirm Overlay ── */
+        #deleteConfirmOverlay {
+          display: none;
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.96);
+          z-index: 10;
+          border-radius: inherit;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          text-align: center;
+          gap: 1rem;
+        }
+        #deleteConfirmOverlay.show {
+          display: flex;
+        }
       </style>
       <style>body { visibility: hidden; }</style>
     </head>
@@ -324,7 +343,35 @@ input, select, textarea {
         class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       >
         <div class="modal-inner bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full sm:max-w-2xl overflow-hidden flex flex-col"
-             style="max-height: 95dvh; max-height: 95vh;">
+             style="max-height: 95dvh; max-height: 95vh; position: relative;">
+
+          <!-- ── Delete Confirm Overlay ── -->
+          <div id="deleteConfirmOverlay" class="rounded-t-[2rem] sm:rounded-[2.5rem]">
+            <div class="w-16 h-16 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center mb-2">
+              <i class="fas fa-trash text-red-500 text-xl"></i>
+            </div>
+            <p class="text-lg font-black text-gray-900">ลบนักเรียนออก?</p>
+            <p id="deleteConfirmName" class="text-sm text-gray-400 font-medium"></p>
+            <p class="text-xs text-red-400 font-bold bg-red-50 border border-red-100 rounded-xl px-4 py-2">
+              ⚠️ การลบจะไม่สามารถย้อนกลับได้
+            </p>
+            <div class="flex gap-3 w-full max-w-xs mt-2">
+              <button
+                onclick="hideDeleteConfirm()"
+                class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-all"
+              >
+                ยกเลิก
+              </button>
+              <button
+                id="confirmDeleteBtn"
+                onclick="confirmDeleteStudent()"
+                class="flex-1 py-3 bg-red-600 text-white rounded-2xl font-bold text-sm hover:bg-red-700 transition-all"
+              >
+                <i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ
+              </button>
+            </div>
+          </div>
+
           <div class="modal-header bg-gray-900 px-6 py-5 md:px-8 md:py-6 flex items-center justify-between flex-shrink-0">
             <h2 class="text-white font-black text-lg md:text-xl">Student Details</h2>
             <button
@@ -448,20 +495,33 @@ input, select, textarea {
           </div>
 
           <div class="modal-footer px-5 pb-6 pt-4 md:px-8 md:pb-8 border-t border-gray-50 flex-shrink-0">
-            <div id="footer-view" class="modal-footer-btns flex gap-3 justify-end">
+            <!-- VIEW MODE footer -->
+            <div id="footer-view" class="modal-footer-btns flex gap-3 justify-between items-center">
+              <!-- ── ปุ่มลบ (ซ้ายมือ) ── -->
               <button
-                onclick="closeDetailModal()"
-                class="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all text-sm"
+                onclick="showDeleteConfirm()"
+                class="inline-flex items-center gap-2 px-5 py-3 bg-red-50 text-red-500 border border-red-100 rounded-2xl font-bold text-sm hover:bg-red-100 hover:border-red-300 transition-all"
               >
-                Close
+                <i class="fas fa-trash text-xs"></i>
+                ลบนักเรียน
               </button>
-              <button
-                onclick="enterEditMode()"
-                class="px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-red-600 transition-all text-sm"
-              >
-                <i class="fas fa-pen mr-2 text-xs"></i>Edit
-              </button>
+              <!-- ── ปุ่ม Close + Edit (ขวามือ) ── -->
+              <div class="flex gap-3">
+                <button
+                  onclick="closeDetailModal()"
+                  class="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all text-sm"
+                >
+                  Close
+                </button>
+                <button
+                  onclick="enterEditMode()"
+                  class="px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-red-600 transition-all text-sm"
+                >
+                  <i class="fas fa-pen mr-2 text-xs"></i>Edit
+                </button>
+              </div>
             </div>
+            <!-- EDIT MODE footer -->
             <div id="footer-edit" class="modal-footer-btns hidden flex gap-3 justify-end">
               <button
                 onclick="cancelEditMode()"
@@ -617,7 +677,7 @@ input, select, textarea {
           }
           liveSearchTimer = setTimeout(() => {
             showLiveResults(q);
-            loadStudentList(); // also update the grid live
+            loadStudentList();
           }, 300);
         }
 
@@ -880,10 +940,59 @@ input, select, textarea {
           updateEditAgePreview();
 
           exitEditModeUI();
+          hideDeleteConfirm();
           hideSaveStatus();
 
           document.getElementById("detailModal").classList.remove("hidden");
           document.body.style.overflow = "hidden";
+        }
+
+        /* ─── Delete Student ─── */
+        function showDeleteConfirm() {
+          const name = currentStudentData
+            ? (currentStudentData.name || currentStudentData.fullNameThai || "นักเรียนคนนี้")
+            : "นักเรียนคนนี้";
+          document.getElementById("deleteConfirmName").innerText = name + " (ID: " + (currentStudentData?.studentId || "-") + ")";
+          document.getElementById("deleteConfirmOverlay").classList.add("show");
+        }
+
+        function hideDeleteConfirm() {
+          document.getElementById("deleteConfirmOverlay").classList.remove("show");
+          const btn = document.getElementById("confirmDeleteBtn");
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ';
+        }
+
+        function confirmDeleteStudent() {
+          if (!currentStudentData) return;
+          const btn = document.getElementById("confirmDeleteBtn");
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 text-xs"></i>กำลังลบ...';
+
+          fetch(scriptURL, {
+            method: "POST",
+            body: JSON.stringify({
+              action:    "deleteStudent",
+              studentId: currentStudentData.studentId
+            })
+          })
+          .then(r => r.json())
+          .then(res => {
+            if (res.status === "success") {
+              hideDeleteConfirm();
+              closeDetailModal();
+              loadStudentList(true);
+            } else {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ';
+              alert("เกิดข้อผิดพลาด: " + (res.message || "ไม่สามารถลบได้"));
+            }
+          })
+          .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ';
+            alert("Network error. กรุณาลองใหม่อีกครั้ง");
+          });
         }
 
         /* ─── Photo Upload ─── */
