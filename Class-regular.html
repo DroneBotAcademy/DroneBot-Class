@@ -17,12 +17,13 @@
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
 }
-  /* Prevent iOS auto-zoom on input focus */
+/* Prevent iOS auto-zoom on input focus */
 input, select, textarea {
   font-size: 16px !important;
 }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 </style>
+
 <style>
 body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 
@@ -31,6 +32,7 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   border: 1px solid #f1f5f9;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 .student-card::before {
   content: '';
@@ -272,6 +274,63 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   box-sizing: border-box;
 }
 .reset-input:focus { border-color: #f97316; }
+
+/* ── Bulk Select ── */
+.card-checkbox {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  z-index: 2;
+  flex-shrink: 0;
+}
+.card-checkbox.checked {
+  background: #e63946;
+  border-color: #e63946;
+}
+.card-checkbox.checked::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+.student-card.selected {
+  border-color: #fca5a5 !important;
+  box-shadow: 0 0 0 3px rgba(230,57,70,.15) !important;
+}
+
+/* ── Bulk Action Bar ── */
+#bulkBar {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  border-radius: 999px;
+  padding: 12px 20px;
+  align-items: center;
+  gap: 12px;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+  font-family: 'Kanit', sans-serif;
+  white-space: nowrap;
+}
+#bulkBar.show { display: flex; }
 </style>
 <style>body { visibility: hidden; }</style>
 </head>
@@ -376,7 +435,7 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 </div>
 </main>
 
-<!-- ══ PROGRESS MODAL (mobile-fixed) ══ -->
+<!-- ══ PROGRESS MODAL ══ -->
 <div id="progressModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
   <div class="modal-inner">
 
@@ -388,7 +447,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       <p class="text-gray-400 text-xs mt-1">บันทึกความคืบหน้าการเรียน</p>
     </div>
 
-    <!-- Session selector in modal -->
     <div class="mb-4">
       <label class="text-xs font-bold text-gray-400 mb-2 block">📅 วันเรียน</label>
       <select id="modalSessionSelect" class="session-select-modal">
@@ -476,7 +534,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     <input id="new-phone" placeholder="เบอร์โทร"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
 
-    <!-- วันเรียน dropdown -->
     <select id="new-session"
       class="col-span-2 p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all font-[Kanit] text-sm cursor-pointer">
       <option value="">📅 เลือกวันเรียน (ถ้ามี)</option>
@@ -495,6 +552,55 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     ยกเลิก
   </button>
 </div>
+</div>
+
+<!-- ══ BULK ACTION BAR ══ -->
+<div id="bulkBar">
+  <span id="bulkCount" class="text-sm font-bold">0 คน</span>
+  <button onclick="openBulkModal()"
+    class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-full font-bold text-sm transition-all">
+    <i class="fas fa-bolt mr-1 text-xs"></i> อัปเดตที่เลือก
+  </button>
+  <button onclick="clearSelection()"
+    class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full font-bold text-sm transition-all">
+    ยกเลิก
+  </button>
+</div>
+
+<!-- ══ BULK UPDATE MODAL ══ -->
+<div id="bulkModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+  <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] w-full sm:max-w-md shadow-2xl"
+       style="max-height:92dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding: 28px 20px;">
+
+    <div class="text-center mb-5">
+      <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fas fa-bolt text-red-500 text-lg"></i>
+      </div>
+      <h2 class="text-lg font-black text-gray-900">Bulk Update</h2>
+      <p id="bulkModalSubtitle" class="text-gray-400 text-xs mt-1"></p>
+    </div>
+
+    <div class="mb-4">
+      <label class="text-xs font-bold text-gray-400 mb-2 block">📅 วันเรียน</label>
+      <select id="bulkSession" class="session-select-modal">
+        <option value="">-- ไม่เปลี่ยน --</option>
+        <option value="เสาร์เช้า"> เสาร์เช้า</option>
+        <option value="อาทิตย์เช้า"> อาทิตย์เช้า</option>
+        <option value="อาทิตย์บ่าย"> อาทิตย์บ่าย</option>
+      </select>
+    </div>
+
+    <div id="bulkSteps" class="flex flex-col gap-3 mb-5"></div>
+
+    <button onclick="saveBulkProgress()"
+      class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-bold mb-2 transition-all flex items-center justify-center gap-2 text-sm">
+      <i class="fas fa-save"></i> บันทึกทั้งหมด
+    </button>
+    <button onclick="closeModal('bulkModal')"
+      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">
+      ยกเลิก
+    </button>
+  </div>
 </div>
 
 <script src="./js/config.js"></script>
@@ -516,11 +622,17 @@ let currentClassSession = "";
 // ── Reset modal state ──
 let resetTargetId = "";
 
+// ── Bulk selection state ──
+let selectedStudents = new Set();
+let bulkTempProgress = 0;
+let bulkWeeks = [];
+let bulkInstructorsWeek = [];
+
 // ── Session config ──
 const SESSION_CONFIG = {
-  'เสาร์เช้า':  { cls: 'sat-morning',   color: '#d97706', dot: '#fbbf24' },
-  'อาทิตย์เช้า': { cls: 'sun-morning',   color: '#16a34a', dot: '#4ade80' },
-  'อาทิตย์บ่าย': { cls: 'sun-evening',   color: '#7c3aed', dot: '#a78bfa' },
+  'เสาร์เช้า':   { cls: 'sat-morning', color: '#d97706', dot: '#fbbf24' },
+  'อาทิตย์เช้า': { cls: 'sun-morning', color: '#16a34a', dot: '#4ade80' },
+  'อาทิตย์บ่าย': { cls: 'sun-evening', color: '#7c3aed', dot: '#a78bfa' },
 };
 
 function getSessionCls(session) {
@@ -551,6 +663,7 @@ function loadStudents() {
     .then(r => r.json())
     .then(res => {
       allData = res.data || [];
+      clearSelection();
       filterAndRender();
     });
 }
@@ -664,14 +777,21 @@ function renderCard(s) {
     ? `<span class="session-badge ${sessionCls}">${getSessionEmoji(s.classSession)} ${s.classSession}</span>`
     : `<span class="session-badge other">📋 ยังไม่ระบุ</span>`;
 
-  // สีปุ่ม Reset ตาม progress: ถ้าครบ 4 จะเด่นขึ้น
+  const isSelected = selectedStudents.has(s.studentId);
+
   const resetBtnClass = p >= 4
     ? "w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-2xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-1"
     : "w-full bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-400 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-1";
 
   return `
-    <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
-      <div class="flex justify-between items-start mb-1">
+    <div id="card-${s.studentId}"
+      class="student-card bg-white p-7 rounded-[2rem] shadow-sm${isSelected ? ' selected' : ''}"
+      onclick="toggleSelect(event, '${s.studentId}')">
+
+      <!-- Checkbox -->
+      <div class="card-checkbox${isSelected ? ' checked' : ''}" id="chk-${s.studentId}"></div>
+
+      <div class="flex justify-between items-start mb-1" style="padding-right:36px">
         <div>
           <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
           <p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
@@ -686,15 +806,15 @@ function renderCard(s) {
             <span class="text-[9px] font-bold ${p >= i ? 'text-red-500' : 'text-gray-300'}">S${i}</span>
           </div>`).join("")}
       </div>
-      <button onclick='openProgress("${s.studentId}","${s.courseId}","${s.name}",${p},${JSON.stringify(s.weeks || [])},${JSON.stringify(s.instructorsWeek || [])},"${s.classSession || ''}")'
+      <button onclick='event.stopPropagation(); openProgress("${s.studentId}","${s.courseId}","${s.name}",${p},${JSON.stringify(s.weeks || [])},${JSON.stringify(s.instructorsWeek || [])},"${s.classSession || ''}")'
         class="w-full bg-gray-50 hover:bg-red-600 hover:text-white text-gray-700 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2">
         <i class="fas fa-pen-to-square mr-1 text-xs"></i> อัปเดต Progress
       </button>
-      <button onclick='openResetModal("${s.studentId}", "${s.name.replace(/'/g, "\\'")}")'
+      <button onclick='event.stopPropagation(); openResetModal("${s.studentId}", "${s.name.replace(/'/g, "\\'")}")'
         class="${resetBtnClass}">
         <i class="fas fa-rotate-left text-xs"></i> Reset รอบใหม่${p >= 4 ? ' ✓' : ''}
       </button>
-      <button onclick='deleteStudentRegular("${s.studentId}")'
+      <button onclick='event.stopPropagation(); deleteStudentRegular("${s.studentId}")'
         class="w-full bg-red-50 hover:bg-red-600 hover:text-white text-red-500 py-2.5 rounded-2xl font-bold text-sm transition-all">
         <i class="fas fa-trash mr-1 text-xs"></i> ลบออกจากคลาส
       </button>
@@ -709,7 +829,154 @@ function emptyState() {
     </div>`;
 }
 
-// ── Open Progress Modal ──
+// ══════════════════════════════════════
+//  BULK SELECT
+// ══════════════════════════════════════
+function toggleSelect(event, studentId) {
+  if (event.target.closest('button') || event.target.closest('select')) return;
+
+  if (selectedStudents.has(studentId)) {
+    selectedStudents.delete(studentId);
+  } else {
+    selectedStudents.add(studentId);
+  }
+
+  const card = document.getElementById("card-" + studentId);
+  const chk  = document.getElementById("chk-" + studentId);
+  if (selectedStudents.has(studentId)) {
+    card?.classList.add("selected");
+    chk?.classList.add("checked");
+  } else {
+    card?.classList.remove("selected");
+    chk?.classList.remove("checked");
+  }
+
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById("bulkBar");
+  const cnt = document.getElementById("bulkCount");
+  if (selectedStudents.size > 0) {
+    bar.classList.add("show");
+    cnt.textContent = selectedStudents.size + " คน";
+  } else {
+    bar.classList.remove("show");
+  }
+}
+
+function clearSelection() {
+  selectedStudents.forEach(id => {
+    document.getElementById("card-" + id)?.classList.remove("selected");
+    document.getElementById("chk-" + id)?.classList.remove("checked");
+  });
+  selectedStudents.clear();
+  updateBulkBar();
+}
+
+// ── Open Bulk Modal ──
+function openBulkModal() {
+  bulkTempProgress = 0;
+  bulkWeeks = ["", "", "", ""];
+  bulkInstructorsWeek = ["", "", "", ""];
+
+  document.getElementById("bulkModalSubtitle").textContent =
+    "อัปเดตพร้อมกัน " + selectedStudents.size + " คน";
+  document.getElementById("bulkSession").value = "";
+
+  renderBulkSteps();
+  document.getElementById("bulkModal").classList.remove("hidden");
+}
+
+function renderBulkSteps() {
+  const box = document.getElementById("bulkSteps");
+  box.innerHTML = '';
+  for (let i = 1; i <= 4; i++) {
+    const done = bulkTempProgress >= i;
+    const insOptions = instructors.map(ins =>
+      `<option value="${ins.name}" ${bulkInstructorsWeek[i-1] == ins.name ? 'selected' : ''}>${ins.name}</option>`
+    ).join('');
+
+    box.innerHTML += `
+      <div id="bulkStepCard${i}" class="step-card ${done ? 'done' : 'pending'}">
+        <div class="step-top">
+          <button id="bulkStepBtn${i}" class="step-sbtn ${done ? 'done' : 'pending'}"
+            onclick="bulkToggle(${i})">S${i}</button>
+          <select id="bulkIns${i}" class="step-select">${insOptions}</select>
+        </div>
+        <input id="bulkWeek${i}"
+          value="${bulkWeeks[i-1] || ''}"
+          placeholder="สัปดาห์นี้เรียนอะไร..."
+          oninput="bulkAutoTick()"
+          class="step-input" />
+      </div>`;
+  }
+}
+
+function bulkAutoTick() {
+  let newProgress = 0;
+  for (let j = 1; j <= 4; j++) {
+    const el = document.getElementById("bulkWeek" + j);
+    if (el && el.value.trim()) newProgress = j;
+  }
+  bulkTempProgress = newProgress;
+  updateBulkStepStyles();
+}
+
+function bulkToggle(i) {
+  bulkTempProgress = (i === bulkTempProgress) ? i - 1 : i;
+  updateBulkStepStyles();
+}
+
+function updateBulkStepStyles() {
+  for (let i = 1; i <= 4; i++) {
+    const done = bulkTempProgress >= i;
+    document.getElementById("bulkStepCard" + i).className = "step-card " + (done ? "done" : "pending");
+    document.getElementById("bulkStepBtn"  + i).className = "step-sbtn " + (done ? "done" : "pending");
+  }
+}
+
+// ── Save Bulk Progress ──
+function saveBulkProgress() {
+  const session = document.getElementById("bulkSession").value;
+  const weekData = [], instructorData = [];
+  for (let i = 1; i <= 4; i++) {
+    weekData.push(document.getElementById("bulkWeek" + i).value);
+    instructorData.push(document.getElementById("bulkIns" + i).value);
+  }
+
+  const ids = [...selectedStudents];
+  showLoading();
+
+  Promise.all(ids.map(studentId =>
+    fetch(scriptURL, { method: "POST", body: JSON.stringify({
+      action: "updateWeekAndInstructor",
+      studentId,
+      weekData,
+      instructorData,
+      ...(session ? { classSession: session } : {})
+    })}).then(r => r.json())
+    .then(() => fetch(scriptURL, { method: "POST", body: JSON.stringify({
+      action: "updateProgressRegular",
+      studentId,
+      progress: bulkTempProgress
+    })}).then(r => r.json()))
+  ))
+  .then(() => {
+    hideLoading();
+    closeModal('bulkModal');
+    clearSelection();
+    loadStudents();
+  })
+  .catch(() => {
+    hideLoading();
+    alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+  });
+}
+
+// ══════════════════════════════════════
+//  SINGLE PROGRESS MODAL
+// ══════════════════════════════════════
 function openProgress(id, courseId, name, p, weeks = [], insWeek = [], classSession = '') {
   currentStudentId = id;
   currentCourseId = courseId;
@@ -724,7 +991,6 @@ function openProgress(id, courseId, name, p, weeks = [], insWeek = [], classSess
   document.getElementById("progressModal").classList.remove("hidden");
 }
 
-// ── แทน function renderSteps เดิม ──
 function renderSteps() {
   const box = document.getElementById("steps");
   box.innerHTML = '';
@@ -751,36 +1017,27 @@ function renderSteps() {
   }
 }
 
-// ── เพิ่ม function ใหม่สำหรับ update style โดยไม่ re-render ──
-function updateStepStyles() {
-  for (let i = 1; i <= 4; i++) {
-    const done = tempProgress >= i;
-    const card = document.getElementById("stepCard" + i);
-    const btn  = document.getElementById("stepBtn" + i);
-    if (card) {
-      card.className = "step-card " + (done ? "done" : "pending");
-    }
-    if (btn) {
-      btn.className = "step-sbtn " + (done ? "done" : "pending");
-    }
-  }
-}
-
-// ── แทน function autoTickStep เดิม ──
+// พิมพ์แล้วขึ้นสีแดงทันที ไม่ต้องกด
 function autoTickStep(i) {
-  // นับ progress จาก step ที่มีข้อความ (ต่อเนื่องจาก S1)
   let newProgress = 0;
   for (let j = 1; j <= 4; j++) {
     const el = document.getElementById("week" + j);
-    if (el && el.value.trim()) {
-      newProgress = j;
-    }
+    if (el && el.value.trim()) newProgress = j;
   }
   tempProgress = newProgress;
   updateStepStyles();
 }
 
-// ── แทน function toggle เดิม ──
+function updateStepStyles() {
+  for (let i = 1; i <= 4; i++) {
+    const done = tempProgress >= i;
+    const card = document.getElementById("stepCard" + i);
+    const btn  = document.getElementById("stepBtn" + i);
+    if (card) card.className = "step-card " + (done ? "done" : "pending");
+    if (btn)  btn.className  = "step-sbtn " + (done ? "done" : "pending");
+  }
+}
+
 function toggle(i) {
   tempProgress = (i === tempProgress) ? i - 1 : i;
   updateStepStyles();
@@ -789,7 +1046,7 @@ function toggle(i) {
 function showLoading() { document.getElementById("saveLoadingOverlay").classList.add("show"); }
 function hideLoading() { document.getElementById("saveLoadingOverlay").classList.remove("show"); }
 
-// ── Save Progress ──
+// ── Save Single Progress ──
 function saveProgress() {
   showLoading();
   const selectedSession = document.getElementById("modalSessionSelect").value;
@@ -823,7 +1080,6 @@ function openResetModal(studentId, name) {
   resetTargetId = studentId;
   document.getElementById("resetStudentName").textContent = name;
 
-  // Auto-fill เดือนปัจจุบันเป็น พ.ศ. ไทย
   const now = new Date();
   const thMonth = now.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
   document.getElementById("resetMonthInput").value = thMonth;
