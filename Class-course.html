@@ -38,6 +38,28 @@
     .badge-green  { background: linear-gradient(135deg,#22c55e,#16a34a); color:white; }
     .badge-yellow { background: linear-gradient(135deg,#f59e0b,#d97706); color:white; }
 
+    /* ── Completed Date Badge ── */
+    .completed-date-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .completed-date-badge.green {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+    .completed-date-badge.yellow {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
     /* ── Course Dropdown ── */
     .custom-select-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
     .custom-select-wrapper .select-icon  { position:absolute; left:14px; color:#e63946; font-size:13px; pointer-events:none; z-index:1; }
@@ -278,9 +300,9 @@
       display: none;
     }
     /* Prevent iOS auto-zoom on input focus */
-input, select, textarea {
-  font-size: 16px !important;
-}
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   </style>
   <style>body { visibility: hidden; }</style>
 </head>
@@ -620,7 +642,6 @@ input, select, textarea {
         }).join('');
       }
       box.classList.add('open');
-      // Also filter the grid live
       renderLiveFilter(q);
     }
 
@@ -722,6 +743,8 @@ input, select, textarea {
         const isCourse = currentTab === 'course';
         const isDone  = p >= 6;
         const hasCert = (s.certificate || '').toLowerCase() === 'received';
+        // ✅ วันที่จบหลักสูตร
+        const completedDate = s.completedDate || '';
 
         let cardClass = 'bg-white student-card';
         let badge     = '';
@@ -753,6 +776,15 @@ input, select, textarea {
           btnRem    = 'background:#fef3c7;color:#b45309;';
         }
 
+        // ✅ สร้าง badge วันที่จบ (แสดงเฉพาะคนที่เสร็จแล้ว)
+        const dateBadgeColor = hasCert ? 'green' : 'yellow';
+        const completedDateHtml = (isDone && completedDate)
+          ? `<div class="completed-date-badge ${dateBadgeColor}">
+               <i class="fas fa-calendar-check" style="font-size:10px;"></i>
+               จบหลักสูตร ${completedDate}
+             </div>`
+          : '';
+
         const safeName = (s.name || '').replace(/'/g,"\\'");
 
         grid.innerHTML += `
@@ -773,7 +805,7 @@ input, select, textarea {
               <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center"></i><span>${s.phone || '-'}</span></div>
             </div>
             ${isCourse ? `
-              <div class="mb-4">
+              <div class="mb-3">
                 <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 ${isDone && hasCert ? 'text-green-500' : isDone ? 'text-yellow-500' : 'text-gray-300'}">
                   <span>PROGRESS</span><span>${p}/6</span>
                 </div>
@@ -781,6 +813,7 @@ input, select, textarea {
                   ${Array.from({length:6},(_,i)=>`<div class="progress-step ${p>i?barClass:''}"></div>`).join('')}
                 </div>
               </div>` : ''}
+            ${completedDateHtml}
             <button onclick="openProgressModal('${safeName}',${p},'${s.studentId}','${s.courseId||''}','${s.certificate||'Pending'}')"
               class="w-full py-3 rounded-2xl font-bold text-sm mb-2 transition-all"
               style="${btnUpd}">
@@ -876,9 +909,21 @@ input, select, textarea {
 
     function finishCourseNow() {
       if (!confirm('ต้องการบันทึกจบหลักสูตรทันทีใช่หรือไม่?')) return;
-      tempProgress = 6;
-      renderSessionCheckboxes();
-      saveProgressData();
+      showLoading('กำลังบันทึกวันที่จบหลักสูตร...');
+
+      // ✅ เรียก forceCompleteCourse เพื่อบันทึกวันที่ใน sheet ด้วย
+      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"forceCompleteCourse", studentId:currentStudentId, courseId:currentCourseId }) })
+        .then(r => r.json())
+        .then(res => {
+          if (res.status === 'success') {
+            closeModal('progressModal');
+            loadStudents();
+          } else {
+            alert(res.message || 'เกิดข้อผิดพลาด');
+          }
+        })
+        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
+        .finally(() => hideLoading());
     }
 
     /* ── Add Course ── */
