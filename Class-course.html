@@ -11,7 +11,6 @@
     * { box-sizing: border-box; }
     body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 
-    /* ── Skeleton ── */
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200% 100%;
@@ -20,12 +19,10 @@
     }
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
-    /* ── Progress Bars ── */
     .progress-step { height: 8px; border-radius: 4px; background: #e2e8f0; transition: all 0.5s; }
     .progress-done-green  { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
     .progress-done-yellow { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
 
-    /* ── Cards ── */
     .student-card { transition: all 0.2s ease; }
     .card-green  { background: linear-gradient(135deg,#f0fdf4,#dcfce7) !important; border: 2px solid #86efac !important; }
     .card-yellow { background: linear-gradient(135deg,#fffbeb,#fef3c7) !important; border: 2px solid #fcd34d !important; }
@@ -38,7 +35,6 @@
     .badge-green  { background: linear-gradient(135deg,#22c55e,#16a34a); color:white; }
     .badge-yellow { background: linear-gradient(135deg,#f59e0b,#d97706); color:white; }
 
-    /* ── Completed Date Badge ── */
     .completed-date-badge {
       display: inline-flex;
       align-items: center;
@@ -49,25 +45,15 @@
       font-weight: 700;
       margin-bottom: 10px;
     }
-    .completed-date-badge.green {
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #86efac;
-    }
-    .completed-date-badge.yellow {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fcd34d;
-    }
+    .completed-date-badge.green { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .completed-date-badge.yellow { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
 
-    /* ── Course Dropdown ── */
     .custom-select-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
     .custom-select-wrapper .select-icon  { position:absolute; left:14px; color:#e63946; font-size:13px; pointer-events:none; z-index:1; }
     .custom-select-wrapper .chevron-icon { position:absolute; right:14px; color:#94a3b8; font-size:11px; pointer-events:none; z-index:1; }
     #courseDropdown {
       appearance: none; -webkit-appearance: none;
-      padding: 12px 40px 12px 40px;
-      width: 100%;
+      padding: 12px 40px 12px 40px; width: 100%;
       background: white; border: 2px solid #f1f5f9; border-radius: 999px;
       font-family: 'Kanit', sans-serif; font-size: 14px; font-weight: 500;
       color: #374151; cursor: pointer; outline: none;
@@ -75,18 +61,15 @@
     }
     #courseDropdown:focus { border-color: #e63946; }
 
-    /* ── Filter Buttons ── */
     .filter-btn { cursor:pointer; white-space:nowrap; transition:all 0.2s; }
     .filter-btn.active-all       { background:#374151 !important; color:white !important; border-color:#374151 !important; }
     .filter-btn.active-inprogress{ background:#f1f5f9 !important; color:#475569 !important; border-color:#94a3b8 !important; }
     .filter-btn.active-pending   { background:#fef3c7 !important; color:#b45309 !important; border-color:#f59e0b !important; }
     .filter-btn.active-received  { background:#dcfce7 !important; color:#15803d !important; border-color:#22c55e !important; }
 
-    /* ── Filter scroll area mobile ── */
     .filter-scroll { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
     .filter-scroll::-webkit-scrollbar { display:none; }
 
-    /* ── Certificate Toggle ── */
     .cert-toggle-row {
       display:flex; align-items:center; justify-content:space-between;
       padding:14px 16px; border-radius:1rem; border:2px solid #e5e7eb;
@@ -105,14 +88,45 @@
     .cert-toggle-row.cert-on .cert-switch { background:#22c55e; }
     .cert-toggle-row.cert-on .cert-switch::after { transform:translateX(20px); }
 
-    /* ── Modal scroll on small screens ── */
-    .modal-inner {
-      max-height: 90vh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+    /* ── Date Picker Row ── */
+    .date-picker-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: 1rem;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      margin-top: 10px;
+      gap: 10px;
     }
+    .date-picker-row .dp-label { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .date-picker-row .dp-icon-wrap {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: #eff6ff; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .date-picker-row .dp-title { font-weight: 700; font-size: 13px; color: #374151; }
+    .date-picker-row .dp-sub   { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+    #completedDateInput {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 13px;
+      color: #374151;
+      background: white;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      width: 145px;
+      flex-shrink: 0;
+    }
+    #completedDateInput:focus { border-color: #3b82f6; }
+    #completedDateInput::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
 
-    /* ── Loading overlay ── */
+    .modal-inner { max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
     #loadingOverlay {
       display:none; position:fixed; inset:0;
       background:rgba(0,0,0,0.45); backdrop-filter:blur(4px);
@@ -131,7 +145,6 @@
     }
     @keyframes spin { to { transform:rotate(360deg); } }
 
-    /* ── FAB (Floating Action Buttons) mobile ── */
     .fab-area {
       display: none;
       position: fixed; bottom: 24px; right: 16px;
@@ -150,7 +163,6 @@
     }
     .fab-btn:active { transform: scale(0.92); }
 
-    /* ── Card grid responsive ── */
     @media (max-width: 640px) {
       .card-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
       .card-inner { padding: 16px !important; border-radius: 20px !important; }
@@ -160,149 +172,69 @@
       .top-bar    { margin-bottom: 12px !important; gap: 8px !important; }
     }
 
-    /* ── Live Search Dropdown ── */
     .search-live-wrapper { position: relative; flex: 1; }
     .search-live-results {
-      display: none;
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0; right: 0;
-      background: white;
-      border: 2px solid #f1f5f9;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      z-index: 300;
-      overflow: hidden;
-      max-height: 320px;
-      overflow-y: auto;
+      display: none; position: absolute;
+      top: calc(100% + 6px); left: 0; right: 0;
+      background: white; border: 2px solid #f1f5f9;
+      border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 300; overflow: hidden; max-height: 320px; overflow-y: auto;
     }
     .search-live-results.open { display: block; }
     .search-live-item {
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-      border-bottom: 1px solid #f8fafc;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      padding: 12px 16px; cursor: pointer; transition: background 0.15s;
+      border-bottom: 1px solid #f8fafc; display: flex; align-items: center; gap: 10px;
     }
     .search-live-item:last-child { border-bottom: none; }
     .search-live-item:hover { background: #fff1f2; }
     .search-live-item .sli-name { font-size: 14px; font-weight: 700; color: #1f2937; }
     .search-live-item .sli-sub  { font-size: 11px; color: #94a3b8; margin-top: 1px; }
     .search-live-item .sli-tag  {
-      margin-left: auto; flex-shrink: 0;
-      font-size: 10px; font-weight: 700;
-      background: #fff1f2; color: #e63946;
-      border-radius: 999px; padding: 2px 8px;
+      margin-left: auto; flex-shrink: 0; font-size: 10px; font-weight: 700;
+      background: #fff1f2; color: #e63946; border-radius: 999px; padding: 2px 8px;
     }
-    .search-live-empty {
-      padding: 20px 16px;
-      text-align: center;
-      font-size: 13px;
-      color: #94a3b8;
-    }
+    .search-live-empty { padding: 20px 16px; text-align: center; font-size: 13px; color: #94a3b8; }
 
-    /* ══════════════════════════════════════
-       Searchable Dropdown (Custom)
-    ══════════════════════════════════════ */
-    .search-select-wrapper {
-      position: relative;
-      width: 100%;
-    }
+    .search-select-wrapper { position: relative; width: 100%; }
     .search-select-trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #f9fafb;
-      border: 2px solid #e5e7eb;
-      border-radius: 16px;
-      cursor: pointer;
-      font-family: 'Kanit', sans-serif;
-      font-size: 14px;
-      color: #374151;
-      transition: border-color 0.2s;
-      user-select: none;
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: #f9fafb; border: 2px solid #e5e7eb;
+      border-radius: 16px; cursor: pointer; font-family: 'Kanit', sans-serif;
+      font-size: 14px; color: #374151; transition: border-color 0.2s; user-select: none;
     }
     .search-select-trigger:hover,
     .search-select-trigger.open { border-color: #e63946; background: white; }
     .search-select-trigger .trigger-text { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .search-select-trigger .trigger-chevron { color: #94a3b8; font-size: 11px; margin-left: 8px; transition: transform 0.2s; flex-shrink: 0; }
     .search-select-trigger.open .trigger-chevron { transform: rotate(180deg); }
-
     .search-select-dropdown {
-      display: none;
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0; right: 0;
-      background: white;
-      border: 2px solid #e5e7eb;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      z-index: 200;
-      overflow: hidden;
+      display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: white; border: 2px solid #e5e7eb; border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 200; overflow: hidden;
     }
     .search-select-dropdown.open { display: block; }
-
     .search-select-input-wrap {
-      padding: 10px 12px;
-      border-bottom: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding: 10px 12px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;
     }
     .search-select-input-wrap i { color: #94a3b8; font-size: 13px; flex-shrink: 0; }
     .search-select-input {
-      border: none;
-      outline: none;
-      font-family: 'Kanit', sans-serif;
-      font-size: 13px;
-      width: 100%;
-      color: #374151;
-      background: transparent;
+      border: none; outline: none; font-family: 'Kanit', sans-serif;
+      font-size: 13px; width: 100%; color: #374151; background: transparent;
     }
     .search-select-input::placeholder { color: #cbd5e1; }
-
-    .search-select-list {
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 4px 0;
-      -webkit-overflow-scrolling: touch;
-    }
+    .search-select-list { max-height: 200px; overflow-y: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; }
     .search-select-list::-webkit-scrollbar { width: 4px; }
     .search-select-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
-
     .search-select-option {
-      padding: 10px 14px;
-      font-family: 'Kanit', sans-serif;
-      font-size: 13px;
-      color: #374151;
-      cursor: pointer;
-      transition: background 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding: 10px 14px; font-family: 'Kanit', sans-serif; font-size: 13px;
+      color: #374151; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px;
     }
     .search-select-option:hover { background: #fff1f2; color: #e63946; }
     .search-select-option.selected { background: #fff1f2; color: #e63946; font-weight: 700; }
-    .search-select-option.placeholder-opt { color: #94a3b8; font-style: italic; }
     .search-select-option .opt-sub { font-size: 11px; color: #94a3b8; margin-left: auto; }
-    .search-select-option.selected .opt-sub { color: #fca5a5; }
+    .search-select-empty { padding: 16px 14px; text-align: center; font-size: 12px; color: #94a3b8; font-family: 'Kanit', sans-serif; display: none; }
 
-    .search-select-empty {
-      padding: 16px 14px;
-      text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
-      font-family: 'Kanit', sans-serif;
-      display: none;
-    }
-    /* Prevent iOS auto-zoom on input focus */
-    input, select, textarea {
-      font-size: 16px !important;
-    }
+    input, select, textarea { font-size: 16px !important; }
   </style>
   <style>body { visibility: hidden; }</style>
 </head>
@@ -310,7 +242,6 @@
   <script src="./js/auth-guard.js"></script>
   <div id="main-navbar"></div>
 
-  <!-- Loading Overlay -->
   <div id="loadingOverlay">
     <div class="loading-box">
       <div class="spinner-ring"></div>
@@ -321,10 +252,7 @@
   <main class="flex-1">
     <div class="page-pad p-4 md:p-8 lg:p-10">
 
-      <!-- ── TOP BAR ── -->
       <div class="top-bar flex flex-col gap-3 mb-6">
-
-        <!-- Row 1: Dropdown + Add buttons (desktop) -->
         <div class="flex items-center gap-3">
           <div class="custom-select-wrapper flex-1 md:flex-none md:w-64">
             <i class="fas fa-layer-group select-icon"></i>
@@ -333,8 +261,6 @@
             </select>
             <i class="fas fa-chevron-down chevron-icon"></i>
           </div>
-
-          <!-- Desktop action buttons -->
           <div class="desktop-action-btns flex gap-2 ml-auto">
             <button onclick="openAddCourseModal()"
               class="bg-white border-2 border-gray-200 text-gray-700 px-4 py-2.5 rounded-2xl font-bold text-sm hover:border-red-500 hover:text-red-600 transition-all shadow-sm">
@@ -347,7 +273,6 @@
           </div>
         </div>
 
-        <!-- Row 2: Search (Live) -->
         <div class="flex gap-2">
           <div class="search-live-wrapper">
             <input type="text" id="searchInput"
@@ -358,7 +283,6 @@
               class="w-full py-3 pl-10 pr-4 bg-white border-2 border-gray-100 rounded-full outline-none focus:border-red-500 transition-all shadow-sm text-sm font-medium"
             >
             <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 text-sm" style="pointer-events:none;"></i>
-            <!-- Live results dropdown -->
             <div id="liveResults" class="search-live-results"></div>
           </div>
           <button onclick="closeLiveResults(); loadStudents()"
@@ -368,7 +292,6 @@
           </button>
         </div>
 
-        <!-- Row 3: Title + Filter Buttons -->
         <div class="flex flex-col sm:flex-row sm:items-center gap-2">
           <h2 id="currentTabText" class="text-base font-bold text-gray-800 shrink-0">Course Class Students</h2>
           <div class="filter-scroll">
@@ -390,10 +313,8 @@
             </button>
           </div>
         </div>
-
       </div>
 
-      <!-- ── CARD GRID ── -->
       <div id="studentGrid" class="card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
           <div class="skeleton h-5 w-3/4 mb-3"></div>
@@ -407,7 +328,6 @@
     </div>
   </main>
 
-  <!-- ── FAB Floating Action Buttons (mobile only) ── -->
   <div class="fab-area">
     <div class="relative flex items-center">
       <button onclick="openAddCourseModal()" class="fab-btn bg-white text-gray-700 border-2 border-gray-200">
@@ -421,9 +341,7 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════
-       Progress + Certificate Modal
-  ════════════════════════════════════════ -->
+  <!-- ════ Progress + Certificate Modal ════ -->
   <div id="progressModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="modal-inner bg-white w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl">
       <div class="p-6 sm:p-8">
@@ -436,6 +354,21 @@
           <p class="text-gray-400 text-xs mt-1">จัดการ Progress & เกียรติบัตร</p>
         </div>
         <div class="grid grid-cols-3 gap-2 mb-4" id="sessionList"></div>
+
+        <!-- ✅ Date Picker วันที่จบหลักสูตร -->
+        <div class="date-picker-row" id="completedDateRow">
+          <div class="dp-label">
+            <div class="dp-icon-wrap">
+              <i class="fas fa-calendar-check" style="color:#3b82f6;font-size:14px;"></i>
+            </div>
+            <div>
+              <p class="dp-title">วันที่จบหลักสูตร</p>
+              <p class="dp-sub">แก้ไขได้ตามต้องการ</p>
+            </div>
+          </div>
+          <input type="date" id="completedDateInput" />
+        </div>
+
         <div id="certToggleRow" class="cert-toggle-row mt-3" onclick="toggleCertificate()">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" id="certIconWrap" style="background:#fef9c3">
@@ -448,6 +381,7 @@
           </div>
           <div class="cert-switch" id="certSwitch"></div>
         </div>
+
         <div class="space-y-2 mt-5">
           <button id="btnSaveProgress" onclick="saveProgressData()"
             class="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm">
@@ -466,9 +400,7 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════
-       Add Course Modal
-  ════════════════════════════════════════ -->
+  <!-- ════ Add Course Modal ════ -->
   <div id="addCourseModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="modal-inner bg-white w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl">
       <div class="p-6 sm:p-8">
@@ -484,18 +416,13 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════
-       Add Student Modal — Searchable Dropdowns
-  ════════════════════════════════════════ -->
+  <!-- ════ Add Student Modal ════ -->
   <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="modal-inner bg-white w-full sm:max-w-md rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl">
       <div class="p-6 sm:p-8">
         <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
         <h2 class="text-xl font-black text-gray-900 mb-5">เพิ่มนักเรียนเข้าคอร์ส</h2>
-
         <div class="flex flex-col gap-5 mb-5">
-
-          <!-- ── Searchable Student Dropdown ── -->
           <div>
             <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">นักเรียน</p>
             <div class="search-select-wrapper" id="studentSelectWrapper">
@@ -506,14 +433,8 @@
               <div class="search-select-dropdown" id="studentDropdown">
                 <div class="search-select-input-wrap">
                   <i class="fas fa-search"></i>
-                  <input
-                    type="text"
-                    class="search-select-input"
-                    id="studentSearchInput"
-                    placeholder="พิมพ์ชื่อหรือชื่อเล่น..."
-                    oninput="filterOptions('student')"
-                    autocomplete="off"
-                  >
+                  <input type="text" class="search-select-input" id="studentSearchInput"
+                    placeholder="พิมพ์ชื่อหรือชื่อเล่น..." oninput="filterOptions('student')" autocomplete="off">
                 </div>
                 <div class="search-select-list" id="studentOptionList"></div>
                 <div class="search-select-empty" id="studentEmpty">ไม่พบข้อมูล</div>
@@ -521,8 +442,6 @@
             </div>
             <input type="hidden" id="selectedStudentId">
           </div>
-
-          <!-- ── Searchable Course Dropdown ── -->
           <div>
             <p class="text-[10px] font-black uppercase tracking-widest text-gray-300 mb-2">คอร์ส</p>
             <div class="search-select-wrapper" id="courseSelectWrapper">
@@ -533,14 +452,8 @@
               <div class="search-select-dropdown" id="courseDropdownModal">
                 <div class="search-select-input-wrap">
                   <i class="fas fa-search"></i>
-                  <input
-                    type="text"
-                    class="search-select-input"
-                    id="courseSearchInput"
-                    placeholder="พิมพ์ชื่อคอร์ส..."
-                    oninput="filterOptions('course')"
-                    autocomplete="off"
-                  >
+                  <input type="text" class="search-select-input" id="courseSearchInput"
+                    placeholder="พิมพ์ชื่อคอร์ส..." oninput="filterOptions('course')" autocomplete="off">
                 </div>
                 <div class="search-select-list" id="courseOptionList"></div>
                 <div class="search-select-empty" id="courseEmpty">ไม่พบข้อมูล</div>
@@ -548,9 +461,7 @@
             </div>
             <input type="hidden" id="selectedCourseId">
           </div>
-
         </div>
-
         <div class="flex gap-3">
           <button id="btnSaveStudent" onclick="submitAddStudent()"
             class="flex-1 py-3.5 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-md text-sm">
@@ -574,513 +485,410 @@
     let currentFilter    = 'all';
     let allStudentsCache = [];
     let liveSearchTimer  = null;
-
-    // ── Searchable dropdown state ──
-    let studentOptions = [];
-    let courseOptions  = [];
-    let activeDropdown = null;
+    let studentOptions   = [];
+    let courseOptions    = [];
+    let activeDropdown   = null;
 
     window.onload = () => {
       fetchCourseList();
       switchTab(currentTab);
       document.querySelector('[data-filter="all"]').classList.add('active-all');
-
       document.addEventListener('click', (e) => {
-        if (!e.target.closest('#studentSelectWrapper') && !e.target.closest('#courseSelectWrapper')) {
-          closeAllDropdowns();
-        }
-        if (!e.target.closest('.search-live-wrapper')) {
-          closeLiveResults();
-        }
+        if (!e.target.closest('#studentSelectWrapper') && !e.target.closest('#courseSelectWrapper')) closeAllDropdowns();
+        if (!e.target.closest('.search-live-wrapper')) closeLiveResults();
       });
     };
 
-    /* ── Loading ── */
     function showLoading(t) {
       document.getElementById('loadingText').innerText = t || 'กำลังบันทึก...';
       document.getElementById('loadingOverlay').classList.add('show');
     }
     function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
 
-    /* ══════════════════════════════════════
-       LIVE SEARCH
-    ══════════════════════════════════════ */
+    /* ── Live Search ── */
     function onSearchInput() {
       clearTimeout(liveSearchTimer);
       const q = document.getElementById('searchInput').value.trim();
       if (!q) { closeLiveResults(); loadStudents(); return; }
-      liveSearchTimer = setTimeout(() => {
-        showLiveResults(q);
-      }, 250);
+      liveSearchTimer = setTimeout(() => showLiveResults(q), 250);
     }
-
     function showLiveResults(q) {
       const lower = q.toLowerCase();
       const matched = allStudentsCache.filter(s =>
-        (s.name || '').toLowerCase().includes(lower) ||
-        (s.nickname || '').toLowerCase().includes(lower) ||
-        (s.nameEng || '').toLowerCase().includes(lower)
+        (s.name||'').toLowerCase().includes(lower) ||
+        (s.nickname||'').toLowerCase().includes(lower) ||
+        (s.nameEng||'').toLowerCase().includes(lower)
       );
-
       const box = document.getElementById('liveResults');
       if (!matched.length) {
         box.innerHTML = `<div class="search-live-empty">ไม่พบ "${q}"</div>`;
       } else {
-        box.innerHTML = matched.slice(0, 8).map(s => {
-          const p = Number(s.progress) || 0;
-          const isDone = p >= 6;
-          const hasCert = (s.certificate || '').toLowerCase() === 'received';
-          let tagText = isDone && hasCert ? 'รับแล้ว' : isDone ? 'รอเกียรติบัตร' : `${p}/6`;
-          return `
-            <div class="search-live-item" onclick="pickLiveResult('${(s.name||'').replace(/'/g,"\\'")}')">
-              <div>
-                <div class="sli-name">${s.nickname || '-'} <span style="font-weight:400;color:#6b7280;">${s.name || ''}</span></div>
-                <div class="sli-sub">${s.courseName || '-'} · ${s.studentId || ''}</div>
-              </div>
-              <span class="sli-tag">${tagText}</span>
-            </div>`;
+        box.innerHTML = matched.slice(0,8).map(s => {
+          const p = Number(s.progress)||0;
+          const isDone = p>=6, hasCert = (s.certificate||'').toLowerCase()==='received';
+          const tagText = isDone&&hasCert ? 'รับแล้ว' : isDone ? 'รอเกียรติบัตร' : `${p}/6`;
+          return `<div class="search-live-item" onclick="pickLiveResult('${(s.name||'').replace(/'/g,"\\'")}')">
+            <div>
+              <div class="sli-name">${s.nickname||'-'} <span style="font-weight:400;color:#6b7280;">${s.name||''}</span></div>
+              <div class="sli-sub">${s.courseName||'-'} · ${s.studentId||''}</div>
+            </div>
+            <span class="sli-tag">${tagText}</span>
+          </div>`;
         }).join('');
       }
       box.classList.add('open');
       renderLiveFilter(q);
     }
-
     function renderLiveFilter(q) {
       const lower = q.toLowerCase();
-      const matched = allStudentsCache.filter(s =>
-        (s.name || '').toLowerCase().includes(lower) ||
-        (s.nickname || '').toLowerCase().includes(lower) ||
-        (s.nameEng || '').toLowerCase().includes(lower)
+      let matched = allStudentsCache.filter(s =>
+        (s.name||'').toLowerCase().includes(lower) ||
+        (s.nickname||'').toLowerCase().includes(lower) ||
+        (s.nameEng||'').toLowerCase().includes(lower)
       );
-      let filtered = matched;
-      if (currentFilter === 'inprogress') filtered = filtered.filter(s => Number(s.progress) < 6);
-      else if (currentFilter === 'pending')   filtered = filtered.filter(s => Number(s.progress) >= 6 && (s.certificate||'').toLowerCase() !== 'received');
-      else if (currentFilter === 'received')  filtered = filtered.filter(s => Number(s.progress) >= 6 && (s.certificate||'').toLowerCase() === 'received');
-      renderCards(filtered);
+      if (currentFilter==='inprogress') matched = matched.filter(s => Number(s.progress)<6);
+      else if (currentFilter==='pending')  matched = matched.filter(s => Number(s.progress)>=6 && (s.certificate||'').toLowerCase()!=='received');
+      else if (currentFilter==='received') matched = matched.filter(s => Number(s.progress)>=6 && (s.certificate||'').toLowerCase()==='received');
+      renderCards(matched);
     }
+    function pickLiveResult(name) { document.getElementById('searchInput').value=name; closeLiveResults(); loadStudents(); }
+    function closeLiveResults() { document.getElementById('liveResults').classList.remove('open'); }
 
-    function pickLiveResult(name) {
-      document.getElementById('searchInput').value = name;
-      closeLiveResults();
-      loadStudents();
-    }
-
-    function closeLiveResults() {
-      document.getElementById('liveResults').classList.remove('open');
-    }
-
-    /* ── Course Dropdown (top bar) ── */
+    /* ── Course Dropdown ── */
     function fetchCourseList() {
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
-        .then(r => r.json()).then(res => {
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getCourseData'})})
+        .then(r=>r.json()).then(res=>{
           const dd = document.getElementById('courseDropdown');
           dd.innerHTML = '<option value="">— เลือกคอร์ส (ทั้งหมด) —</option>';
-          (res.data || []).forEach(c => dd.innerHTML += `<option value="${c.id}">${c.name}</option>`);
-          courseOptions = (res.data || []).map(c => ({ id: c.id, label: c.name }));
+          (res.data||[]).forEach(c => dd.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+          courseOptions = (res.data||[]).map(c=>({id:c.id,label:c.name}));
         });
     }
 
     function switchTab(tab) {
-      const targetPage = tab === 'regular' ? 'Class-regular.html' : 'Class-course.html';
-      if (['class-course.html','class-regular.html'].includes(currentPageName) && currentPageName !== targetPage.toLowerCase()) {
-        window.location.href = targetPage; return;
+      const targetPage = tab==='regular' ? 'Class-regular.html' : 'Class-course.html';
+      if (['class-course.html','class-regular.html'].includes(currentPageName) && currentPageName!==targetPage.toLowerCase()) {
+        window.location.href=targetPage; return;
       }
-      currentTab = tab;
-      document.getElementById('currentTabText').innerText = tab === 'course' ? 'Course Class Students' : 'Regular Class Students';
+      currentTab=tab;
+      document.getElementById('currentTabText').innerText = tab==='course' ? 'Course Class Students' : 'Regular Class Students';
       loadStudents();
     }
 
     /* ── Filter ── */
     function setFilter(f) {
-      currentFilter = f;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
+      currentFilter=f;
+      document.querySelectorAll('.filter-btn').forEach(btn=>{
         btn.classList.remove('active-all','active-inprogress','active-pending','active-received');
-        if (btn.dataset.filter === f) btn.classList.add('active-' + f);
+        if (btn.dataset.filter===f) btn.classList.add('active-'+f);
       });
       applyFilter();
     }
-
     function applyFilter() {
       let d = allStudentsCache;
-      if (currentFilter === 'inprogress') d = d.filter(s => Number(s.progress) < 6);
-      else if (currentFilter === 'pending')   d = d.filter(s => Number(s.progress) >= 6 && (s.certificate||'').toLowerCase() !== 'received');
-      else if (currentFilter === 'received')  d = d.filter(s => Number(s.progress) >= 6 && (s.certificate||'').toLowerCase() === 'received');
+      if (currentFilter==='inprogress') d=d.filter(s=>Number(s.progress)<6);
+      else if (currentFilter==='pending')  d=d.filter(s=>Number(s.progress)>=6&&(s.certificate||'').toLowerCase()!=='received');
+      else if (currentFilter==='received') d=d.filter(s=>Number(s.progress)>=6&&(s.certificate||'').toLowerCase()==='received');
       renderCards(d);
     }
 
     /* ── Load Students ── */
     function loadStudents() {
-      const q        = document.getElementById('searchInput').value.trim();
-      const courseId = document.getElementById('courseDropdown').value;
-      const grid     = document.getElementById('studentGrid');
-      grid.innerHTML = `
-        <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
-          <div class="skeleton h-5 w-3/4 mb-3"></div>
-          <div class="skeleton h-3 w-1/2 mb-6"></div>
-          <div class="skeleton h-3 w-full mb-2"></div>
-          <div class="skeleton h-3 w-5/6 mb-6"></div>
-          <div class="skeleton h-10 w-full rounded-xl mb-2"></div>
-          <div class="skeleton h-9 w-full rounded-xl"></div>
-        </div>`;
-
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getStudentsByType", type:currentTab, courseId, query:q }) })
-        .then(r => r.json())
-        .then(res => { allStudentsCache = res.data || []; applyFilter(); })
-        .catch(() => { grid.innerHTML = `<div class="col-span-full text-center py-16 text-red-400 italic text-sm">โหลดข้อมูลไม่สำเร็จ</div>`; });
+      const q=document.getElementById('searchInput').value.trim();
+      const courseId=document.getElementById('courseDropdown').value;
+      const grid=document.getElementById('studentGrid');
+      grid.innerHTML=`<div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
+        <div class="skeleton h-5 w-3/4 mb-3"></div><div class="skeleton h-3 w-1/2 mb-6"></div>
+        <div class="skeleton h-3 w-full mb-2"></div><div class="skeleton h-3 w-5/6 mb-6"></div>
+        <div class="skeleton h-10 w-full rounded-xl mb-2"></div><div class="skeleton h-9 w-full rounded-xl"></div>
+      </div>`;
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getStudentsByType',type:currentTab,courseId,query:q})})
+        .then(r=>r.json())
+        .then(res=>{allStudentsCache=res.data||[]; applyFilter();})
+        .catch(()=>{grid.innerHTML=`<div class="col-span-full text-center py-16 text-red-400 italic text-sm">โหลดข้อมูลไม่สำเร็จ</div>`;});
     }
 
     /* ── Render Cards ── */
     function renderCards(students) {
-      const grid = document.getElementById('studentGrid');
-      grid.innerHTML = '';
-      if (!students || !students.length) {
-        grid.innerHTML = `<div class="col-span-full text-center py-16 bg-white rounded-[20px] border-2 border-dashed border-gray-100 text-gray-300 italic text-sm">ไม่พบข้อมูลนักเรียน</div>`;
+      const grid=document.getElementById('studentGrid');
+      grid.innerHTML='';
+      if (!students||!students.length) {
+        grid.innerHTML=`<div class="col-span-full text-center py-16 bg-white rounded-[20px] border-2 border-dashed border-gray-100 text-gray-300 italic text-sm">ไม่พบข้อมูลนักเรียน</div>`;
         return;
       }
+      students.forEach(s=>{
+        const p=Number(s.progress)||0, isCourse=currentTab==='course';
+        const isDone=p>=6, hasCert=(s.certificate||'').toLowerCase()==='received';
+        const completedDate=s.completedDate||'';
 
-      students.forEach(s => {
-        const p       = Number(s.progress) || 0;
-        const isCourse = currentTab === 'course';
-        const isDone  = p >= 6;
-        const hasCert = (s.certificate || '').toLowerCase() === 'received';
-        // ✅ วันที่จบหลักสูตร
-        const completedDate = s.completedDate || '';
+        let cardClass='bg-white student-card', badge='', barClass='progress-done-green';
+        let nameCol='text-gray-800', nickCol='text-red-500', metaCol='text-gray-400';
+        let tagStyle='background:#fff1f2;color:#e63946;', idStyle='background:#f8fafc;color:#94a3b8;';
+        let btnUpd='background:#f8fafc;color:#1f2937;', btnRem='background:#fff1f2;color:#e63946;';
 
-        let cardClass = 'bg-white student-card';
-        let badge     = '';
-        let barClass  = 'progress-done-green';
-        let nameCol   = 'text-gray-800';
-        let nickCol   = 'text-red-500';
-        let metaCol   = 'text-gray-400';
-        let tagStyle  = 'background:#fff1f2;color:#e63946;';
-        let idStyle   = 'background:#f8fafc;color:#94a3b8;';
-        let btnUpd    = 'background:#f8fafc;color:#1f2937;';
-        let btnRem    = 'background:#fff1f2;color:#e63946;';
-
-        if (isDone && hasCert) {
-          cardClass = 'card-green student-card';
-          badge     = `<div class="badge-corner badge-green"><i class="fas fa-graduation-cap mr-1"></i>Certificate</div>`;
-          nameCol   = 'text-green-900'; nickCol = 'text-green-600'; metaCol = 'text-green-700';
-          tagStyle  = 'background:#dcfce7;color:#15803d;';
-          idStyle   = 'background:#dcfce7;color:#15803d;';
-          btnUpd    = 'background:#22c55e;color:white;';
-          btnRem    = 'background:#dcfce7;color:#15803d;';
-        } else if (isDone && !hasCert) {
-          cardClass = 'card-yellow student-card';
-          badge     = `<div class="badge-corner badge-yellow"><i class="fas fa-clock mr-1"></i>Cert Pending</div>`;
-          barClass  = 'progress-done-yellow';
-          nameCol   = 'text-yellow-900'; nickCol = 'text-yellow-700'; metaCol = 'text-yellow-700';
-          tagStyle  = 'background:#fef3c7;color:#b45309;';
-          idStyle   = 'background:#fef3c7;color:#b45309;';
-          btnUpd    = 'background:#f59e0b;color:white;';
-          btnRem    = 'background:#fef3c7;color:#b45309;';
+        if (isDone&&hasCert) {
+          cardClass='card-green student-card';
+          badge=`<div class="badge-corner badge-green"><i class="fas fa-graduation-cap mr-1"></i>Certificate</div>`;
+          nameCol='text-green-900'; nickCol='text-green-600'; metaCol='text-green-700';
+          tagStyle='background:#dcfce7;color:#15803d;'; idStyle='background:#dcfce7;color:#15803d;';
+          btnUpd='background:#22c55e;color:white;'; btnRem='background:#dcfce7;color:#15803d;';
+        } else if (isDone&&!hasCert) {
+          cardClass='card-yellow student-card';
+          badge=`<div class="badge-corner badge-yellow"><i class="fas fa-clock mr-1"></i>Cert Pending</div>`;
+          barClass='progress-done-yellow';
+          nameCol='text-yellow-900'; nickCol='text-yellow-700'; metaCol='text-yellow-700';
+          tagStyle='background:#fef3c7;color:#b45309;'; idStyle='background:#fef3c7;color:#b45309;';
+          btnUpd='background:#f59e0b;color:white;'; btnRem='background:#fef3c7;color:#b45309;';
         }
 
-        // ✅ สร้าง badge วันที่จบ (แสดงเฉพาะคนที่เสร็จแล้ว)
         const dateBadgeColor = hasCert ? 'green' : 'yellow';
-        const completedDateHtml = (isDone && completedDate)
+        const completedDateHtml = (isDone&&completedDate)
           ? `<div class="completed-date-badge ${dateBadgeColor}">
                <i class="fas fa-calendar-check" style="font-size:10px;"></i>
                จบหลักสูตร ${completedDate}
-             </div>`
-          : '';
+             </div>` : '';
 
-        const safeName = (s.name || '').replace(/'/g,"\\'");
+        const safeName=(s.name||'').replace(/'/g,"\\'");
+        const safeDate=(s.completedDate||'').replace(/'/g,"\\'");
 
-        grid.innerHTML += `
-          <div class="card-inner ${cardClass} p-5 rounded-[20px] md:rounded-[2rem] shadow-sm relative overflow-hidden" style="border: ${isDone ? '' : '1px solid #f1f5f9'}">
+        grid.innerHTML+=`
+          <div class="card-inner ${cardClass} p-5 rounded-[20px] md:rounded-[2rem] shadow-sm relative overflow-hidden" style="border:${isDone?'':'1px solid #f1f5f9'}">
             ${badge}
             <div class="absolute top-0 right-0 px-3 py-1.5 rounded-bl-2xl text-[9px] font-bold uppercase tracking-wider" style="${tagStyle}">
-              <i class="fas fa-book-open mr-1"></i>${s.courseName || '-'}
+              <i class="fas fa-book-open mr-1"></i>${s.courseName||'-'}
             </div>
             <div class="flex items-start justify-between mt-2 mb-4">
               <div class="pr-2">
-                <h3 class="card-name font-bold text-lg ${nameCol} leading-tight">${s.nickname || '-'}</h3>
-                <p class="text-sm ${nickCol} font-medium">${s.name || '-'}</p>
+                <h3 class="card-name font-bold text-lg ${nameCol} leading-tight">${s.nickname||'-'}</h3>
+                <p class="text-sm ${nickCol} font-medium">${s.name||'-'}</p>
               </div>
               <span class="text-[10px] font-black rounded-full px-2.5 py-1 shrink-0 mt-0.5" style="${idStyle}">${s.studentId}</span>
             </div>
             <div class="card-meta flex flex-col gap-1.5 mb-4 text-xs ${metaCol} font-medium">
-              <div class="flex items-center gap-2"><i class="fas fa-tag w-4 text-center"></i><span>${s.nameEng || '-'}</span></div>
-              <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center"></i><span>${s.phone || '-'}</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-tag w-4 text-center"></i><span>${s.nameEng||'-'}</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center"></i><span>${s.phone||'-'}</span></div>
             </div>
-            ${isCourse ? `
+            ${isCourse?`
               <div class="mb-3">
-                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 ${isDone && hasCert ? 'text-green-500' : isDone ? 'text-yellow-500' : 'text-gray-300'}">
+                <div class="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2 ${isDone&&hasCert?'text-green-500':isDone?'text-yellow-500':'text-gray-300'}">
                   <span>PROGRESS</span><span>${p}/6</span>
                 </div>
                 <div class="grid grid-cols-6 gap-1">
                   ${Array.from({length:6},(_,i)=>`<div class="progress-step ${p>i?barClass:''}"></div>`).join('')}
                 </div>
-              </div>` : ''}
+              </div>`:''}
             ${completedDateHtml}
-            <button onclick="openProgressModal('${safeName}',${p},'${s.studentId}','${s.courseId||''}','${s.certificate||'Pending'}')"
-              class="w-full py-3 rounded-2xl font-bold text-sm mb-2 transition-all"
-              style="${btnUpd}">
-              ${isDone ? '<i class="fas fa-graduation-cap mr-1"></i>ดู / แก้ไข' : 'อัปเดต Progress'}
+            <button onclick="openProgressModal('${safeName}',${p},'${s.studentId}','${s.courseId||''}','${s.certificate||'Pending'}','${safeDate}')"
+              class="w-full py-3 rounded-2xl font-bold text-sm mb-2 transition-all" style="${btnUpd}">
+              ${isDone?'<i class="fas fa-graduation-cap mr-1"></i>ดู / แก้ไข':'อัปเดต Progress'}
               <i class="fas fa-chevron-right ml-1 text-[10px]"></i>
             </button>
             <button onclick="deleteEnrollment('${s.studentId}','${s.courseId}')"
-              class="w-full py-2.5 rounded-2xl font-bold text-sm transition-all"
-              style="${btnRem}">
+              class="w-full py-2.5 rounded-2xl font-bold text-sm transition-all" style="${btnRem}">
               <i class="fas fa-trash mr-1"></i> ลบออกจากคอร์ส
             </button>
           </div>`;
       });
     }
 
-    /* ── Progress Modal ── */
-    function openProgressModal(name, progress, studentId, courseId, certificate) {
+    /* ════ Progress Modal ════ */
+    // ✅ รับ completedDate เพิ่มมา
+    function openProgressModal(name, progress, studentId, courseId, certificate, completedDate) {
       currentStudentId = studentId;
       currentCourseId  = courseId;
       tempProgress     = Number(progress);
-      tempCertificate  = (certificate || '').toLowerCase() === 'received';
+      tempCertificate  = (certificate||'').toLowerCase()==='received';
       document.getElementById('modalStudentName').innerText = name;
+
+      // ✅ set Date Picker — แปลง dd/MM/yyyy → yyyy-MM-dd สำหรับ input[type=date]
+      const dateInput = document.getElementById('completedDateInput');
+      if (completedDate && completedDate.includes('/')) {
+        const parts = completedDate.split('/'); // [dd, MM, yyyy]
+        dateInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      } else {
+        dateInput.value = '';
+      }
+
+      // ✅ ซ่อน date picker ถ้ายังไม่จบ
+      document.getElementById('completedDateRow').style.display = tempProgress >= 6 ? 'flex' : 'none';
+
       renderSessionCheckboxes();
       renderCertToggle();
       document.getElementById('progressModal').classList.remove('hidden');
     }
 
     function renderSessionCheckboxes() {
-      let html = '';
-      for (let i = 1; i <= 6; i++) {
-        const on = i <= tempProgress;
-        html += `
-          <div onclick="toggleSession(${i})" class="flex items-center justify-between p-3 rounded-2xl cursor-pointer border-2 transition-all ${on ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-transparent'}">
-            <span class="font-bold text-sm ${on ? 'text-green-700' : 'text-gray-500'}">S${i}</span>
-            <div class="w-6 h-6 border-2 ${on ? 'bg-green-500 border-green-500' : 'border-gray-300'} rounded-full flex items-center justify-center">
-              <i class="fas fa-check text-[9px] text-white ${on ? '' : 'opacity-0'}"></i>
-            </div>
-          </div>`;
+      let html='';
+      for (let i=1;i<=6;i++) {
+        const on=i<=tempProgress;
+        html+=`<div onclick="toggleSession(${i})" class="flex items-center justify-between p-3 rounded-2xl cursor-pointer border-2 transition-all ${on?'bg-green-50 border-green-500':'bg-gray-50 border-transparent'}">
+          <span class="font-bold text-sm ${on?'text-green-700':'text-gray-500'}">S${i}</span>
+          <div class="w-6 h-6 border-2 ${on?'bg-green-500 border-green-500':'border-gray-300'} rounded-full flex items-center justify-center">
+            <i class="fas fa-check text-[9px] text-white ${on?'':'opacity-0'}"></i>
+          </div>
+        </div>`;
       }
-      document.getElementById('sessionList').innerHTML = html;
-      document.getElementById('btnFinishNow').style.display = tempProgress >= 6 ? 'none' : 'flex';
+      document.getElementById('sessionList').innerHTML=html;
+      document.getElementById('btnFinishNow').style.display = tempProgress>=6 ? 'none' : 'flex';
+      // ✅ toggle แสดง date picker ตาม progress
+      document.getElementById('completedDateRow').style.display = tempProgress>=6 ? 'flex' : 'none';
     }
 
     function renderCertToggle() {
-      const row = document.getElementById('certToggleRow');
-      const iw  = document.getElementById('certIconWrap');
-      const ic  = document.getElementById('certIcon');
-      const lb  = document.getElementById('certLabel');
-      const sl  = document.getElementById('certSubLabel');
+      const row=document.getElementById('certToggleRow');
+      const iw=document.getElementById('certIconWrap');
+      const ic=document.getElementById('certIcon');
+      const lb=document.getElementById('certLabel');
+      const sl=document.getElementById('certSubLabel');
       if (tempCertificate) {
-        row.classList.add('cert-on');
-        iw.style.background = '#dcfce7';
-        ic.className = 'fas fa-graduation-cap text-green-500';
-        lb.innerText = 'รับเกียรติบัตรแล้ว ✓'; lb.style.color = '#15803d';
-        sl.innerText = 'แตะเพื่อยกเลิก';
+        row.classList.add('cert-on'); iw.style.background='#dcfce7';
+        ic.className='fas fa-graduation-cap text-green-500';
+        lb.innerText='รับเกียรติบัตรแล้ว ✓'; lb.style.color='#15803d'; sl.innerText='แตะเพื่อยกเลิก';
       } else {
-        row.classList.remove('cert-on');
-        iw.style.background = '#fef9c3';
-        ic.className = 'fas fa-graduation-cap text-yellow-500';
-        lb.innerText = 'รับเกียรติบัตรแล้ว'; lb.style.color = '#374151';
-        sl.innerText = 'แตะเพื่อยืนยันการรับ';
+        row.classList.remove('cert-on'); iw.style.background='#fef9c3';
+        ic.className='fas fa-graduation-cap text-yellow-500';
+        lb.innerText='รับเกียรติบัตรแล้ว'; lb.style.color='#374151'; sl.innerText='แตะเพื่อยืนยันการรับ';
       }
     }
 
-    function toggleCertificate() { tempCertificate = !tempCertificate; renderCertToggle(); }
+    function toggleCertificate() { tempCertificate=!tempCertificate; renderCertToggle(); }
 
     function toggleSession(step) {
-      tempProgress = step === tempProgress ? step - 1 : step;
+      tempProgress = step===tempProgress ? step-1 : step;
       renderSessionCheckboxes();
     }
 
+    // ✅ แปลง yyyy-MM-dd → dd/MM/yyyy
+    function getFormattedDate() {
+      const val = document.getElementById('completedDateInput').value;
+      if (!val) return '';
+      const parts = val.split('-'); // [yyyy, MM, dd]
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
     function saveProgressData() {
-      const btn = document.getElementById('btnSaveProgress');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>กำลังบันทึก...';
+      const btn=document.getElementById('btnSaveProgress');
+      btn.disabled=true;
+      btn.innerHTML='<i class="fas fa-spinner animate-spin mr-2"></i>กำลังบันทึก...';
       showLoading('กำลังบันทึก...');
 
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"updateProgress", studentId:currentStudentId, courseId:currentCourseId, newProgress:tempProgress }) })
-        .then(r => r.json())
-        .then(() => fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"updateCertificate", studentId:currentStudentId, courseId:currentCourseId, received:tempCertificate }) }))
-        .then(r => r.json())
-        .then(res => {
-          if (res.status === 'success') { closeModal('progressModal'); loadStudents(); }
-          else alert(res.message || 'เกิดข้อผิดพลาด');
+      const formattedDate = tempProgress >= 6 ? getFormattedDate() : '';
+
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'updateProgress',studentId:currentStudentId,courseId:currentCourseId,newProgress:tempProgress,completedDate:formattedDate})})
+        .then(r=>r.json())
+        .then(()=>fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'updateCertificate',studentId:currentStudentId,courseId:currentCourseId,received:tempCertificate})}))
+        .then(r=>r.json())
+        .then(res=>{
+          if (res.status==='success') { closeModal('progressModal'); loadStudents(); }
+          else alert(res.message||'เกิดข้อผิดพลาด');
         })
-        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
-        .finally(() => {
-          hideLoading();
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-save"></i> บันทึก';
-        });
+        .catch(()=>alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
+        .finally(()=>{ hideLoading(); btn.disabled=false; btn.innerHTML='<i class="fas fa-save"></i> บันทึก'; });
     }
 
     function finishCourseNow() {
       if (!confirm('ต้องการบันทึกจบหลักสูตรทันทีใช่หรือไม่?')) return;
       showLoading('กำลังบันทึกวันที่จบหลักสูตร...');
-
-      // ✅ เรียก forceCompleteCourse เพื่อบันทึกวันที่ใน sheet ด้วย
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"forceCompleteCourse", studentId:currentStudentId, courseId:currentCourseId }) })
-        .then(r => r.json())
-        .then(res => {
-          if (res.status === 'success') {
-            closeModal('progressModal');
-            loadStudents();
-          } else {
-            alert(res.message || 'เกิดข้อผิดพลาด');
-          }
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'forceCompleteCourse',studentId:currentStudentId,courseId:currentCourseId})})
+        .then(r=>r.json())
+        .then(res=>{
+          if (res.status==='success') { closeModal('progressModal'); loadStudents(); }
+          else alert(res.message||'เกิดข้อผิดพลาด');
         })
-        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
-        .finally(() => hideLoading());
+        .catch(()=>alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
+        .finally(()=>hideLoading());
     }
 
     /* ── Add Course ── */
-    function openAddCourseModal() {
-      document.getElementById('newCourseName').value = '';
-      document.getElementById('addCourseModal').classList.remove('hidden');
-    }
+    function openAddCourseModal() { document.getElementById('newCourseName').value=''; document.getElementById('addCourseModal').classList.remove('hidden'); }
     function submitAddCourse() {
-      const name = document.getElementById('newCourseName').value.trim();
+      const name=document.getElementById('newCourseName').value.trim();
       if (!name) return;
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"addNewCourse", courseName:name }) })
-        .then(r => r.json()).then(res => {
-          if (res.status === 'success') { closeModal('addCourseModal'); fetchCourseList(); }
-        });
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'addNewCourse',courseName:name})})
+        .then(r=>r.json()).then(res=>{ if(res.status==='success'){closeModal('addCourseModal');fetchCourseList();} });
     }
 
-    /* ════════════════════════════════════════
-       Searchable Dropdown Logic
-    ════════════════════════════════════════ */
+    /* ── Searchable Dropdown ── */
     function toggleDropdown(type) {
-      const isOpen = document.getElementById(type === 'student' ? 'studentDropdown' : 'courseDropdownModal').classList.contains('open');
+      const isOpen=document.getElementById(type==='student'?'studentDropdown':'courseDropdownModal').classList.contains('open');
       closeAllDropdowns();
       if (!isOpen) openDropdown(type);
     }
-
     function openDropdown(type) {
-      const dropdown = document.getElementById(type === 'student' ? 'studentDropdown' : 'courseDropdownModal');
-      const trigger  = document.getElementById(type === 'student' ? 'studentTrigger' : 'courseTrigger');
-      const input    = document.getElementById(type === 'student' ? 'studentSearchInput' : 'courseSearchInput');
-      dropdown.classList.add('open');
-      trigger.classList.add('open');
-      activeDropdown = type;
-      renderDropdownOptions(type, '');
-      setTimeout(() => input.focus(), 50);
+      const dd=document.getElementById(type==='student'?'studentDropdown':'courseDropdownModal');
+      const tr=document.getElementById(type==='student'?'studentTrigger':'courseTrigger');
+      const inp=document.getElementById(type==='student'?'studentSearchInput':'courseSearchInput');
+      dd.classList.add('open'); tr.classList.add('open'); activeDropdown=type;
+      renderDropdownOptions(type,''); setTimeout(()=>inp.focus(),50);
     }
-
     function closeAllDropdowns() {
-      ['studentDropdown','courseDropdownModal'].forEach(id => {
-        document.getElementById(id).classList.remove('open');
-      });
-      ['studentTrigger','courseTrigger'].forEach(id => {
-        document.getElementById(id).classList.remove('open');
-      });
-      activeDropdown = null;
+      ['studentDropdown','courseDropdownModal'].forEach(id=>document.getElementById(id).classList.remove('open'));
+      ['studentTrigger','courseTrigger'].forEach(id=>document.getElementById(id).classList.remove('open'));
+      activeDropdown=null;
     }
-
     function filterOptions(type) {
-      const q = document.getElementById(type === 'student' ? 'studentSearchInput' : 'courseSearchInput').value;
-      renderDropdownOptions(type, q);
+      renderDropdownOptions(type, document.getElementById(type==='student'?'studentSearchInput':'courseSearchInput').value);
     }
-
-    function renderDropdownOptions(type, query) {
-      const listEl  = document.getElementById(type === 'student' ? 'studentOptionList' : 'courseOptionList');
-      const emptyEl = document.getElementById(type === 'student' ? 'studentEmpty' : 'courseEmpty');
-      const opts    = type === 'student' ? studentOptions : courseOptions;
-      const selId   = type === 'student'
-        ? document.getElementById('selectedStudentId').value
-        : document.getElementById('selectedCourseId').value;
-
-      const q = (query || '').toLowerCase();
-      const filtered = q
-        ? opts.filter(o => o.label.toLowerCase().includes(q) || (o.sub || '').toLowerCase().includes(q))
-        : opts;
-
-      if (!filtered.length) {
-        listEl.innerHTML = '';
-        emptyEl.style.display = 'block';
-        return;
-      }
-      emptyEl.style.display = 'none';
-
-      listEl.innerHTML = filtered.map(o => `
-        <div class="search-select-option ${o.id === selId ? 'selected' : ''}"
-          onclick="selectOption('${type}','${o.id}','${(o.label).replace(/'/g,"\\'")}')">
-          <span>${o.label}</span>
-          ${o.sub ? `<span class="opt-sub">${o.sub}</span>` : ''}
-        </div>
-      `).join('');
+    function renderDropdownOptions(type,query) {
+      const listEl=document.getElementById(type==='student'?'studentOptionList':'courseOptionList');
+      const emptyEl=document.getElementById(type==='student'?'studentEmpty':'courseEmpty');
+      const opts=type==='student'?studentOptions:courseOptions;
+      const selId=type==='student'?document.getElementById('selectedStudentId').value:document.getElementById('selectedCourseId').value;
+      const q=(query||'').toLowerCase();
+      const filtered=q?opts.filter(o=>o.label.toLowerCase().includes(q)||(o.sub||'').toLowerCase().includes(q)):opts;
+      if (!filtered.length){listEl.innerHTML='';emptyEl.style.display='block';return;}
+      emptyEl.style.display='none';
+      listEl.innerHTML=filtered.map(o=>`
+        <div class="search-select-option ${o.id===selId?'selected':''}" onclick="selectOption('${type}','${o.id}','${o.label.replace(/'/g,"\\'")}')">
+          <span>${o.label}</span>${o.sub?`<span class="opt-sub">${o.sub}</span>`:''}
+        </div>`).join('');
     }
-
-    function selectOption(type, id, label) {
-      if (type === 'student') {
-        document.getElementById('selectedStudentId').value = id;
-        document.getElementById('studentTriggerText').textContent = label;
-        document.getElementById('studentTriggerText').style.color = '#111827';
-      } else {
-        document.getElementById('selectedCourseId').value = id;
-        document.getElementById('courseTriggerText').textContent = label;
-        document.getElementById('courseTriggerText').style.color = '#111827';
-      }
+    function selectOption(type,id,label) {
+      if (type==='student'){document.getElementById('selectedStudentId').value=id;document.getElementById('studentTriggerText').textContent=label;document.getElementById('studentTriggerText').style.color='#111827';}
+      else{document.getElementById('selectedCourseId').value=id;document.getElementById('courseTriggerText').textContent=label;document.getElementById('courseTriggerText').style.color='#111827';}
       closeAllDropdowns();
     }
 
     /* ── Add Student Modal ── */
     function openAddStudentModal() {
-      document.getElementById('selectedStudentId').value = '';
-      document.getElementById('selectedCourseId').value = '';
-      document.getElementById('studentTriggerText').textContent = '— เลือกนักเรียน —';
-      document.getElementById('studentTriggerText').style.color = '';
-      document.getElementById('courseTriggerText').textContent = '— เลือกคอร์ส —';
-      document.getElementById('courseTriggerText').style.color = '';
-      document.getElementById('studentSearchInput').value = '';
-      document.getElementById('courseSearchInput').value = '';
-      studentOptions = [];
-
+      ['selectedStudentId','selectedCourseId'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('studentTriggerText').textContent='— เลือกนักเรียน —'; document.getElementById('studentTriggerText').style.color='';
+      document.getElementById('courseTriggerText').textContent='— เลือกคอร์ส —'; document.getElementById('courseTriggerText').style.color='';
+      document.getElementById('studentSearchInput').value=''; document.getElementById('courseSearchInput').value='';
+      studentOptions=[];
       document.getElementById('addStudentModal').classList.remove('hidden');
-
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getAllStudents" }) })
-        .then(r => r.json()).then(res => {
-          studentOptions = (res.data || []).map(s => ({
-            id: s.studentId,
-            label: `${s.name || '-'} (${s.nickname || s.studentId})`,
-            sub: s.studentId
-          }));
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getAllStudents'})})
+        .then(r=>r.json()).then(res=>{
+          studentOptions=(res.data||[]).map(s=>({id:s.studentId,label:`${s.name||'-'} (${s.nickname||s.studentId})`,sub:s.studentId}));
         });
-
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"getCourseData" }) })
-        .then(r => r.json()).then(res => {
-          courseOptions = (res.data || []).map(c => ({ id: c.id, label: c.name }));
-        });
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getCourseData'})})
+        .then(r=>r.json()).then(res=>{ courseOptions=(res.data||[]).map(c=>({id:c.id,label:c.name})); });
     }
-
     function submitAddStudent() {
-      const studentId = document.getElementById('selectedStudentId').value;
-      const courseId  = document.getElementById('selectedCourseId').value;
-      if (!studentId) { alert('กรุณาเลือกนักเรียน'); return; }
-      if (!courseId)  { alert('กรุณาเลือกคอร์ส');    return; }
-
-      const btn = document.getElementById('btnSaveStudent');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-1"></i>กำลังบันทึก...';
+      const studentId=document.getElementById('selectedStudentId').value;
+      const courseId=document.getElementById('selectedCourseId').value;
+      if (!studentId){alert('กรุณาเลือกนักเรียน');return;}
+      if (!courseId){alert('กรุณาเลือกคอร์ส');return;}
+      const btn=document.getElementById('btnSaveStudent');
+      btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner animate-spin mr-1"></i>กำลังบันทึก...';
       showLoading('กำลังเพิ่มนักเรียน...');
-
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"enrollStudent", studentId, courseId }) })
-        .then(r => r.json())
-        .then(res => {
-          if (res.status === 'success') { closeModal('addStudentModal'); loadStudents(); }
-          else alert(res.message || 'เกิดข้อผิดพลาด');
-        })
-        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
-        .finally(() => { hideLoading(); btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-1"></i>บันทึก'; });
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'enrollStudent',studentId,courseId})})
+        .then(r=>r.json())
+        .then(res=>{ if(res.status==='success'){closeModal('addStudentModal');loadStudents();}else alert(res.message||'เกิดข้อผิดพลาด'); })
+        .catch(()=>alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'))
+        .finally(()=>{hideLoading();btn.disabled=false;btn.innerHTML='<i class="fas fa-save mr-1"></i>บันทึก';});
     }
 
-    /* ── Delete Enrollment ── */
-    function deleteEnrollment(studentId, courseId) {
+    function deleteEnrollment(studentId,courseId) {
       if (!confirm('ต้องการลบออกจากคอร์สนี้ใช่ไหม?')) return;
       showLoading('กำลังลบข้อมูล...');
-      fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"deleteEnrollment", studentId, courseId }) })
-        .then(r => r.json())
-        .then(res => { if (res.status === 'success') loadStudents(); else alert('ลบไม่สำเร็จ'); })
-        .finally(() => hideLoading());
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'deleteEnrollment',studentId,courseId})})
+        .then(r=>r.json())
+        .then(res=>{if(res.status==='success')loadStudents();else alert('ลบไม่สำเร็จ');})
+        .finally(()=>hideLoading());
     }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-      closeAllDropdowns();
-    }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); closeAllDropdowns(); }
   </script>
 </body>
 </html>
