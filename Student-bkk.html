@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DroneBot - Students (Bangkok)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <style>
+      body { font-family: "Kanit", sans-serif; background-color: #f8fafc; }
+      .student-card { transition: all 0.25s ease; border: 1px solid #f1f5f9; cursor: pointer; }
+      .student-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -10px rgba(15,23,42,0.22); border-color: #bfdbfe; }
+      #detailModal, #addStudentModal { transition: opacity 0.2s ease; }
+      #detailModal.hidden, #addStudentModal.hidden { opacity: 0; pointer-events: none; }
+      .avatar-circle { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+      .view-field { display: block; } .edit-field { display: none; }
+      .edit-mode .view-field { display: none; } .edit-mode .edit-field { display: block; }
+      .edit-input { width:100%; padding:8px 12px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:10px; font-family:"Kanit",sans-serif; font-size:14px; outline:none; transition:border-color .2s; }
+      .edit-input:focus { border-color:#3b82f6; background:white; }
+      .age-badge { display:inline-flex; align-items:center; gap:4px; background:#eff6ff; color:#3b82f6; border:1px solid #bfdbfe; border-radius:999px; padding:2px 10px; font-size:12px; font-weight:700; }
+      .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:4px; }
+      @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+      .stat-pill { display:inline-flex; align-items:center; gap:6px; background:white; border:1.5px solid #f1f5f9; border-radius:999px; padding:6px 16px; font-size:13px; font-weight:700; color:#64748b; box-shadow:0 1px 4px rgba(0,0,0,.04); }
+      .stat-pill .num { color:#3b82f6; font-size:15px; }
+      .branch-badge { display:inline-flex; align-items:center; gap:4px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:999px; padding:3px 12px; font-size:11px; font-weight:900; letter-spacing:.05em; }
+      .search-live-wrapper { position:relative; flex:1; }
+      .search-live-results { display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:white; border:2px solid #f1f5f9; border-radius:20px; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:300; overflow:hidden; max-height:320px; overflow-y:auto; }
+      .search-live-results.open { display:block; }
+      .search-live-item { padding:12px 16px; cursor:pointer; transition:background .15s; border-bottom:1px solid #f8fafc; display:flex; align-items:center; gap:10px; }
+      .search-live-item:last-child { border-bottom:none; }
+      .search-live-item:hover { background:#eff6ff; }
+      .sli-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:white; font-size:12px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+      .sli-avatar img { width:100%; height:100%; object-fit:cover; }
+      .sli-name { font-size:14px; font-weight:700; color:#1f2937; }
+      .sli-sub { font-size:11px; color:#94a3b8; margin-top:1px; }
+      .sli-tag { margin-left:auto; flex-shrink:0; font-size:10px; font-weight:700; background:#f1f5f9; color:#64748b; border-radius:999px; padding:2px 8px; }
+      .search-live-empty { padding:20px 16px; text-align:center; font-size:13px; color:#94a3b8; }
+      input, select, textarea { font-size:16px !important; }
+      #deleteConfirmOverlay { display:none; position:absolute; inset:0; background:rgba(255,255,255,0.96); z-index:10; border-radius:inherit; flex-direction:column; align-items:center; justify-content:center; padding:2rem; text-align:center; gap:1rem; }
+      #deleteConfirmOverlay.show { display:flex; }
+      @media (max-width:480px) {
+        .modal-footer-btns { flex-direction:column-reverse; gap:.625rem; }
+        .modal-footer-btns button { width:100%; justify-content:center; }
+      }
+    </style>
+    <style>body { visibility: hidden; }</style>
+  </head>
+  <body class="flex flex-col md:flex-row min-h-screen">
+    <script src="./js/auth-guard.js"></script>
+    <div id="main-navbar"></div>
+
+    <main class="flex-1">
+      <header class="bg-white border-b border-gray-100 px-4 py-8 md:px-12 md:py-10">
+        <div class="max-w-5xl">
+          <!-- Branch badge -->
+          <div class="mb-3">
+            <span class="branch-badge">
+              <i class="fas fa-map-marker-alt text-[10px]"></i>
+              BANGKOK BRANCH
+            </span>
+          </div>
+          <h1 class="text-2xl md:text-4xl font-black text-gray-900">Student List</h1>
+          <p class="mt-1 text-gray-400 text-sm md:text-base">Bangkok branch — Course & Regular students.</p>
+        </div>
+
+        <div class="mt-6 max-w-3xl">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="search-live-wrapper">
+              <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300" style="pointer-events:none;z-index:1;"></i>
+              <input type="text" id="studentSearchInput" placeholder="Search by full name..."
+                oninput="onSearchInput()"
+                onkeyup="if(event.key==='Enter'){ closeLiveResults(); loadStudentList(); }"
+                autocomplete="off"
+                class="w-full rounded-[2rem] border-2 border-transparent bg-gray-50 p-4 pl-12 text-sm md:p-5 md:pl-14 md:text-base outline-none transition-all focus:border-blue-500 focus:bg-white" />
+              <div id="liveResults" class="search-live-results"></div>
+            </div>
+            <button onclick="closeLiveResults(); loadStudentList()"
+              class="rounded-[1.5rem] bg-gray-900 px-6 py-3 md:px-8 md:py-4 font-bold text-white text-sm md:text-base transition-all hover:bg-blue-600">
+              Search
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="p-4 md:p-10">
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col gap-2">
+            <h2 class="text-xl font-bold text-gray-800">BKK Students</h2>
+            <div id="studentStats" class="flex flex-wrap gap-2">
+              <span class="stat-pill"><i class="fas fa-users text-gray-300 text-xs"></i>ทั้งหมด <span class="num" id="countTotal">-</span> คน</span>
+              <span class="stat-pill"><i class="fas fa-graduation-cap text-gray-300 text-xs"></i>Course <span class="num" id="countCourse">-</span> คน</span>
+              <span class="stat-pill"><i class="fas fa-chalkboard text-gray-300 text-xs"></i>Regular <span class="num" id="countRegular">-</span> คน</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="loadStudentList(true)"
+              class="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 md:px-5 md:py-3 text-sm font-bold text-gray-500 shadow-sm transition-all hover:border-blue-100 hover:bg-blue-50 hover:text-blue-600">
+              <i class="fas fa-rotate"></i>Refresh
+            </button>
+            <button onclick="openAddStudentModal()"
+              class="inline-flex items-center gap-2 rounded-2xl bg-gray-900 px-4 py-2.5 md:px-5 md:py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-600">
+              <i class="fas fa-plus"></i>New Student
+            </button>
+          </div>
+        </div>
+
+        <div id="studentList" class="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <!-- Skeletons injected by JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- ─── Student Detail / Edit Modal ─── -->
+    <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full sm:max-w-2xl overflow-hidden flex flex-col"
+           style="max-height:95dvh;max-height:95vh;position:relative;">
+
+        <div id="deleteConfirmOverlay" class="rounded-t-[2rem] sm:rounded-[2.5rem]">
+          <div class="w-16 h-16 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center mb-2">
+            <i class="fas fa-trash text-red-500 text-xl"></i>
+          </div>
+          <p class="text-lg font-black text-gray-900">ลบนักเรียนออก?</p>
+          <p id="deleteConfirmName" class="text-sm text-gray-400 font-medium"></p>
+          <p class="text-xs text-red-400 font-bold bg-red-50 border border-red-100 rounded-xl px-4 py-2">⚠️ การลบจะไม่สามารถย้อนกลับได้</p>
+          <div class="flex gap-3 w-full max-w-xs mt-2">
+            <button onclick="hideDeleteConfirm()" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-200 transition-all">ยกเลิก</button>
+            <button id="confirmDeleteBtn" onclick="confirmDeleteStudent()" class="flex-1 py-3 bg-red-600 text-white rounded-2xl font-bold text-sm hover:bg-red-700 transition-all"><i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ</button>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 px-6 py-5 md:px-8 md:py-6 flex items-center justify-between flex-shrink-0">
+          <h2 class="text-white font-black text-lg md:text-xl">Student Details</h2>
+          <button onclick="closeDetailModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"><i class="fas fa-times text-sm"></i></button>
+        </div>
+
+        <div class="p-5 md:p-8 overflow-y-auto flex-1">
+          <div class="flex items-start gap-4 md:gap-6 mb-6 md:mb-8">
+            <div class="flex-shrink-0 relative">
+              <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                <img id="modal-photo" src="" alt="" class="w-full h-full object-cover hidden" onerror="this.classList.add('hidden');document.getElementById('modal-avatar-initials').classList.remove('hidden')" />
+                <span id="modal-avatar-initials" class="text-white text-xl md:text-2xl font-black"></span>
+              </div>
+              <button id="cameraBtn" onclick="triggerPhotoUpload()" class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border-2 border-gray-200 text-gray-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500 flex items-center justify-center transition-all shadow-sm">
+                <i class="fas fa-camera text-[10px]"></i>
+              </button>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p id="modal-fullname" class="text-xl md:text-2xl font-black text-gray-900 truncate"></p>
+              <p id="modal-type-badge" class="text-sm font-medium text-blue-500 mt-0.5 mb-2"></p>
+              <input type="file" id="photoFileInput" accept="image/*" class="hidden" onchange="handleStudentPhotoSelect(event)" />
+              <div id="uploadProgress" class="hidden">
+                <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
+                  <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                  <span id="uploadProgressText">Uploading photo...</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-1.5">
+                  <div id="uploadProgressBar" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width:0%"></div>
+                </div>
+              </div>
+              <p id="photoHint" class="text-[11px] text-gray-300 font-medium"><i class="fas fa-camera mr-1"></i>Click the camera icon to change photo</p>
+            </div>
+          </div>
+
+          <div id="modal-form" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-4 md:gap-y-5">
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Student ID</p>
+              <p id="view-studentId" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Type</p>
+              <p id="view-type" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+              <select id="edit-type" class="edit-field edit-input"><option value="Course">Course Class</option><option value="Regular">Regular Class</option></select>
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Full Name (Thai)</p>
+              <p id="view-name" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+              <input id="edit-name" type="text" class="edit-field edit-input" placeholder="ชื่อ-นามสกุล" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Nickname (Thai)</p>
+              <p id="view-nickname" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+              <input id="edit-nickname" type="text" class="edit-field edit-input" placeholder="ชื่อเล่น" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Name</p>
+              <p id="view-nameEng" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+              <input id="edit-nameEng" type="text" class="edit-field edit-input" placeholder="English name" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Nickname</p>
+              <p id="view-nicknameEng" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+              <input id="edit-nicknameEng" type="text" class="edit-field edit-input" placeholder="English nickname" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Phone</p>
+              <p id="view-phone" class="view-field text-gray-700 font-medium text-sm md:text-base"></p>
+              <input id="edit-phone" type="text" inputmode="tel" class="edit-field edit-input" placeholder="Phone number" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Date of Birth</p>
+              <div class="view-field flex items-center gap-2 flex-wrap">
+                <p id="view-dob" class="text-gray-700 font-medium text-sm md:text-base"></p>
+                <span id="view-age-badge" class="age-badge hidden"><i class="fas fa-birthday-cake text-[10px]"></i><span id="view-age-text"></span></span>
+              </div>
+              <div class="edit-field">
+                <input id="edit-dob" type="date" class="edit-input" />
+                <p id="edit-age-preview" class="mt-1 text-xs text-gray-400 font-medium"></p>
+              </div>
+            </div>
+          </div>
+
+          <div id="save-status" class="hidden mt-4 p-3 rounded-xl text-sm font-bold text-center"></div>
+        </div>
+
+        <div class="px-5 pb-6 pt-4 md:px-8 md:pb-8 border-t border-gray-50 flex-shrink-0">
+          <div id="footer-view" class="flex gap-3 justify-between items-center">
+            <button onclick="showDeleteConfirm()" class="inline-flex items-center gap-2 px-5 py-3 bg-red-50 text-red-500 border border-red-100 rounded-2xl font-bold text-sm hover:bg-red-100 transition-all"><i class="fas fa-trash text-xs"></i>ลบนักเรียน</button>
+            <div class="flex gap-3">
+              <button onclick="closeDetailModal()" class="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all text-sm">Close</button>
+              <button onclick="enterEditMode()" class="px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all text-sm"><i class="fas fa-pen mr-2 text-xs"></i>Edit</button>
+            </div>
+          </div>
+          <div id="footer-edit" class="hidden flex gap-3 justify-end">
+            <button onclick="cancelEditMode()" class="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all text-sm">Cancel</button>
+            <button onclick="saveStudentEdit()" id="save-btn" class="px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all text-sm"><i class="fas fa-save mr-2 text-xs"></i>Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Add Student Modal ─── -->
+    <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl w-full sm:max-w-2xl overflow-hidden flex flex-col" style="max-height:95dvh;max-height:95vh;">
+        <div class="bg-gray-900 px-6 py-5 md:px-8 md:py-6 flex items-center justify-between flex-shrink-0">
+          <div>
+            <h2 class="text-white font-black text-lg md:text-xl">Add New Student</h2>
+            <span class="text-blue-300 text-xs font-bold">Bangkok Branch (BKK)</span>
+          </div>
+          <button onclick="closeAddStudentModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"><i class="fas fa-times text-sm"></i></button>
+        </div>
+
+        <div class="p-5 md:p-8 overflow-y-auto flex-1">
+          <div class="mb-5">
+            <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-2">Student Type</p>
+            <div class="flex gap-3">
+              <button id="type-btn-course" onclick="setAddStudentType('Course')" class="flex-1 py-3 rounded-2xl font-bold text-sm bg-gray-900 text-white transition-all">Course Class</button>
+              <button id="type-btn-regular" onclick="setAddStudentType('Regular')" class="flex-1 py-3 rounded-2xl font-bold text-sm bg-gray-100 text-gray-500 transition-all hover:bg-gray-200">Regular Class</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            <div class="col-span-1 sm:col-span-2">
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Full Name (Thai) *</p>
+              <input id="add-name" type="text" placeholder="ชื่อ-นามสกุล" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Nickname (Thai)</p>
+              <input id="add-nickname" type="text" placeholder="ชื่อเล่น" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Name</p>
+              <input id="add-nameEng" type="text" placeholder="Full name" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">English Nickname</p>
+              <input id="add-nicknameEng" type="text" placeholder="Nickname" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Phone</p>
+              <input id="add-phone" type="text" inputmode="tel" placeholder="0812345678" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all" />
+            </div>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Date of Birth</p>
+              <input id="add-dob" type="date" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all" />
+              <p id="add-age-preview" class="mt-1 text-xs text-gray-400 font-medium"></p>
+            </div>
+            <div id="add-course-field" class="col-span-1 sm:col-span-2 md:col-span-1">
+              <p class="text-[11px] font-black uppercase tracking-widest text-gray-300 mb-1">Course</p>
+              <select id="add-courseId" class="w-full px-4 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl font-[Kanit] text-sm outline-none focus:border-blue-500 focus:bg-white transition-all">
+                <option value="">— Select course —</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="add-save-status" class="hidden mt-4 p-3 rounded-xl text-sm font-bold text-center"></div>
+        </div>
+
+        <div class="px-5 pb-6 pt-4 md:px-8 md:pb-8 border-t border-gray-50 flex-shrink-0">
+          <div class="flex gap-3 justify-end">
+            <button onclick="closeAddStudentModal()" class="px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all text-sm">Cancel</button>
+            <button onclick="submitAddStudent()" id="add-save-btn" class="px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all text-sm"><i class="fas fa-plus mr-2 text-xs"></i>Add Student</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/main-navbar.js"></script>
+    <script>
+      /* ══ Branch config ══ */
+      const BRANCH = "bkk";
+      const BRANCH_LABEL = "Bangkok";
+      const BRANCH_COLOR = "blue";
+
+      let currentStudentData = null;
+      let studentsCache      = [];
+      let liveSearchTimer    = null;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadStudentList();
+        document.getElementById("edit-dob").addEventListener("change", updateEditAgePreview);
+        document.addEventListener("click", e => { if (!e.target.closest('.search-live-wrapper')) closeLiveResults(); });
+        document.getElementById("add-dob").addEventListener("change", function() {
+          const age = calcAge(this.value);
+          document.getElementById("add-age-preview").innerText = age !== null ? `อายุปัจจุบัน: ${age} ปี` : "";
+        });
+        ["add-name","add-nickname","add-nameEng","add-nicknameEng","add-phone"].forEach(id => {
+          document.getElementById(id).addEventListener("input", function() { if (this.value.trim()) { this.style.borderColor=""; this.style.background=""; } });
+        });
+        document.getElementById("add-courseId").addEventListener("change", function() { if (this.value) { this.style.borderColor=""; this.style.background=""; } });
+        document.getElementById("detailModal").addEventListener("click", function(e) { if (e.target===this) closeDetailModal(); });
+        document.getElementById("addStudentModal").addEventListener("click", function(e) { if (e.target===this) closeAddStudentModal(); });
+      });
+
+      /* ── Helpers ── */
+      function calcAge(dobStr) {
+        if (!dobStr) return null;
+        const dob = new Date(dobStr);
+        if (isNaN(dob)) return null;
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+        return age < 0 ? 0 : age;
+      }
+      function formatDob(dobStr) {
+        if (!dobStr) return "-";
+        const d = new Date(dobStr);
+        if (isNaN(d)) return dobStr;
+        return d.toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" });
+      }
+      function getStudentTypeLabel(type) {
+        const t = (type||"").toLowerCase();
+        if (t==="regular") return "Regular Class";
+        if (t==="course")  return "Course Class";
+        return "Student";
+      }
+      function updateCounts(students) {
+        document.getElementById("countTotal").innerText   = students.length;
+        document.getElementById("countCourse").innerText  = students.filter(s=>(s.type||"").toLowerCase()==="course").length;
+        document.getElementById("countRegular").innerText = students.filter(s=>(s.type||"").toLowerCase()==="regular").length;
+      }
+
+      /* ── Live Search ── */
+      function onSearchInput() {
+        clearTimeout(liveSearchTimer);
+        const q = document.getElementById("studentSearchInput").value.trim();
+        if (!q) { closeLiveResults(); loadStudentList(true); return; }
+        liveSearchTimer = setTimeout(() => { showLiveResults(q); loadStudentList(); }, 300);
+      }
+      function showLiveResults(q) {
+        const lower = q.toLowerCase();
+        const matched = studentsCache.filter(s =>
+          (s.name||'').toLowerCase().includes(lower) ||
+          (s.nameEng||'').toLowerCase().includes(lower) ||
+          (s.nickname||'').toLowerCase().includes(lower)
+        );
+        const box = document.getElementById('liveResults');
+        if (!matched.length) {
+          box.innerHTML = `<div class="search-live-empty">No results for "${q}"</div>`;
+        } else {
+          box.innerHTML = matched.slice(0,8).map(s => {
+            const fullName = s.name||'-';
+            const initials = fullName!=='-' ? fullName.slice(0,2) : '??';
+            const realIdx  = studentsCache.indexOf(s);
+            const avatarHtml = s.photoUrl
+              ? `<img src="${s.photoUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+              : initials;
+            return `<div class="search-live-item" onclick="closeLiveResults();openDetailModal(${realIdx})">
+              <div class="sli-avatar">${avatarHtml}</div>
+              <div><div class="sli-name">${fullName}</div><div class="sli-sub">${s.nameEng||'-'} · ${s.studentId||''}</div></div>
+              <span class="sli-tag">${getStudentTypeLabel(s.type)}</span>
+            </div>`;
+          }).join('');
+        }
+        box.classList.add('open');
+      }
+      function closeLiveResults() { document.getElementById('liveResults').classList.remove('open'); }
+
+      /* ── Load List ── */
+      function loadStudentList(forceAll=false) {
+        const query = document.getElementById("studentSearchInput").value.trim();
+        const list  = document.getElementById("studentList");
+        const skel  = `<div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100"><div class="flex items-start gap-3 mb-4"><div class="skeleton w-10 h-10 rounded-full flex-shrink-0"></div><div class="flex-1"><div class="skeleton h-5 w-3/4 mb-2"></div><div class="skeleton h-3 w-1/2"></div></div><div class="skeleton w-16 h-6 rounded-full"></div></div><div class="space-y-2"><div class="skeleton h-4 w-full"></div><div class="skeleton h-4 w-5/6"></div></div></div>`;
+        list.innerHTML = Array(6).fill(skel).join("");
+
+        if (query && !forceAll) {
+          fetch(scriptURL, { method:"POST", body:JSON.stringify({ action:"searchStudents", query, branch:BRANCH }) })
+            .then(r=>r.json()).then(r=>renderStudents(r.data||[])).catch(showStudentError);
+          return;
+        }
+        if (forceAll) document.getElementById("studentSearchInput").value = "";
+
+        Promise.all([
+          fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"getStudentsByType",type:"course",courseId:"",branch:BRANCH})}).then(r=>r.json()),
+          fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"getStudentsByType",type:"regular",courseId:"",branch:BRANCH})}).then(r=>r.json()),
+        ]).then(([cr,rr]) => {
+          const seen = new Set();
+          const all = [...(cr.data||[]), ...(rr.data||[])].filter(s => {
+            const key = s.studentId||`${s.name}-${s.phone}`;
+            if (seen.has(key)) return false;
+            seen.add(key); return true;
+          });
+          renderStudents(all);
+        }).catch(showStudentError);
+      }
+      function showStudentError() {
+        document.getElementById("studentList").innerHTML = '<div class="col-span-full rounded-[2rem] border-2 border-dashed border-blue-100 bg-white py-16 text-center text-blue-400">Unable to load student data</div>';
+      }
+
+      function renderStudents(students) {
+        const list = document.getElementById("studentList");
+        if (!students||!students.length) {
+          list.innerHTML='<div class="col-span-full rounded-[2rem] border-2 border-dashed border-gray-100 bg-white py-16 text-center text-gray-300">No students found</div>';
+          updateCounts([]); return;
+        }
+        studentsCache = students;
+        updateCounts(students);
+        list.innerHTML = students.map((s,idx) => {
+          const fullName  = s.name||"-";
+          const initials  = fullName!=="-" ? fullName.slice(0,2) : "??";
+          const age       = calcAge(s.dob);
+          const agePill   = age!==null ? `<span class="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-500"><i class="fas fa-birthday-cake text-[9px]"></i>${age} ปี</span>` : "";
+          const avatarHtml = s.photoUrl
+            ? `<img src="${s.photoUrl}" alt="${fullName}" class="w-10 h-10 rounded-full object-cover flex-shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+               <div class="avatar-circle w-10 h-10 rounded-full items-center justify-center text-white text-sm font-black flex-shrink-0" style="display:none">${initials}</div>`
+            : `<div class="avatar-circle w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black flex-shrink-0">${initials}</div>`;
+
+          return `<article class="student-card rounded-[2rem] bg-white p-5 md:p-6 shadow-sm" onclick="openDetailModal(${idx})">
+            <div class="mb-4 flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3">
+                ${avatarHtml}
+                <div class="min-w-0">
+                  <h3 class="text-base md:text-lg font-black text-gray-900 truncate">${fullName}</h3>
+                  <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <p class="text-sm font-medium text-blue-500 truncate">${s.nameEng||"-"}</p>
+                    ${agePill}
+                  </div>
+                </div>
+              </div>
+              <span class="rounded-full bg-gray-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-gray-400 whitespace-nowrap flex-shrink-0">${getStudentTypeLabel(s.type)}</span>
+            </div>
+            <div class="space-y-2.5 text-sm font-medium text-gray-400">
+              <p class="truncate"><i class="fas fa-id-card w-6 text-gray-300"></i>${s.studentId||"-"}</p>
+              <p class="truncate"><i class="fas fa-tag w-6 text-gray-300"></i>${s.nickname||"-"} (${s.nicknameEng||"-"})</p>
+              <p class="truncate"><i class="fas fa-phone w-6 text-gray-300"></i>${s.phone||"No phone number"}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-50 flex justify-end">
+              <span class="text-xs font-bold text-gray-300"><i class="fas fa-chevron-right mr-1"></i>View Details</span>
+            </div>
+          </article>`;
+        }).join("");
+      }
+
+      /* ── Detail Modal ── */
+      function openDetailModal(idx) {
+        const s = studentsCache[idx];
+        if (!s) return;
+        currentStudentData = s;
+        const fullName = s.name||"-";
+        const initials = fullName!=="-" ? fullName.slice(0,2) : "??";
+        const photoEl    = document.getElementById("modal-photo");
+        const initialsEl = document.getElementById("modal-avatar-initials");
+        if (s.photoUrl) { photoEl.src=s.photoUrl; photoEl.classList.remove("hidden"); initialsEl.classList.add("hidden"); }
+        else { photoEl.src=""; photoEl.classList.add("hidden"); initialsEl.classList.remove("hidden"); }
+        initialsEl.innerText = initials;
+        document.getElementById("modal-fullname").innerText    = fullName;
+        document.getElementById("modal-type-badge").innerText  = getStudentTypeLabel(s.type);
+        document.getElementById("photoHint").classList.remove("hidden");
+        document.getElementById("uploadProgress").classList.add("hidden");
+        document.getElementById("view-studentId").innerText   = s.studentId||"-";
+        document.getElementById("view-type").innerText        = getStudentTypeLabel(s.type);
+        document.getElementById("view-name").innerText        = s.name||"-";
+        document.getElementById("view-nickname").innerText    = s.nickname||"-";
+        document.getElementById("view-nameEng").innerText     = s.nameEng||"-";
+        document.getElementById("view-nicknameEng").innerText = s.nicknameEng||"-";
+        document.getElementById("view-phone").innerText       = s.phone||"No phone number";
+        document.getElementById("view-dob").innerText = s.dob ? formatDob(s.dob) : "-";
+        const age = calcAge(s.dob);
+        const ageBadge = document.getElementById("view-age-badge");
+        if (age!==null) { ageBadge.classList.remove("hidden"); document.getElementById("view-age-text").innerText = age+" ปี"; }
+        else ageBadge.classList.add("hidden");
+        document.getElementById("edit-name").value        = s.name||"";
+        document.getElementById("edit-nickname").value    = s.nickname||"";
+        document.getElementById("edit-nameEng").value     = s.nameEng||"";
+        document.getElementById("edit-nicknameEng").value = s.nicknameEng||"";
+        document.getElementById("edit-phone").value       = s.phone||"";
+        document.getElementById("edit-type").value        = s.type||"Course";
+        document.getElementById("edit-dob").value         = s.dob||"";
+        updateEditAgePreview();
+        exitEditModeUI(); hideDeleteConfirm(); hideSaveStatus();
+        document.getElementById("detailModal").classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      }
+      function closeDetailModal() { document.getElementById("detailModal").classList.add("hidden"); document.body.style.overflow=""; currentStudentData=null; }
+      function enterEditMode() { document.getElementById("modal-form").classList.add("edit-mode"); document.getElementById("footer-view").classList.add("hidden"); document.getElementById("footer-edit").classList.remove("hidden"); document.getElementById("cameraBtn").classList.add("hidden"); }
+      function cancelEditMode() { exitEditModeUI(); hideSaveStatus(); }
+      function exitEditModeUI() { document.getElementById("modal-form").classList.remove("edit-mode"); document.getElementById("footer-view").classList.remove("hidden"); document.getElementById("footer-edit").classList.add("hidden"); document.getElementById("cameraBtn").classList.remove("hidden"); }
+      function hideSaveStatus() { const el=document.getElementById("save-status"); el.className="hidden mt-4 p-3 rounded-xl text-sm font-bold text-center"; }
+      function updateEditAgePreview() { const age=calcAge(document.getElementById("edit-dob").value); document.getElementById("edit-age-preview").innerText=age!==null?`อายุปัจจุบัน: ${age} ปี`:""; }
+
+      function showDeleteConfirm() {
+        const name = currentStudentData ? (currentStudentData.name||"นักเรียนคนนี้") : "นักเรียนคนนี้";
+        document.getElementById("deleteConfirmName").innerText = name+" (ID: "+(currentStudentData?.studentId||"-")+")";
+        document.getElementById("deleteConfirmOverlay").classList.add("show");
+      }
+      function hideDeleteConfirm() {
+        document.getElementById("deleteConfirmOverlay").classList.remove("show");
+        const btn=document.getElementById("confirmDeleteBtn");
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ';
+      }
+      function confirmDeleteStudent() {
+        if (!currentStudentData) return;
+        const btn=document.getElementById("confirmDeleteBtn");
+        btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-1 text-xs"></i>กำลังลบ...';
+        fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"deleteStudent",studentId:currentStudentData.studentId})})
+          .then(r=>r.json()).then(res=>{
+            if (res.status==="success") { hideDeleteConfirm(); closeDetailModal(); loadStudentList(true); }
+            else { btn.disabled=false; btn.innerHTML='<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ'; alert("เกิดข้อผิดพลาด: "+(res.message||"ไม่สามารถลบได้")); }
+          }).catch(()=>{ btn.disabled=false; btn.innerHTML='<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ'; alert("Network error. กรุณาลองใหม่"); });
+      }
+
+      function saveStudentEdit() {
+        if (!currentStudentData) return;
+        const btn=document.getElementById("save-btn");
+        btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2 text-xs"></i>Saving...';
+        const payload = {
+          action:"updateStudent", studentId:currentStudentData.studentId,
+          name:document.getElementById("edit-name").value.trim(),
+          nickname:document.getElementById("edit-nickname").value.trim(),
+          nameEng:document.getElementById("edit-nameEng").value.trim(),
+          nicknameEng:document.getElementById("edit-nicknameEng").value.trim(),
+          phone:document.getElementById("edit-phone").value.trim(),
+          type:document.getElementById("edit-type").value,
+          dob:document.getElementById("edit-dob").value,
+        };
+        fetch(scriptURL,{method:"POST",body:JSON.stringify(payload)}).then(r=>r.json()).then(res=>{
+          btn.disabled=false; btn.innerHTML='<i class="fas fa-save mr-2 text-xs"></i>Save Changes';
+          const statusEl=document.getElementById("save-status");
+          if (res.status==="success") {
+            statusEl.className="block mt-4 p-3 rounded-xl text-sm font-bold text-center bg-green-50 text-green-600 border border-green-100";
+            statusEl.innerHTML='<i class="fas fa-check-circle mr-2"></i>Saved successfully!';
+            currentStudentData={...currentStudentData,...payload};
+            document.getElementById("view-name").innerText=payload.name||"-";
+            document.getElementById("view-nickname").innerText=payload.nickname||"-";
+            document.getElementById("view-nameEng").innerText=payload.nameEng||"-";
+            document.getElementById("view-nicknameEng").innerText=payload.nicknameEng||"-";
+            document.getElementById("view-phone").innerText=payload.phone||"No phone number";
+            document.getElementById("view-type").innerText=getStudentTypeLabel(payload.type);
+            document.getElementById("modal-fullname").innerText=payload.name||"-";
+            document.getElementById("view-dob").innerText=payload.dob?formatDob(payload.dob):"-";
+            const age=calcAge(payload.dob); const ageBadge=document.getElementById("view-age-badge");
+            if (age!==null){ageBadge.classList.remove("hidden");document.getElementById("view-age-text").innerText=age+" ปี";}else ageBadge.classList.add("hidden");
+            exitEditModeUI(); loadStudentList();
+          } else {
+            statusEl.className="block mt-4 p-3 rounded-xl text-sm font-bold text-center bg-red-50 text-red-600 border border-red-100";
+            statusEl.innerHTML='<i class="fas fa-exclamation-circle mr-2"></i>'+(res.message||"Something went wrong.");
+          }
+        }).catch(()=>{
+          btn.disabled=false; btn.innerHTML='<i class="fas fa-save mr-2 text-xs"></i>Save Changes';
+          const statusEl=document.getElementById("save-status");
+          statusEl.className="block mt-4 p-3 rounded-xl text-sm font-bold text-center bg-red-50 text-red-600 border border-red-100";
+          statusEl.innerHTML='<i class="fas fa-exclamation-circle mr-2"></i>Network error. Please try again.';
+        });
+      }
+
+      /* ── Photo Upload ── */
+      function triggerPhotoUpload() { document.getElementById("photoFileInput").click(); }
+      function compressImageForUpload(file, callback) {
+        const img=new Image(); const reader=new FileReader();
+        reader.onload=e=>{img.src=e.target.result;};
+        img.onload=function(){
+          const canvas=document.createElement("canvas"); const ctx=canvas.getContext("2d");
+          const MAX_WIDTH=600; let w=img.width,h=img.height;
+          if(w>MAX_WIDTH){h=Math.round(h*MAX_WIDTH/w);w=MAX_WIDTH;}
+          canvas.width=w;canvas.height=h;ctx.drawImage(img,0,0,w,h);
+          callback(canvas.toDataURL("image/jpeg",0.6));
+        };
+        reader.readAsDataURL(file);
+      }
+      function handleStudentPhotoSelect(event) {
+        const file=event.target.files[0];
+        if(!file) return;
+        if(!file.type.startsWith("image/")){alert("Please select an image file");return;}
+        if(file.size>5*1024*1024){alert("Image must be smaller than 5MB");return;}
+        document.getElementById("photoHint").classList.add("hidden");
+        document.getElementById("uploadProgress").classList.remove("hidden");
+        document.getElementById("uploadProgressText").innerText="Compressing image...";
+        document.getElementById("uploadProgressBar").style.width="20%";
+        compressImageForUpload(file,function(compressed){
+          const base64Data=compressed.split(",")[1];
+          document.getElementById("uploadProgressBar").style.width="50%";
+          document.getElementById("uploadProgressText").innerText="Uploading to Drive...";
+          fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"uploadStudentPhoto",studentId:currentStudentData.studentId,base64Data,mimeType:"image/jpeg"})})
+            .then(r=>r.json()).then(res=>{
+              document.getElementById("uploadProgressBar").style.width="100%";
+              if(res.status==="success"){
+                const photoEl=document.getElementById("modal-photo");const initialsEl=document.getElementById("modal-avatar-initials");
+                photoEl.src=res.photoUrl;photoEl.classList.remove("hidden");initialsEl.classList.add("hidden");
+                currentStudentData.photoUrl=res.photoUrl;
+                const idx=studentsCache.findIndex(s=>s.studentId===currentStudentData.studentId);
+                if(idx!==-1)studentsCache[idx].photoUrl=res.photoUrl;
+                document.getElementById("uploadProgressText").innerText="✓ Photo updated!";
+                setTimeout(()=>{document.getElementById("uploadProgress").classList.add("hidden");document.getElementById("photoHint").classList.remove("hidden");loadStudentList();},1500);
+              } else {
+                document.getElementById("uploadProgressText").innerText="❌ "+(res.message||"Upload failed");
+                document.getElementById("uploadProgressBar").style.background="#ef4444";
+                setTimeout(()=>{document.getElementById("uploadProgress").classList.add("hidden");document.getElementById("photoHint").classList.remove("hidden");document.getElementById("uploadProgressBar").style.background="#3b82f6";document.getElementById("uploadProgressBar").style.width="0%";},2500);
+              }
+              event.target.value="";
+            }).catch(()=>{document.getElementById("uploadProgressText").innerText="❌ Connection error.";event.target.value="";});
+        });
+      }
+
+      /* ── Add Student ── */
+      let addStudentType = "Course";
+      function openAddStudentModal() {
+        ["add-name","add-nickname","add-nameEng","add-nicknameEng","add-phone"].forEach(id=>{const el=document.getElementById(id);el.value="";el.style.borderColor="";el.style.background="";});
+        document.getElementById("add-dob").value="";
+        document.getElementById("add-age-preview").innerText="";
+        document.getElementById("add-courseId").value="";
+        setAddStudentType("Course"); hideAddSaveStatus(); loadCoursesForSelect();
+        document.getElementById("addStudentModal").classList.remove("hidden");
+        document.body.style.overflow="hidden";
+      }
+      function closeAddStudentModal() { document.getElementById("addStudentModal").classList.add("hidden"); document.body.style.overflow=""; }
+      function setAddStudentType(type) {
+        addStudentType=type; const isCourse=type==="Course";
+        document.getElementById("type-btn-course").className="flex-1 py-3 rounded-2xl font-bold text-sm transition-all "+(isCourse?"bg-gray-900 text-white":"bg-gray-100 text-gray-500 hover:bg-gray-200");
+        document.getElementById("type-btn-regular").className="flex-1 py-3 rounded-2xl font-bold text-sm transition-all "+(!isCourse?"bg-gray-900 text-white":"bg-gray-100 text-gray-500 hover:bg-gray-200");
+        document.getElementById("add-course-field").style.display=isCourse?"block":"none";
+      }
+      function loadCoursesForSelect() {
+        fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"getCourseData"})}).then(r=>r.json()).then(res=>{
+          const sel=document.getElementById("add-courseId");
+          sel.innerHTML='<option value="">— Select course —</option>';
+          (res.data||[]).forEach(c=>{const opt=document.createElement("option");opt.value=c.id;opt.textContent=c.name;sel.appendChild(opt);});
+        });
+      }
+      function hideAddSaveStatus() { const el=document.getElementById("add-save-status"); el.className="hidden mt-4 p-3 rounded-xl text-sm font-bold text-center"; }
+      function validateAddStudentForm() {
+        const fields=["add-name","add-nickname","add-nameEng","add-nicknameEng","add-phone"];
+        let isValid=true;
+        fields.forEach(id=>{const input=document.getElementById(id);if(!input.value.trim()){input.style.borderColor="#ef4444";input.style.background="#fff1f2";isValid=false;}else{input.style.borderColor="";input.style.background="";}});
+        if(addStudentType==="Course"){const sel=document.getElementById("add-courseId");if(!sel.value){sel.style.borderColor="#ef4444";sel.style.background="#fff1f2";isValid=false;}else{sel.style.borderColor="";sel.style.background="";}}
+        return isValid;
+      }
+      function submitAddStudent() {
+        if(!validateAddStudentForm()){const el=document.getElementById("add-save-status");el.className="block mt-4 p-3 rounded-xl text-sm font-bold text-center bg-red-50 text-red-600 border border-red-100";el.innerHTML='<i class="fas fa-exclamation-circle mr-2"></i>โปรดกรอกข้อมูลในช่องที่จำเป็นทั้งหมด';return;}
+        const studentName=document.getElementById("add-name").value.trim();
+        if(!confirm(`ยืนยันการเพิ่มนักเรียน?\n\nชื่อ: ${studentName}\nสาขา: ${BRANCH_LABEL} (${BRANCH.toUpperCase()})\nประเภท: ${addStudentType} Class`)) return;
+        const btn=document.getElementById("add-save-btn");
+        btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2 text-xs"></i>Adding...';
+        const payload={
+          action:addStudentType==="Course"?"addStudentWithCourse":"addStudent",
+          name:document.getElementById("add-name").value.trim(),
+          nickname:document.getElementById("add-nickname").value.trim(),
+          nameEng:document.getElementById("add-nameEng").value.trim(),
+          nicknameEng:document.getElementById("add-nicknameEng").value.trim(),
+          phone:document.getElementById("add-phone").value.trim(),
+          dob:document.getElementById("add-dob").value,
+          type:addStudentType,
+          branch:BRANCH,  // ← ส่ง branch ไปด้วยเสมอ
+          courseId:addStudentType==="Course"?document.getElementById("add-courseId").value:"",
+        };
+        fetch(scriptURL,{method:"POST",body:JSON.stringify(payload)}).then(r=>r.json()).then(res=>{
+          btn.disabled=false;btn.innerHTML='<i class="fas fa-plus mr-2 text-xs"></i>Add Student';
+          const el=document.getElementById("add-save-status");
+          if(res.status==="success"){
+            el.className="block mt-4 p-3 rounded-xl text-sm font-bold text-center bg-green-50 text-green-600 border border-green-100";
+            el.innerHTML='<i class="fas fa-check-circle mr-2"></i>Student added! (ID: '+res.studentId+')';
+            setTimeout(()=>{closeAddStudentModal();loadStudentList(true);},1200);
+          } else {
+            el.className="block mt-4 p-3 rounded-xl text-sm font-bold text-center bg-red-50 text-red-600 border border-red-100";
+            el.innerHTML='<i class="fas fa-exclamation-circle mr-2"></i>'+(res.message||"Something went wrong.");
+          }
+        }).catch(()=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-plus mr-2 text-xs"></i>Add Student';});
+      }
+    </script>
+  </body>
+</html>
