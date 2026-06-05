@@ -524,7 +524,7 @@
         if (!currentStudentData) return;
         const btn=document.getElementById("confirmDeleteBtn");
         btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-1 text-xs"></i>กำลังลบ...';
-        fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"deleteStudent",studentId:currentStudentData.studentId})})
+        fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"deleteStudent",studentId:currentStudentData.studentId,branch:BRANCH})})
           .then(r=>r.json()).then(res=>{
             if (res.status==="success") { hideDeleteConfirm(); closeDetailModal(); loadStudentList(true); }
             else { btn.disabled=false; btn.innerHTML='<i class="fas fa-trash mr-1 text-xs"></i>ยืนยันลบ'; alert("เกิดข้อผิดพลาด: "+(res.message||"ไม่สามารถลบได้")); }
@@ -536,7 +536,7 @@
         const btn=document.getElementById("save-btn");
         btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2 text-xs"></i>Saving...';
         const payload = {
-          action:"updateStudent", studentId:currentStudentData.studentId,
+          action:"updateStudent", studentId:currentStudentData.studentId, branch:BRANCH,
           name:document.getElementById("edit-name").value.trim(),
           nickname:document.getElementById("edit-nickname").value.trim(),
           nameEng:document.getElementById("edit-nameEng").value.trim(),
@@ -602,7 +602,7 @@
           const base64Data=compressed.split(",")[1];
           document.getElementById("uploadProgressBar").style.width="50%";
           document.getElementById("uploadProgressText").innerText="Uploading to Drive...";
-          fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"uploadStudentPhoto",studentId:currentStudentData.studentId,base64Data,mimeType:"image/jpeg"})})
+          fetch(scriptURL,{method:"POST",body:JSON.stringify({action:"uploadStudentPhoto",studentId:currentStudentData.studentId,base64Data,mimeType:"image/jpeg",branch:BRANCH})})
             .then(r=>r.json()).then(res=>{
               document.getElementById("uploadProgressBar").style.width="100%";
               if(res.status==="success"){
