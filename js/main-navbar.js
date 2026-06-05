@@ -1,5 +1,6 @@
 (function () {
-  const classPages = ["class.html", "class-course.html", "class-regular.html"];
+  const classPages   = ["class.html", "class-course.html", "class-regular.html"];
+  const studentPages = ["student-bkk.html", "student-hdy.html"];
 
   function getCurrentPage() {
     return (
@@ -24,12 +25,12 @@
   }
 
   function updateMainNavbarUser() {
-    const userData = JSON.parse(localStorage.getItem("userData") || "null");
-    const avatar = document.getElementById("sidebarAvatar");
-    const name = document.getElementById("sidebarName");
-    const role = document.getElementById("sidebarRole");
+    const userData    = JSON.parse(localStorage.getItem("userData") || "null");
+    const avatar      = document.getElementById("sidebarAvatar");
+    const name        = document.getElementById("sidebarName");
+    const role        = document.getElementById("sidebarRole");
     const mobileAvatar = document.getElementById("mobileAvatar");
-    const adminBtn = document.getElementById("adminPanelBtn");
+    const adminBtn    = document.getElementById("adminPanelBtn");
 
     if (!avatar || !name || !role) return;
 
@@ -53,7 +54,6 @@
     role.textContent = "User";
     avatar.src = "https://ui-avatars.com/api/?name=Guest&background=fef2f2&color=e63946&bold=true";
     if (mobileAvatar) mobileAvatar.src = avatar.src;
-
     if (adminBtn) adminBtn.classList.add("hidden");
   }
 
@@ -61,16 +61,18 @@
     const target = document.getElementById("main-navbar");
     if (!target) return;
 
-    const currentPage = getCurrentPage();
-    const classActive = classPages.includes(currentPage);
-    const courseActive =
-      currentPage === "class-course.html" || currentPage === "class.html";
-    const regularActive = currentPage === "class-regular.html";
+    const currentPage    = getCurrentPage();
+    const classActive    = classPages.includes(currentPage);
+    const courseActive   = currentPage === "class-course.html" || currentPage === "class.html";
+    const regularActive  = currentPage === "class-regular.html";
+    const studentActive  = studentPages.includes(currentPage);
+    const bkkActive      = currentPage === "student-bkk.html";
+    const hdyActive      = currentPage === "student-hdy.html";
 
     target.innerHTML = `
 
-<!-- 🔥 MOBILE TOP BAR (ปรับใหม่สวยขึ้น) -->
-<div class="md:hidden flex items-center justify-between px-4 py-3 
+<!-- 🔥 MOBILE TOP BAR -->
+<div class="md:hidden flex items-center justify-between px-4 py-3
 bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
 
   <!-- LEFT -->
@@ -89,7 +91,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
     <img id="mobileAvatar"
       class="w-9 h-9 rounded-full border-2 border-red-200 shadow-sm">
 
-    <button onclick="toggleSidebar()" 
+    <button onclick="toggleSidebar()"
       class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 hover:bg-red-500 hover:text-white transition-all">
       <i class="fas fa-bars text-lg"></i>
     </button>
@@ -111,7 +113,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
     <img src="./image/logo-white.png" class="w-48 object-contain">
   </div>
 
-  <ul class="space-y-3 flex-1">
+  <ul class="space-y-3 flex-1 overflow-y-auto">
     <li>
       <a href="Home.html" class="${getLinkClasses(currentPage === "home.html")}">
         <i class="fas fa-th-large w-5 text-center"></i>
@@ -126,20 +128,44 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
       </a>
     </li>
 
+    <!-- ── Students submenu ── -->
     <li>
-      <a href="Student.html" class="${getLinkClasses(currentPage === "student.html")}">
-        <i class="fas fa-user-graduate w-5 text-center"></i>
-        <span>Students</span>
-      </a>
+      <button type="button" id="studentMenuButton"
+        class="${getLinkClasses(studentActive)} w-full justify-between">
+        <span class="flex items-center gap-3">
+          <i class="fas fa-user-graduate w-5 text-center"></i>
+          <span>Students</span>
+        </span>
+        <i class="fas fa-chevron-down text-xs transition-transform ${studentActive ? "rotate-180" : ""}"
+          id="studentMenuChevron"></i>
+      </button>
+
+      <ul id="studentMenu" class="${studentActive ? "" : "hidden"} mt-2 space-y-2 pl-4">
+        <li>
+          <a href="Student-bkk.html" class="${getSubLinkClasses(bkkActive)}">
+            <span class="w-4 text-center text-[10px] font-black bg-blue-100 text-blue-600 rounded px-1">BKK</span>
+            <span>Bangkok</span>
+          </a>
+        </li>
+        <li>
+          <a href="Student-hdy.html" class="${getSubLinkClasses(hdyActive)}">
+            <span class="w-4 text-center text-[10px] font-black bg-green-100 text-green-600 rounded px-1">HDY</span>
+            <span>Hat Yai</span>
+          </a>
+        </li>
+      </ul>
     </li>
 
+    <!-- ── Class submenu ── -->
     <li>
-      <button type="button" id="classMenuButton" class="${getLinkClasses(classActive)} w-full justify-between">
+      <button type="button" id="classMenuButton"
+        class="${getLinkClasses(classActive)} w-full justify-between">
         <span class="flex items-center gap-3">
           <i class="fas fa-graduation-cap w-5 text-center"></i>
           <span>Class</span>
         </span>
-        <i class="fas fa-chevron-down text-xs transition-transform ${classActive ? "rotate-180" : ""}" id="classMenuChevron"></i>
+        <i class="fas fa-chevron-down text-xs transition-transform ${classActive ? "rotate-180" : ""}"
+          id="classMenuChevron"></i>
       </button>
 
       <ul id="classMenu" class="${classActive ? "" : "hidden"} mt-2 space-y-2 pl-4">
@@ -166,7 +192,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
     </li>
   </ul>
 
-  <div class="mt-auto space-y-4">
+  <div class="mt-auto space-y-4 pt-4">
     <div class="bg-gray-50 p-4 rounded-2xl flex items-center gap-3 border">
       <img id="sidebarAvatar" class="w-10 h-10 rounded-full">
       <div class="overflow-hidden flex-1">
@@ -190,8 +216,23 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
 </nav>
 `;
 
-    const classMenuButton = document.getElementById("classMenuButton");
-    const classMenu = document.getElementById("classMenu");
+    // ── Student submenu toggle ──
+    const studentMenuButton  = document.getElementById("studentMenuButton");
+    const studentMenu        = document.getElementById("studentMenu");
+    const studentMenuChevron = document.getElementById("studentMenuChevron");
+
+    if (studentMenuButton && studentMenu && studentMenuChevron) {
+      studentMenuButton.addEventListener("click", () => {
+        const isOpen = !studentMenu.classList.contains("hidden");
+        studentMenu.classList.toggle("hidden", isOpen);
+        studentMenuChevron.classList.toggle("rotate-180", !isOpen);
+        studentMenuButton.setAttribute("aria-expanded", String(!isOpen));
+      });
+    }
+
+    // ── Class submenu toggle ──
+    const classMenuButton  = document.getElementById("classMenuButton");
+    const classMenu        = document.getElementById("classMenu");
     const classMenuChevron = document.getElementById("classMenuChevron");
 
     if (classMenuButton && classMenu && classMenuChevron) {
@@ -203,6 +244,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
       });
     }
 
+    // ── Logout ──
     const logoutButton = document.getElementById("logoutButton");
     if (logoutButton) {
       logoutButton.addEventListener("click", () => {
@@ -222,14 +264,13 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
     renderMainNavbar();
   }
 
-  window.renderMainNavbar = renderMainNavbar;
-  window.updateMainNavbarUser = updateMainNavbarUser;
+  window.renderMainNavbar      = renderMainNavbar;
+  window.updateMainNavbarUser  = updateMainNavbarUser;
 })();
 
-function toggleSidebar(){
+function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("sidebarOverlay");
-
   sidebar.classList.toggle("-translate-x-full");
   overlay.classList.toggle("hidden");
 }
