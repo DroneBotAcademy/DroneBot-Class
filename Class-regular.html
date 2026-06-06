@@ -793,8 +793,9 @@ function renderCard(s) {
 
       <div class="flex justify-between items-start mb-1" style="padding-right:36px">
         <div>
-          <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
-          <p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
+        <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
+<p class="text-sm font-bold text-gray-500 mt-0.5">${s.nickname ? '(' + s.nickname + ')' : ''}</p>
+<p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
           ${sessionLabel}
         </div>
         <span class="progress-badge"><i class="fas fa-check-circle text-[10px]"></i> ${p}/4 S</span>
