@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,7 +17,96 @@
     .bg-red-primary { background-color: #e63946; }
     .header-gradient { background: linear-gradient(to right, #ffffff, #fef2f2); border-bottom: 2px solid #e63946; }
 
-    /* Skeleton Loading */
+    /* Branch colors */
+    .bkk-accent { color: #2563eb; }
+    .hdy-accent { color: #e63946; }
+    .bg-bkk { background-color: #2563eb; }
+    .bg-hdy { background-color: #e63946; }
+    .border-bkk { border-color: #2563eb; }
+    .border-hdy { border-color: #e63946; }
+
+    /* Branch tab buttons */
+    .branch-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 22px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      border: 2px solid transparent;
+    }
+    .branch-tab.hdy-tab {
+      background: #fef2f2;
+      color: #e63946;
+      border-color: #fca5a5;
+    }
+    .branch-tab.hdy-tab.active, .branch-tab.hdy-tab:hover {
+      background: #e63946;
+      color: white;
+      border-color: #e63946;
+      box-shadow: 0 4px 14px rgba(230,57,70,0.3);
+    }
+    .branch-tab.bkk-tab {
+      background: #eff6ff;
+      color: #2563eb;
+      border-color: #93c5fd;
+    }
+    .branch-tab.bkk-tab.active, .branch-tab.bkk-tab:hover {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+    }
+    .branch-tab.both-tab {
+      background: #f5f3ff;
+      color: #7c3aed;
+      border-color: #c4b5fd;
+    }
+    .branch-tab.both-tab.active, .branch-tab.both-tab:hover {
+      background: #7c3aed;
+      color: white;
+      border-color: #7c3aed;
+      box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+    }
+
+    /* Branch section card */
+    .branch-section {
+      transition: all 0.3s ease;
+    }
+    .branch-header-bkk {
+      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+    }
+    .branch-header-hdy {
+      background: linear-gradient(135deg, #b91c1c 0%, #e63946 100%);
+    }
+    .branch-badge-bkk {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
+    }
+    .branch-badge-hdy {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    /* View toggle */
+    .view-btn {
+      padding: 6px 16px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #6b7280;
+    }
+    .view-btn.active-hdy { background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.1); color: #e63946; }
+    .view-btn.active-bkk { background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.1); color: #2563eb; }
+
+    /* Skeleton */
     .skeleton {
       background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
       background-size: 200% 100%;
@@ -28,164 +117,310 @@
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
+
+    /* Activity card hover */
+    .act-card-hdy:hover { background: #fff5f5; }
+    .act-card-bkk:hover { background: #eff6ff; }
+
+    /* Divider label */
+    .divider-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 16px 0;
+    }
+    .divider-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
   </style>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 </head>
 <body class="flex flex-col md:flex-row min-h-screen">
   <style>body { visibility: hidden; }</style>
   <script src="./js/auth-guard.js"></script>
 
-    <div id="main-navbar"></div>
+  <div id="main-navbar"></div>
 
-    <!-- Main Content -->
-     <main class="flex-1 w-full p-4 md:p-8">
-      
-      <!-- 🔥 WRAPPER ใหม่ กันชิดซ้าย + จัดกลาง -->
-      <div class="max-w-7xl mx-auto w-full">
+  <!-- Main Content -->
+  <main class="flex-1 w-full p-4 md:p-8">
+    <div class="max-w-7xl mx-auto w-full">
 
-        <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 md:p-8 rounded-3xl header-gradient shadow-sm mt-6">
-          <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
-              WELCOME, <span id="userNameDisplay" class="text-red-primary">User</span>
-            </h1>
-            <p class="text-gray-500 mt-1" id="todayDateLabel">Current date...</p>
+      <!-- HEADER -->
+      <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 md:p-8 rounded-3xl header-gradient shadow-sm mt-6">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+            WELCOME, <span id="userNameDisplay" class="text-red-primary">User</span>
+          </h1>
+          <p class="text-gray-500 mt-1" id="todayDateLabel">Current date...</p>
+        </div>
+      </header>
+
+      <!-- BRANCH TABS -->
+      <div class="mt-6 flex flex-wrap gap-3 items-center">
+        <span class="text-sm font-bold text-gray-400 mr-1">SHOW:</span>
+        <button onclick="switchBranchView('both')" id="tab-both" class="branch-tab both-tab active">
+          <i class="fas fa-globe-asia"></i> All Branches
+        </button>
+        <button onclick="switchBranchView('hdy')" id="tab-hdy" class="branch-tab hdy-tab">
+          <span class="text-xs font-black px-2 py-0.5 rounded-md bg-red-100 text-red-600">HDY</span> Hat Yai
+        </button>
+        <button onclick="switchBranchView('bkk')" id="tab-bkk" class="branch-tab bkk-tab">
+          <span class="text-xs font-black px-2 py-0.5 rounded-md bg-blue-100 text-blue-600">BKK</span> Bangkok
+        </button>
+      </div>
+
+      <!-- CONTENT SECTIONS -->
+      <div class="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-6" id="branchGrid">
+
+        <!-- ===== HAT YAI SECTION ===== -->
+        <div id="section-hdy" class="branch-section card-white rounded-3xl overflow-hidden">
+          <!-- Branch Header -->
+          <div class="branch-header-hdy p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-city text-white text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-white font-bold text-lg leading-tight">Hat Yai</h2>
+                <p class="text-red-200 text-xs">dronebotcenter@gmail.com</p>
+              </div>
+            </div>
+            <span class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-xl">HDY</span>
           </div>
-        </header>
 
-        <!-- CONTENT -->
-        <div class="mt-6">
-          <div class="card-white p-6 md:p-8 rounded-3xl">
-            
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-              <h2 class="text-xl font-bold flex items-center text-gray-800">
-                <i class="fas fa-clock text-red-primary mr-3"></i> 
-                Schedule: <span id="viewTitle">Today</span>
-              </h2>
-
-              <div class="flex bg-gray-100 p-1 rounded-2xl">
-                <button onclick="changeView('day')" id="btn-day" class="px-4 py-2 rounded-xl text-sm font-bold transition-all bg-white shadow-sm text-red-primary">Today</button>
-                <button onclick="changeView('week')" id="btn-week" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-gray-500 hover:text-gray-700">This Week</button>
-                <button onclick="changeView('all')" id="btn-all" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-gray-500 hover:text-gray-700">All</button>
+          <!-- Body -->
+          <div class="p-5">
+            <!-- View Toggle -->
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-2 text-sm font-bold text-gray-600">
+                <i class="fas fa-clock text-red-400 text-xs"></i>
+                <span id="hdy-viewTitle">Today</span>
+              </div>
+              <div class="flex bg-gray-100 p-1 rounded-xl gap-0.5">
+                <button onclick="changeView('hdy', 'day')" id="hdy-btn-day" class="view-btn active-hdy">Today</button>
+                <button onclick="changeView('hdy', 'week')" id="hdy-btn-week" class="view-btn">This Week</button>
+                <button onclick="changeView('hdy', 'all')" id="hdy-btn-all" class="view-btn">All</button>
               </div>
             </div>
 
-            <div id="activityContainer" class="space-y-4">
-                <!-- Skeleton Loading -->
-                <div class="flex items-center gap-4 p-5 rounded-3xl border border-gray-50 bg-white shadow-sm">
-                  <div class="skeleton w-24 h-12 rounded-2xl"></div>
-                  <div class="flex-1">
-                    <div class="skeleton h-6 w-3/4 mb-2"></div>
-                    <div class="skeleton h-4 w-1/2"></div>
-                  </div>
+            <!-- Activity List -->
+            <div id="hdy-activityContainer" class="space-y-3">
+              <!-- skeleton -->
+              <div class="flex items-center gap-3 p-4 rounded-2xl border border-gray-50 bg-white shadow-sm">
+                <div class="skeleton w-24 h-10 rounded-xl"></div>
+                <div class="flex-1">
+                  <div class="skeleton h-5 w-3/4 mb-2"></div>
+                  <div class="skeleton h-3 w-1/2"></div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== BANGKOK SECTION ===== -->
+        <div id="section-bkk" class="branch-section card-white rounded-3xl overflow-hidden">
+          <!-- Branch Header -->
+          <div class="branch-header-bkk p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-building text-white text-lg"></i>
+              </div>
+              <div>
+                <h2 class="text-white font-bold text-lg leading-tight">Bangkok</h2>
+                <p class="text-blue-200 text-xs">DroneBotBkk@gmail.com</p>
+              </div>
+            </div>
+            <span class="bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-xl">BKK</span>
+          </div>
+
+          <!-- Body -->
+          <div class="p-5">
+            <!-- View Toggle -->
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-2 text-sm font-bold text-gray-600">
+                <i class="fas fa-clock text-blue-400 text-xs"></i>
+                <span id="bkk-viewTitle">Today</span>
+              </div>
+              <div class="flex bg-gray-100 p-1 rounded-xl gap-0.5">
+                <button onclick="changeView('bkk', 'day')" id="bkk-btn-day" class="view-btn active-bkk">Today</button>
+                <button onclick="changeView('bkk', 'week')" id="bkk-btn-week" class="view-btn">This Week</button>
+                <button onclick="changeView('bkk', 'all')" id="bkk-btn-all" class="view-btn">All</button>
+              </div>
             </div>
 
+            <!-- Activity List -->
+            <div id="bkk-activityContainer" class="space-y-3">
+              <!-- skeleton -->
+              <div class="flex items-center gap-3 p-4 rounded-2xl border border-gray-50 bg-white shadow-sm">
+                <div class="skeleton w-24 h-10 rounded-xl"></div>
+                <div class="flex-1">
+                  <div class="skeleton h-5 w-3/4 mb-2"></div>
+                  <div class="skeleton h-3 w-1/2"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
-    </main>
-  </div>
+      <!-- END GRID -->
+
+    </div>
+  </main>
 
 <script src="./js/config.js"></script>
 <script src="./js/main-navbar.js"></script>
 <script>
-  let currentView = 'day';
+  // ─── State ───────────────────────────────────────────────
+  const branchViews  = { hdy: 'day', bkk: 'day' };
+  const viewTitles   = { day: 'Today', week: 'This Week', all: 'All' };
+  let   activeBranchView = 'both'; // 'both' | 'hdy' | 'bkk'
 
-  window.onload = function() {
+  // ─── Init ────────────────────────────────────────────────
+  window.onload = function () {
     const userData = JSON.parse(localStorage.getItem('userData'));
-    if(userData) {
+    if (userData) {
       document.getElementById('userNameDisplay').innerText = userData.user;
       if (typeof updateMainNavbarUser === 'function') updateMainNavbarUser();
     }
-    
+
     const now = new Date();
-    document.getElementById('todayDateLabel').innerText = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    
-    loadActivities();
+    document.getElementById('todayDateLabel').innerText =
+      now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    loadActivities('hdy');
+    loadActivities('bkk');
   };
 
-  function changeView(view) {
-    currentView = view;
-    const views = ['day', 'week', 'all'];
-    const titles = { 'day': 'Today', 'week': 'This Week', 'all': 'All' };
-    
-    views.forEach(v => {
-      const btn = document.getElementById(`btn-${v}`);
-      if(v === view) {
-        btn.classList.add('bg-white', 'shadow-sm', 'text-red-primary');
-        btn.classList.remove('text-gray-500');
-      } else {
-        btn.classList.remove('bg-white', 'shadow-sm', 'text-red-primary');
-        btn.classList.add('text-gray-500');
-      }
+  // ─── Branch view switcher ─────────────────────────────────
+  function switchBranchView(mode) {
+    activeBranchView = mode;
+
+    // Reset all tabs
+    ['both', 'hdy', 'bkk'].forEach(t => {
+      const el = document.getElementById('tab-' + t);
+      el.classList.remove('active');
     });
-    
-    document.getElementById('viewTitle').innerText = titles[view];
-    loadActivities();
+    document.getElementById('tab-' + mode).classList.add('active');
+
+    const secHdy = document.getElementById('section-hdy');
+    const secBkk = document.getElementById('section-bkk');
+    const grid   = document.getElementById('branchGrid');
+
+    if (mode === 'both') {
+      secHdy.style.display = '';
+      secBkk.style.display = '';
+      grid.classList.remove('xl:grid-cols-1');
+      grid.classList.add('xl:grid-cols-2');
+    } else if (mode === 'hdy') {
+      secHdy.style.display = '';
+      secBkk.style.display = 'none';
+      grid.classList.remove('xl:grid-cols-2');
+      grid.classList.add('xl:grid-cols-1');
+    } else {
+      secHdy.style.display = 'none';
+      secBkk.style.display = '';
+      grid.classList.remove('xl:grid-cols-2');
+      grid.classList.add('xl:grid-cols-1');
+    }
   }
 
-  function loadActivities() {
-    const container = document.getElementById('activityContainer');
-    // Display skeleton loading
+  // ─── View toggle per branch ───────────────────────────────
+  function changeView(branch, view) {
+    branchViews[branch] = view;
+
+    ['day', 'week', 'all'].forEach(v => {
+      const btn = document.getElementById(`${branch}-btn-${v}`);
+      btn.classList.remove('active-hdy', 'active-bkk');
+      btn.classList.add(); // noop cleanup
+    });
+
+    const activeClass = branch === 'hdy' ? 'active-hdy' : 'active-bkk';
+    const activeBtn   = document.getElementById(`${branch}-btn-${view}`);
+    activeBtn.classList.add(activeClass);
+
+    document.getElementById(`${branch}-viewTitle`).innerText = viewTitles[view];
+    loadActivities(branch);
+  }
+
+  // ─── Load activities ──────────────────────────────────────
+  function loadActivities(branch) {
+    const view      = branchViews[branch];
+    const container = document.getElementById(`${branch}-activityContainer`);
+    const accentBg  = branch === 'hdy' ? 'bg-hdy' : 'bg-bkk';
+    const hoverCls  = branch === 'hdy' ? 'act-card-hdy' : 'act-card-bkk';
+
+    // Skeleton
     container.innerHTML = `
-      <div class="flex items-center gap-4 p-5 rounded-3xl border border-gray-50 bg-white shadow-sm">
-        <div class="skeleton w-24 h-12 rounded-2xl"></div>
+      <div class="flex items-center gap-3 p-4 rounded-2xl border border-gray-50 bg-white shadow-sm">
+        <div class="skeleton w-24 h-10 rounded-xl"></div>
         <div class="flex-1">
-          <div class="skeleton h-6 w-3/4 mb-2"></div>
-          <div class="skeleton h-4 w-1/2"></div>
+          <div class="skeleton h-5 w-3/4 mb-2"></div>
+          <div class="skeleton h-3 w-1/2"></div>
         </div>
       </div>`;
 
     fetch(scriptURL, {
       method: "POST",
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         action: "getActivities",
-        view: currentView 
+        view:   view,
+        branch: branch          // <── backend will pick the correct calendar
       })
     })
     .then(res => res.json())
     .then(response => {
       container.innerHTML = '';
-      
+
       if (response.status === "success" && response.data && response.data.length > 0) {
 
-        // 🔥 Sort: ถ้าเป็น week หรือ all ให้เรียงล่าสุดขึ้นก่อน (descending)
         let sortedData = response.data;
-        if (currentView === 'week' || currentView === 'all') {
+        if (view === 'week' || view === 'all') {
           sortedData = response.data.slice().sort((a, b) => {
-            const dateA = new Date(a.date + ' ' + a.startTime);
-            const dateB = new Date(b.date + ' ' + b.startTime);
-            return dateB - dateA;
+            return new Date(b.date + ' ' + b.startTime) - new Date(a.date + ' ' + a.startTime);
           });
         }
 
         sortedData.forEach(act => {
-          const dateLabel = currentView !== 'day' ? `<p class="text-[10px] font-bold text-red-400 mb-1">${act.date}</p>` : '';
-          
+          const dateLabel = view !== 'day'
+            ? `<p class="text-[10px] font-bold ${branch === 'hdy' ? 'text-red-400' : 'text-blue-400'} mb-0.5">${act.date}</p>`
+            : '';
+
           container.innerHTML += `
-            <div class="flex items-center gap-4 p-5 rounded-3xl border border-gray-50 bg-white mb-3 shadow-sm hover:bg-red-50 transition">
-              <div class="bg-red-primary text-white p-3 rounded-2xl text-center min-w-[100px]">
-                <span class="text-xs font-bold block">${act.startTime} - ${act.endTime}</span> 
+            <div class="flex items-center gap-3 p-4 rounded-2xl border border-gray-50 bg-white shadow-sm ${hoverCls} transition cursor-default">
+              <div class="${accentBg} text-white px-3 py-2.5 rounded-xl text-center min-w-[90px] flex-shrink-0">
+                <span class="text-xs font-bold block leading-tight">${act.startTime}</span>
+                <span class="text-[10px] opacity-80 block">–${act.endTime}</span>
               </div>
-              <div class="flex-1">
+              <div class="flex-1 min-w-0">
                 ${dateLabel}
-                <h3 class="font-bold text-gray-800 text-lg">${act.title}</h3>
-                <p class="text-gray-400 text-xs"><i class="fas fa-map-marker-alt mr-1"></i> ${act.location}</p>
+                <h3 class="font-bold text-gray-800 text-sm leading-snug truncate">${act.title}</h3>
+                <p class="text-gray-400 text-xs mt-0.5 truncate">
+                  <i class="fas fa-map-marker-alt mr-1"></i>${act.location || '–'}
+                </p>
               </div>
             </div>`;
         });
+
       } else {
-        const titles = { 'day': 'Today', 'week': 'This Week', 'all': 'All' };
-        container.innerHTML = `<p class="text-gray-400 italic py-10 text-center border-2 border-dashed border-gray-100 rounded-3xl">No activities for ${titles[currentView]}</p>`;
+        const emptyColor = branch === 'hdy' ? 'border-red-100 text-red-300' : 'border-blue-100 text-blue-300';
+        container.innerHTML = `
+          <p class="italic py-8 text-center text-sm border-2 border-dashed rounded-2xl ${emptyColor}">
+            No activities for ${viewTitles[view]}
+          </p>`;
       }
     })
     .catch(err => {
       console.error("Error:", err);
-      container.innerHTML = '<p class="text-red-500 italic py-10 text-center border-2 border-dashed border-red-100 rounded-3xl">Unable to load activities</p>';
+      container.innerHTML = `
+        <p class="text-red-500 italic py-8 text-center text-sm border-2 border-dashed border-red-100 rounded-2xl">
+          Unable to load activities
+        </p>`;
     });
   }
 </script>
