@@ -940,29 +940,49 @@ function updateBulkStepStyles() {
 // ── Save Bulk Progress ──
 function saveBulkProgress() {
   const session = document.getElementById("bulkSession").value;
-  const weekData = [], instructorData = [];
+  const newWeekData = [];
+  const newInstructorData = [];
   for (let i = 1; i <= 4; i++) {
-    weekData.push(document.getElementById("bulkWeek" + i).value);
-    instructorData.push(document.getElementById("bulkIns" + i).value);
+    newWeekData.push(document.getElementById("bulkWeek" + i).value);
+    newInstructorData.push(document.getElementById("bulkIns" + i).value);
   }
 
   const ids = [...selectedStudents];
   showLoading();
 
-  Promise.all(ids.map(studentId =>
-    fetch(scriptURL, { method: "POST", body: JSON.stringify({
+  Promise.all(ids.map(studentId => {
+    // ดึงข้อมูลเดิมของนักเรียนคนนั้นก่อน
+    const existing = allData.find(s => s.studentId === studentId);
+    const oldWeeks = existing?.weeks || ["", "", "", ""];
+    const oldInstructors = existing?.instructorsWeek || ["", "", "", ""];
+    const oldProgress = Number(existing?.progress) || 0;
+
+    // merge: เอาข้อมูลใหม่เฉพาะ step ที่กรอก ถ้าไม่ได้กรอกให้ใช้ของเดิม
+    const mergedWeeks = newWeekData.map((w, i) => w.trim() !== "" ? w : oldWeeks[i] || "");
+    const mergedInstructors = newInstructorData.map((ins, i) => ins !== "" ? ins : oldInstructors[i] || "");
+
+    // คำนวณ progress ใหม่จาก mergedWeeks
+    let newProgress = 0;
+    for (let j = 0; j < 4; j++) {
+      if (mergedWeeks[j] && mergedWeeks[j].trim()) newProgress = j + 1;
+    }
+    // ถ้า bulkTempProgress ถูกกดเองให้ใช้ค่านั้น
+    if (bulkTempProgress > 0) newProgress = Math.max(newProgress, bulkTempProgress);
+
+    return fetch(scriptURL, { method: "POST", body: JSON.stringify({
       action: "updateWeekAndInstructor",
       studentId,
-      weekData,
-      instructorData,
+      weekData: mergedWeeks,
+      instructorData: mergedInstructors,
       ...(session ? { classSession: session } : {})
-    })}).then(r => r.json())
+    })})
+    .then(r => r.json())
     .then(() => fetch(scriptURL, { method: "POST", body: JSON.stringify({
       action: "updateProgressRegular",
       studentId,
-      progress: bulkTempProgress
-    })}).then(r => r.json()))
-  ))
+      progress: newProgress
+    })}).then(r => r.json()));
+  }))
   .then(() => {
     hideLoading();
     closeModal('bulkModal');
