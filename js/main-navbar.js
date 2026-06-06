@@ -1,6 +1,7 @@
 (function () {
-  const classPages = ["class.html", "class-course.html", "class-regular.html"];
+  const classPages    = ["class.html", "class-course.html", "class-regular.html"];
   const schedulePages = ["schedule-hdy.html", "schedule-bkk.html"];
+  const studentPages  = ["student-bkk.html", "student-hdy.html"];
 
   function getCurrentPage() {
     return (window.location.pathname.split("/").pop() || "Home.html").toLowerCase();
@@ -21,12 +22,12 @@
   }
 
   function updateMainNavbarUser() {
-    const userData = JSON.parse(localStorage.getItem("userData") || "null");
-    const avatar = document.getElementById("sidebarAvatar");
-    const name = document.getElementById("sidebarName");
-    const role = document.getElementById("sidebarRole");
+    const userData     = JSON.parse(localStorage.getItem("userData") || "null");
+    const avatar       = document.getElementById("sidebarAvatar");
+    const name         = document.getElementById("sidebarName");
+    const role         = document.getElementById("sidebarRole");
     const mobileAvatar = document.getElementById("mobileAvatar");
-    const adminBtn = document.getElementById("adminPanelBtn");
+    const adminBtn     = document.getElementById("adminPanelBtn");
 
     if (!avatar || !name || !role) return;
 
@@ -54,19 +55,22 @@
     const target = document.getElementById("main-navbar");
     if (!target) return;
 
-    const currentPage = getCurrentPage();
-    const classActive    = classPages.includes(currentPage);
-    const courseActive   = currentPage === "class-course.html" || currentPage === "class.html";
-    const regularActive  = currentPage === "class-regular.html";
-    const scheduleActive = schedulePages.includes(currentPage);
+    const currentPage       = getCurrentPage();
+    const classActive       = classPages.includes(currentPage);
+    const courseActive      = currentPage === "class-course.html" || currentPage === "class.html";
+    const regularActive     = currentPage === "class-regular.html";
+    const scheduleActive    = schedulePages.includes(currentPage);
     const scheduleHdyActive = currentPage === "schedule-hdy.html";
     const scheduleBkkActive = currentPage === "schedule-bkk.html";
+    const studentActive     = studentPages.includes(currentPage);
+    const bkkActive         = currentPage === "student-bkk.html";
+    const hdyActive         = currentPage === "student-hdy.html";
 
     target.innerHTML = `
 
 <!-- MOBILE TOP BAR -->
 <div class="md:hidden flex items-center justify-between px-4 py-3
-bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
+  bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-md">
       <i class="fas fa-robot text-white text-sm"></i>
@@ -99,7 +103,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
     <img src="./image/logo-white.png" class="w-48 object-contain">
   </div>
 
-  <ul class="space-y-3 flex-1">
+  <ul class="space-y-3 flex-1 overflow-y-auto">
 
     <!-- Dashboard -->
     <li>
@@ -117,9 +121,9 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
           <i class="fas fa-calendar-alt w-5 text-center"></i>
           <span>Schedule</span>
         </span>
-        <i class="fas fa-chevron-down text-xs transition-transform duration-200 ${scheduleActive ? "rotate-180" : ""}" id="scheduleMenuChevron"></i>
+        <i class="fas fa-chevron-down text-xs transition-transform duration-200 ${scheduleActive ? "rotate-180" : ""}"
+          id="scheduleMenuChevron"></i>
       </button>
-
       <ul id="scheduleMenu" class="${scheduleActive ? "" : "hidden"} mt-2 space-y-1 pl-4">
         <li>
           <a href="Schedule-bkk.html" class="${getSubLinkClasses(scheduleBkkActive)}">
@@ -136,12 +140,31 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
       </ul>
     </li>
 
-    <!-- Students -->
+    <!-- Students (submenu) -->
     <li>
-      <a href="Student.html" class="${getLinkClasses(currentPage === "student.html")}">
-        <i class="fas fa-user-graduate w-5 text-center"></i>
-        <span>Students</span>
-      </a>
+      <button type="button" id="studentMenuButton"
+        class="${getLinkClasses(studentActive)} w-full justify-between">
+        <span class="flex items-center gap-3">
+          <i class="fas fa-user-graduate w-5 text-center"></i>
+          <span>Students</span>
+        </span>
+        <i class="fas fa-chevron-down text-xs transition-transform duration-200 ${studentActive ? "rotate-180" : ""}"
+          id="studentMenuChevron"></i>
+      </button>
+      <ul id="studentMenu" class="${studentActive ? "" : "hidden"} mt-2 space-y-1 pl-4">
+        <li>
+          <a href="Student-bkk.html" class="${getSubLinkClasses(bkkActive)}">
+            <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-blue-50 text-blue-600">BKK</span>
+            <span>Bangkok</span>
+          </a>
+        </li>
+        <li>
+          <a href="Student-hdy.html" class="${getSubLinkClasses(hdyActive)}">
+            <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-red-50 text-red-500">HDY</span>
+            <span>Hat Yai</span>
+          </a>
+        </li>
+      </ul>
     </li>
 
     <!-- Class (submenu) -->
@@ -152,9 +175,9 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
           <i class="fas fa-graduation-cap w-5 text-center"></i>
           <span>Class</span>
         </span>
-        <i class="fas fa-chevron-down text-xs transition-transform ${classActive ? "rotate-180" : ""}" id="classMenuChevron"></i>
+        <i class="fas fa-chevron-down text-xs transition-transform duration-200 ${classActive ? "rotate-180" : ""}"
+          id="classMenuChevron"></i>
       </button>
-
       <ul id="classMenu" class="${classActive ? "" : "hidden"} mt-2 space-y-1 pl-4">
         <li>
           <a href="Class-course.html" class="${getSubLinkClasses(courseActive)}">
@@ -181,7 +204,8 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
 
   </ul>
 
-  <div class="mt-auto space-y-4">
+  <!-- Bottom: User Info + Buttons -->
+  <div class="mt-auto space-y-4 pt-4">
     <div class="bg-gray-50 p-4 rounded-2xl flex items-center gap-3 border">
       <img id="sidebarAvatar" class="w-10 h-10 rounded-full">
       <div class="overflow-hidden flex-1">
@@ -189,22 +213,21 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
         <p id="sidebarRole" class="text-[10px] text-red-500 font-bold uppercase">User</p>
       </div>
     </div>
-
     <div id="adminPanelBtn" class="hidden">
       <button onclick="window.location.href='./admin/adminlog.html'"
         class="w-full bg-red-600 text-white py-3 rounded-2xl font-bold">
         Admin Panel
       </button>
     </div>
-
-    <button id="logoutButton" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold">
+    <button id="logoutButton"
+      class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold">
       Logout
     </button>
   </div>
 </nav>
 `;
 
-    // Schedule menu toggle
+    // ── Schedule submenu toggle ──
     const scheduleMenuButton  = document.getElementById("scheduleMenuButton");
     const scheduleMenu        = document.getElementById("scheduleMenu");
     const scheduleMenuChevron = document.getElementById("scheduleMenuChevron");
@@ -213,10 +236,24 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
         const isOpen = !scheduleMenu.classList.contains("hidden");
         scheduleMenu.classList.toggle("hidden", isOpen);
         scheduleMenuChevron.classList.toggle("rotate-180", !isOpen);
+        scheduleMenuButton.setAttribute("aria-expanded", String(!isOpen));
       });
     }
 
-    // Class menu toggle
+    // ── Students submenu toggle ──
+    const studentMenuButton  = document.getElementById("studentMenuButton");
+    const studentMenu        = document.getElementById("studentMenu");
+    const studentMenuChevron = document.getElementById("studentMenuChevron");
+    if (studentMenuButton && studentMenu && studentMenuChevron) {
+      studentMenuButton.addEventListener("click", () => {
+        const isOpen = !studentMenu.classList.contains("hidden");
+        studentMenu.classList.toggle("hidden", isOpen);
+        studentMenuChevron.classList.toggle("rotate-180", !isOpen);
+        studentMenuButton.setAttribute("aria-expanded", String(!isOpen));
+      });
+    }
+
+    // ── Class submenu toggle ──
     const classMenuButton  = document.getElementById("classMenuButton");
     const classMenu        = document.getElementById("classMenu");
     const classMenuChevron = document.getElementById("classMenuChevron");
@@ -229,7 +266,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
       });
     }
 
-    // Logout
+    // ── Logout ──
     const logoutButton = document.getElementById("logoutButton");
     if (logoutButton) {
       logoutButton.addEventListener("click", () => {
@@ -249,7 +286,7 @@ bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b">
     renderMainNavbar();
   }
 
-  window.renderMainNavbar = renderMainNavbar;
+  window.renderMainNavbar     = renderMainNavbar;
   window.updateMainNavbarUser = updateMainNavbarUser;
 })();
 
