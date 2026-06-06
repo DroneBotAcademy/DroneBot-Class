@@ -301,10 +301,8 @@
   function switchBranchView(mode) {
     activeBranchView = mode;
 
-    // Reset all tabs
     ['both', 'hdy', 'bkk'].forEach(t => {
-      const el = document.getElementById('tab-' + t);
-      el.classList.remove('active');
+        document.getElementById('tab-' + t).classList.remove('active');
     });
     document.getElementById('tab-' + mode).classList.add('active');
 
@@ -312,24 +310,31 @@
     const secBkk = document.getElementById('section-bkk');
     const grid   = document.getElementById('branchGrid');
 
-    if (mode === 'both') {
-      secHdy.style.display = '';
-      secBkk.style.display = '';
-      grid.classList.remove('xl:grid-cols-1');
-      grid.classList.add('xl:grid-cols-2');
-    } else if (mode === 'hdy') {
-      secHdy.style.display = '';
-      secBkk.style.display = 'none';
-      grid.classList.remove('xl:grid-cols-2');
-      grid.classList.add('xl:grid-cols-1');
-    } else {
-      secHdy.style.display = 'none';
-      secBkk.style.display = '';
-      grid.classList.remove('xl:grid-cols-2');
-      grid.classList.add('xl:grid-cols-1');
-    }
-  }
+    // ซ่อน/แสดง header
+    const hdyHeader = secHdy.querySelector('.branch-header-hdy');
+    const bkkHeader = secBkk.querySelector('.branch-header-bkk');
 
+    if (mode === 'both') {
+        secHdy.style.display = '';
+        secBkk.style.display = '';
+        grid.classList.remove('xl:grid-cols-1');
+        grid.classList.add('xl:grid-cols-2');
+        hdyHeader.style.display = '';   // แสดง header
+        bkkHeader.style.display = '';
+    } else if (mode === 'hdy') {
+        secHdy.style.display = '';
+        secBkk.style.display = 'none';
+        grid.classList.remove('xl:grid-cols-2');
+        grid.classList.add('xl:grid-cols-1');
+        hdyHeader.style.display = 'none';  // ซ่อน header
+    } else {
+        secHdy.style.display = 'none';
+        secBkk.style.display = '';
+        grid.classList.remove('xl:grid-cols-2');
+        grid.classList.add('xl:grid-cols-1');
+        bkkHeader.style.display = 'none';  // ซ่อน header
+    }
+}
   // ─── View toggle per branch ───────────────────────────────
   function changeView(branch, view) {
     branchViews[branch] = view;
@@ -396,7 +401,7 @@ fetch(url, {
             <div class="flex items-center gap-3 p-4 rounded-2xl border border-gray-50 bg-white shadow-sm ${hoverCls} transition cursor-default">
               <div class="${accentBg} text-white px-3 py-2.5 rounded-xl text-center min-w-[90px] flex-shrink-0">
                 <span class="text-xs font-bold block leading-tight">${act.startTime}</span>
-                <span class="text-[10px] opacity-80 block">–${act.endTime}</span>
+<span class="text-xs font-bold opacity-80 block">–${act.endTime}</span>
               </div>
               <div class="flex-1 min-w-0">
                 ${dateLabel}
