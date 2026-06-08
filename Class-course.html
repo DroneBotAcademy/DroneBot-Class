@@ -36,14 +36,9 @@
     .badge-yellow { background: linear-gradient(135deg,#f59e0b,#d97706); color:white; }
 
     .completed-date-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 10px;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; margin-bottom: 10px;
     }
     .completed-date-badge.green { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
     .completed-date-badge.yellow { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
@@ -60,6 +55,21 @@
       transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     #courseDropdown:focus { border-color: #e63946; }
+
+    /* ── Branch Toggle ── */
+    .branch-toggle-wrap {
+      display: flex; gap: 6px; align-items: center;
+      background: #f1f5f9; border-radius: 999px; padding: 4px;
+    }
+    .branch-btn {
+      padding: 6px 16px; border-radius: 999px;
+      font-size: 12px; font-weight: 900; border: none; cursor: pointer;
+      transition: all 0.2s; font-family: 'Kanit', sans-serif;
+      letter-spacing: 0.03em;
+    }
+    .branch-btn.active-hdy { background: #e63946; color: white; box-shadow: 0 2px 8px rgba(230,57,70,0.35); }
+    .branch-btn.active-bkk { background: #3b82f6; color: white; box-shadow: 0 2px 8px rgba(59,130,246,0.35); }
+    .branch-btn.inactive   { background: transparent; color: #94a3b8; }
 
     .filter-btn { cursor:pointer; white-space:nowrap; transition:all 0.2s; }
     .filter-btn.active-all       { background:#374151 !important; color:white !important; border-color:#374151 !important; }
@@ -89,37 +99,22 @@
     .cert-toggle-row.cert-on .cert-switch::after { transform:translateX(20px); }
 
     .date-picker-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      border-radius: 1rem;
-      border: 2px solid #e5e7eb;
-      background: #f9fafb;
-      margin-top: 10px;
-      gap: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-radius: 1rem; border: 2px solid #e5e7eb;
+      background: #f9fafb; margin-top: 10px; gap: 10px;
     }
     .date-picker-row .dp-label { display: flex; align-items: center; gap: 10px; flex: 1; }
     .date-picker-row .dp-icon-wrap {
       width: 36px; height: 36px; border-radius: 10px;
-      background: #eff6ff; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      background: #eff6ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .date-picker-row .dp-title { font-weight: 700; font-size: 13px; color: #374151; }
     .date-picker-row .dp-sub   { font-size: 11px; color: #94a3b8; margin-top: 1px; }
     #completedDateInput {
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 8px 10px;
-      font-family: 'Kanit', sans-serif;
-      font-size: 13px;
-      color: #374151;
-      background: white;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      width: 145px;
-      flex-shrink: 0;
+      border: 2px solid #e5e7eb; border-radius: 12px; padding: 8px 10px;
+      font-family: 'Kanit', sans-serif; font-size: 13px; color: #374151;
+      background: white; outline: none; cursor: pointer; transition: border-color 0.2s;
+      width: 145px; flex-shrink: 0;
     }
     #completedDateInput:focus { border-color: #3b82f6; }
     #completedDateInput::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
@@ -252,6 +247,22 @@
     <div class="page-pad p-4 md:p-8 lg:p-10">
 
       <div class="top-bar flex flex-col gap-3 mb-6">
+
+        <!-- ── Branch Toggle ── -->
+        <div class="flex items-center justify-between">
+          <div class="branch-toggle-wrap">
+            <button id="btn-hdy" class="branch-btn active-hdy" onclick="setBranch('hdy')">
+              <i class="fas fa-map-marker-alt mr-1"></i> HDY Hat Yai
+            </button>
+            <button id="btn-bkk" class="branch-btn inactive" onclick="setBranch('bkk')">
+              <i class="fas fa-map-marker-alt mr-1"></i> BKK Bangkok
+            </button>
+          </div>
+          <div id="branch-indicator" class="text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600">
+            🏫 Hat Yai
+          </div>
+        </div>
+
         <div class="flex items-center gap-3">
           <div class="custom-select-wrapper flex-1 md:flex-none md:w-64">
             <i class="fas fa-layer-group select-icon"></i>
@@ -474,8 +485,8 @@
   <script src="./js/config.js"></script>
   <script src="./js/main-navbar.js"></script>
   <script>
-    // ✅ ดึง branch จาก localStorage (set ตอน login)
-    const branch = localStorage.getItem('branch') || 'hdy';
+    // ── Branch state (ไม่ผูกกับ localStorage แล้ว เลือกได้ในหน้านี้เลย)
+    let branch = localStorage.getItem('classBranch') || 'hdy';
 
     const currentPageName = (window.location.pathname.split('/').pop() || '').toLowerCase();
     let currentTab       = currentPageName === 'class-regular.html' ? 'regular' : 'course';
@@ -490,7 +501,35 @@
     let courseOptions    = [];
     let activeDropdown   = null;
 
+    /* ── Branch Toggle ── */
+    function setBranch(b) {
+      branch = b;
+      localStorage.setItem('classBranch', b);
+
+      const hdyBtn = document.getElementById('btn-hdy');
+      const bkkBtn = document.getElementById('btn-bkk');
+      const indicator = document.getElementById('branch-indicator');
+
+      if (b === 'hdy') {
+        hdyBtn.className = 'branch-btn active-hdy';
+        bkkBtn.className = 'branch-btn inactive';
+        indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
+        indicator.textContent = '🏫 Hat Yai';
+      } else {
+        bkkBtn.className = 'branch-btn active-bkk';
+        hdyBtn.className = 'branch-btn inactive';
+        indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
+        indicator.textContent = '🏙️ Bangkok';
+      }
+
+      // reset search & reload
+      document.getElementById('searchInput').value = '';
+      allStudentsCache = [];
+      loadStudents();
+    }
+
     window.onload = () => {
+      setBranch(branch); // sync UI กับ branch ปัจจุบัน
       fetchCourseList();
       switchTab(currentTab);
       document.querySelector('[data-filter="all"]').classList.add('active-all');
@@ -593,7 +632,7 @@
       renderCards(d);
     }
 
-    /* ── Load Students ── ✅ ส่ง branch */
+    /* ── Load Students ── */
     function loadStudents() {
       const q=document.getElementById('searchInput').value.trim();
       const courseId=document.getElementById('courseDropdown').value;
@@ -709,7 +748,6 @@
       }
 
       document.getElementById('completedDateRow').style.display = tempProgress >= 6 ? 'flex' : 'none';
-
       renderSessionCheckboxes();
       renderCertToggle();
       document.getElementById('progressModal').classList.remove('hidden');
@@ -767,9 +805,7 @@
       btn.disabled=true;
       btn.innerHTML='<i class="fas fa-spinner animate-spin mr-2"></i>กำลังบันทึก...';
       showLoading('กำลังบันทึก...');
-
       const formattedDate = tempProgress >= 6 ? getFormattedDate() : '';
-
       fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'updateProgress',studentId:currentStudentId,courseId:currentCourseId,newProgress:tempProgress,completedDate:formattedDate})})
         .then(r=>r.json())
         .then(()=>fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'updateCertificate',studentId:currentStudentId,courseId:currentCourseId,received:tempCertificate})}))
@@ -845,7 +881,7 @@
       closeAllDropdowns();
     }
 
-    /* ── Add Student Modal ── ✅ ส่ง branch */
+    /* ── Add Student Modal ── */
     function openAddStudentModal() {
       ['selectedStudentId','selectedCourseId'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('studentTriggerText').textContent='— เลือกนักเรียน —'; document.getElementById('studentTriggerText').style.color='';
@@ -853,7 +889,6 @@
       document.getElementById('studentSearchInput').value=''; document.getElementById('courseSearchInput').value='';
       studentOptions=[];
       document.getElementById('addStudentModal').classList.remove('hidden');
-      // ✅ ส่ง branch ไปด้วย
       fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getAllStudents',branch})})
         .then(r=>r.json()).then(res=>{
           studentOptions=(res.data||[]).map(s=>({id:s.studentId,label:`${s.name||'-'} (${s.nickname||s.studentId})`,sub:s.studentId}));
