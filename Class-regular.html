@@ -292,7 +292,9 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
           <i class="fas fa-map-marker-alt mr-1"></i> BKK Bangkok
         </button>
       </div>
-      
+      <div id="branch-indicator" class="text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600">
+         Hat Yai
+      </div>
     </div>
   </div>
 
@@ -536,22 +538,23 @@ function setBranch(b) {
   const bkkBtn = document.getElementById('btn-bkk');
   const indicator = document.getElementById('branch-indicator');
 
+  if (b === 'hdy') {
+    hdyBtn.className = 'branch-btn active-hdy';
+    bkkBtn.className = 'branch-btn inactive';
+    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
+    indicator.textContent = 'Hat Yai';
+  } else {
+    bkkBtn.className = 'branch-btn active-bkk';
+    hdyBtn.className = 'branch-btn inactive';
+    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
+    indicator.textContent = 'Bangkok';
+  }
+
   document.getElementById('searchInput').value = '';
   allData = [];
   loadStudents();
 }
 
-   if (b === 'hdy') {
-    hdyBtn.className = 'branch-btn active-hdy';
-    bkkBtn.className = 'branch-btn inactive';
-    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
-    indicator.textContent = '🏫 Hat Yai';
-  } else {
-    bkkBtn.className = 'branch-btn active-bkk';
-    hdyBtn.className = 'branch-btn inactive';
-    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
-    indicator.textContent = '🏙️ Bangkok';
-  }
 function getSessionCls(session) { return SESSION_CONFIG[session]?.cls || 'other'; }
 function getSessionEmoji(session) { return SESSION_CONFIG[session]?.emoji || '📋'; }
 
