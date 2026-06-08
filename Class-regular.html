@@ -10,17 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
-/* Skeleton Loading */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
 }
-/* Prevent iOS auto-zoom on input focus */
-input, select, textarea {
-  font-size: 16px !important;
-}
+input, select, textarea { font-size: 16px !important; }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 </style>
 
@@ -68,7 +64,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   font-weight: 700;
 }
 
-/* Session badge */
 .session-badge {
   display: inline-flex;
   align-items: center;
@@ -84,7 +79,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 .session-badge.sun-evening  { background: #ede9fe; color: #7c3aed; }
 .session-badge.other        { background: #f1f5f9; color: #64748b; }
 
-/* Session filter tabs */
 .session-tab {
   padding: 8px 20px;
   border-radius: 999px;
@@ -106,7 +100,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   box-shadow: 0 4px 12px rgba(230,57,70,.3);
 }
 
-/* Session section header */
 .session-section-header {
   display: flex;
   align-items: center;
@@ -169,7 +162,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 }
 .select-pill:focus { border-color: #e63946; }
 
-/* ── Progress Modal — Mobile Fix ── */
 #progressModal .modal-inner {
   width: 100%;
   max-width: 480px;
@@ -244,7 +236,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 }
 .step-input:focus { border-color: #fca5a5; }
 
-/* Session select in modal */
 .session-select-modal {
   width: 100%;
   border: 1.5px solid #e2e8f0;
@@ -260,7 +251,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 }
 .session-select-modal:focus { border-color: #f87171; }
 
-/* Reset modal input */
 .reset-input {
   width: 100%;
   border: 2px solid #fed7aa;
@@ -275,7 +265,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 }
 .reset-input:focus { border-color: #f97316; }
 
-/* ── Bulk Select ── */
 .card-checkbox {
   position: absolute;
   top: 14px;
@@ -312,7 +301,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   box-shadow: 0 0 0 3px rgba(230,57,70,.15) !important;
 }
 
-/* ── Bulk Action Bar ── */
 #bulkBar {
   display: none;
   position: fixed;
@@ -353,7 +341,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     <p class="text-gray-400 text-sm mt-1">จัดการนักเรียนและความคืบหน้าการเรียน</p>
   </div>
 
-  <!-- Filter Row -->
   <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
     <div class="flex gap-3 items-center">
       <i class="fas fa-chalkboard-teacher text-gray-300 text-lg"></i>
@@ -380,7 +367,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     </div>
   </div>
 
-  <!-- Session Filter Tabs -->
   <div class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-1">
     <button class="session-tab active" onclick="setSessionFilter('')" id="tab-all">
       <i class="fas fa-users text-xs mr-1"></i> ทั้งหมด
@@ -399,7 +385,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     </button>
   </div>
 
-  <!-- Count badge -->
   <div class="flex justify-between items-center mb-6">
     <div class="flex items-center gap-3">
       <div class="w-1 h-6 bg-red-500 rounded-full"></div>
@@ -413,7 +398,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   </div>
 
   <div id="studentGrid" class="space-y-8">
-    <!-- Skeleton Loading -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div class="student-card bg-white p-7 rounded-[2rem] shadow-sm">
         <div class="flex justify-between items-start mb-4">
@@ -607,6 +591,9 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 <script src="./js/main-navbar.js"></script>
 
 <script>
+// ✅ ดึง branch จาก localStorage (set ตอน login)
+const branch = localStorage.getItem('branch') || 'hdy';
+
 let allData = [];
 let instructors = [];
 let allStudentsCache = [];
@@ -619,16 +606,13 @@ let currentWeeks = [];
 let currentInstructorsWeek = [];
 let currentClassSession = "";
 
-// ── Reset modal state ──
 let resetTargetId = "";
 
-// ── Bulk selection state ──
 let selectedStudents = new Set();
 let bulkTempProgress = 0;
 let bulkWeeks = [];
 let bulkInstructorsWeek = [];
 
-// ── Session config ──
 const SESSION_CONFIG = {
   'เสาร์เช้า':   { cls: 'sat-morning', color: '#d97706', dot: '#fbbf24' },
   'อาทิตย์เช้า': { cls: 'sun-morning', color: '#16a34a', dot: '#4ade80' },
@@ -643,7 +627,6 @@ function getSessionEmoji(session) {
   return SESSION_CONFIG[session]?.emoji || '📋';
 }
 
-// ── Load Instructors ──
 function loadInstructors() {
   fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getInstructors" }) })
     .then(r => r.json())
@@ -657,7 +640,6 @@ function loadInstructors() {
     });
 }
 
-// ── Load Students ──
 function loadStudents() {
   fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getStudentCoursesRegular" }) })
     .then(r => r.json())
@@ -668,7 +650,6 @@ function loadStudents() {
     });
 }
 
-// ── Session Filter ──
 function setSessionFilter(session) {
   activeSession = session;
   const tabMap = {
@@ -684,7 +665,6 @@ function setSessionFilter(session) {
   filterAndRender();
 }
 
-// ── Filter & Render ──
 function filterAndRender() {
   const q = document.getElementById("searchInput").value.toLowerCase();
   const instructor = document.getElementById("instructorDropdown").value;
@@ -710,7 +690,6 @@ function filterAndRender() {
   }
 }
 
-// ── Render Grouped by Session ──
 function renderGrouped(data) {
   const grid = document.getElementById("studentGrid");
   grid.innerHTML = '';
@@ -752,7 +731,6 @@ function renderGrouped(data) {
   });
 }
 
-// ── Render Flat Grid ──
 function renderFlat(data) {
   const grid = document.getElementById("studentGrid");
   grid.innerHTML = '';
@@ -769,7 +747,6 @@ function renderFlat(data) {
   `;
 }
 
-// ── Single Card HTML ──
 function renderCard(s) {
   const p = Number(s.progress) || 0;
   const sessionCls = getSessionCls(s.classSession);
@@ -788,14 +765,13 @@ function renderCard(s) {
       class="student-card bg-white p-7 rounded-[2rem] shadow-sm${isSelected ? ' selected' : ''}"
       onclick="toggleSelect(event, '${s.studentId}')">
 
-      <!-- Checkbox -->
       <div class="card-checkbox${isSelected ? ' checked' : ''}" id="chk-${s.studentId}"></div>
 
       <div class="flex justify-between items-start mb-1" style="padding-right:36px">
         <div>
-        <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
-<p class="text-sm font-bold text-gray-500 mt-0.5">${s.nickname ? '(' + s.nickname + ')' : ''}</p>
-<p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
+          <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
+          <p class="text-sm font-bold text-gray-500 mt-0.5">${s.nickname ? '(' + s.nickname + ')' : ''}</p>
+          <p class="text-xs text-gray-400 mt-0.5">${s.studentId || ''}</p>
           ${sessionLabel}
         </div>
         <span class="progress-badge"><i class="fas fa-check-circle text-[10px]"></i> ${p}/4 S</span>
@@ -830,9 +806,6 @@ function emptyState() {
     </div>`;
 }
 
-// ══════════════════════════════════════
-//  BULK SELECT
-// ══════════════════════════════════════
 function toggleSelect(event, studentId) {
   if (event.target.closest('button') || event.target.closest('select')) return;
 
@@ -875,7 +848,6 @@ function clearSelection() {
   updateBulkBar();
 }
 
-// ── Open Bulk Modal ──
 function openBulkModal() {
   bulkTempProgress = 0;
   bulkWeeks = ["", "", "", ""];
@@ -937,7 +909,6 @@ function updateBulkStepStyles() {
   }
 }
 
-// ── Save Bulk Progress ──
 function saveBulkProgress() {
   const session = document.getElementById("bulkSession").value;
   const newWeekData = [];
@@ -951,22 +922,17 @@ function saveBulkProgress() {
   showLoading();
 
   Promise.all(ids.map(studentId => {
-    // ดึงข้อมูลเดิมของนักเรียนคนนั้นก่อน
     const existing = allData.find(s => s.studentId === studentId);
     const oldWeeks = existing?.weeks || ["", "", "", ""];
     const oldInstructors = existing?.instructorsWeek || ["", "", "", ""];
-    const oldProgress = Number(existing?.progress) || 0;
 
-    // merge: เอาข้อมูลใหม่เฉพาะ step ที่กรอก ถ้าไม่ได้กรอกให้ใช้ของเดิม
     const mergedWeeks = newWeekData.map((w, i) => w.trim() !== "" ? w : oldWeeks[i] || "");
     const mergedInstructors = newInstructorData.map((ins, i) => ins !== "" ? ins : oldInstructors[i] || "");
 
-    // คำนวณ progress ใหม่จาก mergedWeeks
     let newProgress = 0;
     for (let j = 0; j < 4; j++) {
       if (mergedWeeks[j] && mergedWeeks[j].trim()) newProgress = j + 1;
     }
-    // ถ้า bulkTempProgress ถูกกดเองให้ใช้ค่านั้น
     if (bulkTempProgress > 0) newProgress = Math.max(newProgress, bulkTempProgress);
 
     return fetch(scriptURL, { method: "POST", body: JSON.stringify({
@@ -995,9 +961,6 @@ function saveBulkProgress() {
   });
 }
 
-// ══════════════════════════════════════
-//  SINGLE PROGRESS MODAL
-// ══════════════════════════════════════
 function openProgress(id, courseId, name, p, weeks = [], insWeek = [], classSession = '') {
   currentStudentId = id;
   currentCourseId = courseId;
@@ -1038,7 +1001,6 @@ function renderSteps() {
   }
 }
 
-// พิมพ์แล้วขึ้นสีแดงทันที ไม่ต้องกด
 function autoTickStep(i) {
   let newProgress = 0;
   for (let j = 1; j <= 4; j++) {
@@ -1067,7 +1029,6 @@ function toggle(i) {
 function showLoading() { document.getElementById("saveLoadingOverlay").classList.add("show"); }
 function hideLoading() { document.getElementById("saveLoadingOverlay").classList.remove("show"); }
 
-// ── Save Single Progress ──
 function saveProgress() {
   showLoading();
   const selectedSession = document.getElementById("modalSessionSelect").value;
@@ -1096,7 +1057,6 @@ function saveProgress() {
   .catch(() => { hideLoading(); });
 }
 
-// ── Open Reset Modal ──
 function openResetModal(studentId, name) {
   resetTargetId = studentId;
   document.getElementById("resetStudentName").textContent = name;
@@ -1108,7 +1068,6 @@ function openResetModal(studentId, name) {
   document.getElementById("resetModal").classList.remove("hidden");
 }
 
-// ── Confirm Reset & Archive ──
 function confirmReset() {
   const month = document.getElementById("resetMonthInput").value.trim();
   if (!month) { alert("กรุณาระบุเดือน เช่น พ.ค. 2568"); return; }
@@ -1138,7 +1097,6 @@ function confirmReset() {
   });
 }
 
-// ── Delete Student ──
 function deleteStudentRegular(studentId) {
   if (!confirm("ต้องการลบนักเรียนคนนี้ออกจาก Regular Class ใช่ไหม?")) return;
   showLoading();
@@ -1163,7 +1121,7 @@ function closeModal(id) {
   document.getElementById(id).classList.add("hidden");
 }
 
-// ── Open Add Student Modal ──
+/* ── Open Add Student Modal ── ✅ ส่ง branch */
 function openAddStudentModal() {
   document.getElementById("studentSelect").value = "";
   document.getElementById("new-name").value = "";
@@ -1174,8 +1132,9 @@ function openAddStudentModal() {
   document.getElementById("new-phone").value = "";
   document.getElementById("new-session").value = "";
 
+  // ✅ ส่ง branch ไปด้วย
   fetch(scriptURL, { method: "POST", body: JSON.stringify({
-    action: "getStudentsByType", type: "Regular", courseId: "", query: ""
+    action: "getStudentsByType", type: "Regular", courseId: "", query: "", branch
   })})
   .then(r => r.json())
   .then(res => {
@@ -1204,7 +1163,7 @@ function fillFromExisting() {
   }
 }
 
-// ── Add Student ──
+/* ── Add Student ── ✅ ส่ง branch ตอนสร้างใหม่ */
 function addStudent() {
   const existingId = document.getElementById("studentSelect").value;
   const name = document.getElementById("new-name").value.trim();
@@ -1224,6 +1183,7 @@ function addStudent() {
     .then(() => { hideLoading(); closeModal('addStudentModal'); loadStudents(); })
     .catch(() => { hideLoading(); alert("เกิดข้อผิดพลาด"); });
   } else {
+    // ✅ ส่ง branch ไปด้วยตอนสร้างนักเรียนใหม่
     fetch(scriptURL, { method: "POST", body: JSON.stringify({
       action: "addStudent",
       name: name,
@@ -1233,12 +1193,14 @@ function addStudent() {
       age: document.getElementById("new-age").value.trim(),
       phone: document.getElementById("new-phone").value.trim(),
       type: "Regular",
-      courseId: ""
+      courseId: "",
+      branch: branch
     })})
     .then(r => r.json())
     .then(res => {
       if (res.status === "success") {
-        fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents" }) })
+        // ✅ ส่ง branch ตอนดึงข้อมูลใหม่ด้วย
+        fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents", branch }) })
           .then(r => r.json())
           .then(res2 => {
             const newStudent = (res2.data || []).find(s => s.name === name);
