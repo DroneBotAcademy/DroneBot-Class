@@ -88,7 +88,6 @@
     .cert-toggle-row.cert-on .cert-switch { background:#22c55e; }
     .cert-toggle-row.cert-on .cert-switch::after { transform:translateX(20px); }
 
-    /* ── Date Picker Row ── */
     .date-picker-row {
       display: flex;
       align-items: center;
@@ -355,7 +354,6 @@
         </div>
         <div class="grid grid-cols-3 gap-2 mb-4" id="sessionList"></div>
 
-        <!-- ✅ Date Picker วันที่จบหลักสูตร -->
         <div class="date-picker-row" id="completedDateRow">
           <div class="dp-label">
             <div class="dp-icon-wrap">
@@ -476,6 +474,9 @@
   <script src="./js/config.js"></script>
   <script src="./js/main-navbar.js"></script>
   <script>
+    // ✅ ดึง branch จาก localStorage (set ตอน login)
+    const branch = localStorage.getItem('branch') || 'hdy';
+
     const currentPageName = (window.location.pathname.split('/').pop() || '').toLowerCase();
     let currentTab       = currentPageName === 'class-regular.html' ? 'regular' : 'course';
     let currentStudentId = null;
@@ -592,7 +593,7 @@
       renderCards(d);
     }
 
-    /* ── Load Students ── */
+    /* ── Load Students ── ✅ ส่ง branch */
     function loadStudents() {
       const q=document.getElementById('searchInput').value.trim();
       const courseId=document.getElementById('courseDropdown').value;
@@ -602,7 +603,7 @@
         <div class="skeleton h-3 w-full mb-2"></div><div class="skeleton h-3 w-5/6 mb-6"></div>
         <div class="skeleton h-10 w-full rounded-xl mb-2"></div><div class="skeleton h-9 w-full rounded-xl"></div>
       </div>`;
-      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getStudentsByType',type:currentTab,courseId,query:q})})
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getStudentsByType',type:currentTab,courseId,query:q,branch})})
         .then(r=>r.json())
         .then(res=>{allStudentsCache=res.data||[]; applyFilter();})
         .catch(()=>{grid.innerHTML=`<div class="col-span-full text-center py-16 text-red-400 italic text-sm">โหลดข้อมูลไม่สำเร็จ</div>`;});
@@ -692,7 +693,6 @@
     }
 
     /* ════ Progress Modal ════ */
-    // ✅ รับ completedDate เพิ่มมา
     function openProgressModal(name, progress, studentId, courseId, certificate, completedDate) {
       currentStudentId = studentId;
       currentCourseId  = courseId;
@@ -700,16 +700,14 @@
       tempCertificate  = (certificate||'').toLowerCase()==='received';
       document.getElementById('modalStudentName').innerText = name;
 
-      // ✅ set Date Picker — แปลง dd/MM/yyyy → yyyy-MM-dd สำหรับ input[type=date]
       const dateInput = document.getElementById('completedDateInput');
       if (completedDate && completedDate.includes('/')) {
-        const parts = completedDate.split('/'); // [dd, MM, yyyy]
+        const parts = completedDate.split('/');
         dateInput.value = `${parts[2]}-${parts[1]}-${parts[0]}`;
       } else {
         dateInput.value = '';
       }
 
-      // ✅ ซ่อน date picker ถ้ายังไม่จบ
       document.getElementById('completedDateRow').style.display = tempProgress >= 6 ? 'flex' : 'none';
 
       renderSessionCheckboxes();
@@ -730,7 +728,6 @@
       }
       document.getElementById('sessionList').innerHTML=html;
       document.getElementById('btnFinishNow').style.display = tempProgress>=6 ? 'none' : 'flex';
-      // ✅ toggle แสดง date picker ตาม progress
       document.getElementById('completedDateRow').style.display = tempProgress>=6 ? 'flex' : 'none';
     }
 
@@ -758,11 +755,10 @@
       renderSessionCheckboxes();
     }
 
-    // ✅ แปลง yyyy-MM-dd → dd/MM/yyyy
     function getFormattedDate() {
       const val = document.getElementById('completedDateInput').value;
       if (!val) return '';
-      const parts = val.split('-'); // [yyyy, MM, dd]
+      const parts = val.split('-');
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
@@ -849,7 +845,7 @@
       closeAllDropdowns();
     }
 
-    /* ── Add Student Modal ── */
+    /* ── Add Student Modal ── ✅ ส่ง branch */
     function openAddStudentModal() {
       ['selectedStudentId','selectedCourseId'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('studentTriggerText').textContent='— เลือกนักเรียน —'; document.getElementById('studentTriggerText').style.color='';
@@ -857,13 +853,15 @@
       document.getElementById('studentSearchInput').value=''; document.getElementById('courseSearchInput').value='';
       studentOptions=[];
       document.getElementById('addStudentModal').classList.remove('hidden');
-      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getAllStudents'})})
+      // ✅ ส่ง branch ไปด้วย
+      fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getAllStudents',branch})})
         .then(r=>r.json()).then(res=>{
           studentOptions=(res.data||[]).map(s=>({id:s.studentId,label:`${s.name||'-'} (${s.nickname||s.studentId})`,sub:s.studentId}));
         });
       fetch(scriptURL,{method:'POST',body:JSON.stringify({action:'getCourseData'})})
         .then(r=>r.json()).then(res=>{ courseOptions=(res.data||[]).map(c=>({id:c.id,label:c.name})); });
     }
+
     function submitAddStudent() {
       const studentId=document.getElementById('selectedStudentId').value;
       const courseId=document.getElementById('selectedCourseId').value;
