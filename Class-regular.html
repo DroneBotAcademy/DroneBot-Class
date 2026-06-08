@@ -23,6 +23,21 @@ input, select, textarea { font-size: 16px !important; }
 <style>
 body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 
+/* ── Branch Toggle ── */
+.branch-toggle-wrap {
+  display: flex; gap: 6px; align-items: center;
+  background: #f1f5f9; border-radius: 999px; padding: 4px;
+}
+.branch-btn {
+  padding: 6px 16px; border-radius: 999px;
+  font-size: 12px; font-weight: 900; border: none; cursor: pointer;
+  transition: all 0.2s; font-family: 'Kanit', sans-serif;
+  letter-spacing: 0.03em;
+}
+.branch-btn.active-hdy { background: #e63946; color: white; box-shadow: 0 2px 8px rgba(230,57,70,0.35); }
+.branch-btn.active-bkk { background: #3b82f6; color: white; box-shadow: 0 2px 8px rgba(59,130,246,0.35); }
+.branch-btn.inactive   { background: transparent; color: #94a3b8; }
+
 .student-card {
   transition: all .3s;
   border: 1px solid #f1f5f9;
@@ -177,122 +192,58 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
   #progressModal .modal-inner { padding: 32px; }
 }
 
-.step-card {
-  border-radius: 14px;
-  padding: 12px;
-  transition: all .2s;
-}
+.step-card { border-radius: 14px; padding: 12px; transition: all .2s; }
 .step-card.done { background: #fff1f2; border: 1.5px solid #fecaca; }
 .step-card.pending { background: #f8fafc; border: 1.5px solid #f1f5f9; }
 
-.step-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
+.step-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .step-sbtn {
-  flex-shrink: 0;
-  min-width: 44px;
-  padding: 5px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .2s;
-  text-align: center;
-  border: none;
-  outline: none;
+  flex-shrink: 0; min-width: 44px; padding: 5px 14px;
+  border-radius: 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; text-align: center; border: none; outline: none;
 }
 .step-sbtn.done  { background: #e63946; color: #fff; }
 .step-sbtn.pending { background: #e2e8f0; color: #94a3b8; }
 
 .step-select {
-  flex: 1;
-  min-width: 120px;
-  border: 1.5px solid #e2e8f0;
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-family: 'Kanit', sans-serif;
-  background: white;
-  outline: none;
-  transition: border-color .2s;
+  flex: 1; min-width: 120px; border: 1.5px solid #e2e8f0;
+  padding: 6px 10px; border-radius: 10px; font-size: 13px;
+  font-family: 'Kanit', sans-serif; background: white; outline: none; transition: border-color .2s;
 }
 .step-select:focus { border-color: #f87171; }
 
 .step-input {
-  width: 100%;
-  border: 1.5px solid transparent;
-  background: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-family: 'Kanit', sans-serif;
-  outline: none;
-  transition: border-color .2s;
-  box-sizing: border-box;
+  width: 100%; border: 1.5px solid transparent; background: white;
+  padding: 8px 12px; border-radius: 10px; font-size: 13px;
+  font-family: 'Kanit', sans-serif; outline: none; transition: border-color .2s; box-sizing: border-box;
 }
 .step-input:focus { border-color: #fca5a5; }
 
 .session-select-modal {
-  width: 100%;
-  border: 1.5px solid #e2e8f0;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-family: 'Kanit', sans-serif;
-  background: white;
-  outline: none;
-  transition: border-color .2s;
-  margin-bottom: 16px;
-  cursor: pointer;
+  width: 100%; border: 1.5px solid #e2e8f0; padding: 10px 14px;
+  border-radius: 12px; font-size: 13px; font-family: 'Kanit', sans-serif;
+  background: white; outline: none; transition: border-color .2s; margin-bottom: 16px; cursor: pointer;
 }
 .session-select-modal:focus { border-color: #f87171; }
 
 .reset-input {
-  width: 100%;
-  border: 2px solid #fed7aa;
-  background: #fff7ed;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-family: 'Kanit', sans-serif;
-  outline: none;
-  transition: border-color .2s;
-  box-sizing: border-box;
+  width: 100%; border: 2px solid #fed7aa; background: #fff7ed;
+  padding: 10px 14px; border-radius: 12px; font-size: 14px;
+  font-family: 'Kanit', sans-serif; outline: none; transition: border-color .2s; box-sizing: border-box;
 }
 .reset-input:focus { border-color: #f97316; }
 
 .card-checkbox {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 22px;
-  height: 22px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
-  background: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .2s;
-  z-index: 2;
-  flex-shrink: 0;
+  position: absolute; top: 14px; right: 14px;
+  width: 22px; height: 22px; border-radius: 8px;
+  border: 2px solid #e2e8f0; background: white;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .2s; z-index: 2; flex-shrink: 0;
 }
-.card-checkbox.checked {
-  background: #e63946;
-  border-color: #e63946;
-}
+.card-checkbox.checked { background: #e63946; border-color: #e63946; }
 .card-checkbox.checked::after {
-  content: '';
-  width: 5px;
-  height: 9px;
-  border: 2px solid white;
-  border-top: none;
-  border-left: none;
+  content: ''; width: 5px; height: 9px;
+  border: 2px solid white; border-top: none; border-left: none;
   transform: rotate(45deg) translateY(-1px);
 }
 
@@ -302,21 +253,10 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 }
 
 #bulkBar {
-  display: none;
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1e293b;
-  color: white;
-  border-radius: 999px;
-  padding: 12px 20px;
-  align-items: center;
-  gap: 12px;
-  z-index: 100;
-  box-shadow: 0 8px 32px rgba(0,0,0,.3);
-  font-family: 'Kanit', sans-serif;
-  white-space: nowrap;
+  display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #1e293b; color: white; border-radius: 999px; padding: 12px 20px;
+  align-items: center; gap: 12px; z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3); font-family: 'Kanit', sans-serif; white-space: nowrap;
 }
 #bulkBar.show { display: flex; }
 </style>
@@ -336,9 +276,25 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 <main class="flex-1">
 <div class="p-8 md:p-10">
 
-  <div class="mb-8">
-    <h1 class="text-3xl font-black text-gray-900">Regular Class</h1>
-    <p class="text-gray-400 text-sm mt-1">จัดการนักเรียนและความคืบหน้าการเรียน</p>
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-black text-gray-900">Regular Class</h1>
+      <p class="text-gray-400 text-sm mt-1">จัดการนักเรียนและความคืบหน้าการเรียน</p>
+    </div>
+    <!-- ── Branch Toggle ── -->
+    <div class="flex items-center gap-3">
+      <div class="branch-toggle-wrap">
+        <button id="btn-hdy" class="branch-btn active-hdy" onclick="setBranch('hdy')">
+          <i class="fas fa-map-marker-alt mr-1"></i> HDY Hat Yai
+        </button>
+        <button id="btn-bkk" class="branch-btn inactive" onclick="setBranch('bkk')">
+          <i class="fas fa-map-marker-alt mr-1"></i> BKK Bangkok
+        </button>
+      </div>
+      <div id="branch-indicator" class="text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600">
+        🏫 Hat Yai
+      </div>
+    </div>
   </div>
 
   <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
@@ -352,14 +308,10 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     <div class="flex flex-col sm:flex-row gap-3 items-stretch w-full md:w-auto">
       <div class="relative w-full sm:w-72">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-sm"></i>
-        <input
-          id="searchInput"
-          placeholder="ค้นหาชื่อนักเรียน..."
-          onkeyup="filterAndRender()"
-          class="search-bar pl-10 w-full">
+        <input id="searchInput" placeholder="ค้นหาชื่อนักเรียน..."
+          onkeyup="filterAndRender()" class="search-bar pl-10 w-full">
       </div>
-      <button
-        onclick="loadStudents()"
+      <button onclick="loadStudents()"
         class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2">
         <i class="fas fa-rotate-right"></i>
         <span class="hidden sm:inline">รีโหลด</span>
@@ -371,18 +323,10 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     <button class="session-tab active" onclick="setSessionFilter('')" id="tab-all">
       <i class="fas fa-users text-xs mr-1"></i> ทั้งหมด
     </button>
-    <button class="session-tab" onclick="setSessionFilter('เสาร์เช้า')" id="tab-sat-morning">
-       เสาร์เช้า
-    </button>
-    <button class="session-tab" onclick="setSessionFilter('อาทิตย์เช้า')" id="tab-sun-morning">
-       อาทิตย์เช้า
-    </button>
-    <button class="session-tab" onclick="setSessionFilter('อาทิตย์บ่าย')" id="tab-sun-evening">
-       อาทิตย์บ่าย
-    </button>
-    <button class="session-tab" onclick="setSessionFilter('__other__')" id="tab-other">
-       ยังไม่ระบุ
-    </button>
+    <button class="session-tab" onclick="setSessionFilter('เสาร์เช้า')" id="tab-sat-morning"> เสาร์เช้า</button>
+    <button class="session-tab" onclick="setSessionFilter('อาทิตย์เช้า')" id="tab-sun-morning"> อาทิตย์เช้า</button>
+    <button class="session-tab" onclick="setSessionFilter('อาทิตย์บ่าย')" id="tab-sun-evening"> อาทิตย์บ่าย</button>
+    <button class="session-tab" onclick="setSessionFilter('__other__')" id="tab-other"> ยังไม่ระบุ</button>
   </div>
 
   <div class="flex justify-between items-center mb-6">
@@ -408,7 +352,8 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
           <div class="skeleton w-16 h-6 rounded-full"></div>
         </div>
         <div class="grid grid-cols-4 gap-1.5 mb-5">
-          <div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div>
+          <div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div>
+          <div class="skeleton h-2 w-full"></div><div class="skeleton h-2 w-full"></div>
         </div>
         <div class="skeleton h-10 w-full mb-2 rounded-2xl"></div>
         <div class="skeleton h-10 w-full rounded-2xl"></div>
@@ -422,7 +367,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 <!-- ══ PROGRESS MODAL ══ -->
 <div id="progressModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
   <div class="modal-inner">
-
     <div class="text-center mb-5">
       <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
         <i class="fas fa-tasks text-red-500 text-lg"></i>
@@ -430,7 +374,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       <h2 id="modalName" class="text-lg font-black text-gray-900"></h2>
       <p class="text-gray-400 text-xs mt-1">บันทึกความคืบหน้าการเรียน</p>
     </div>
-
     <div class="mb-4">
       <label class="text-xs font-bold text-gray-400 mb-2 block">📅 วันเรียน</label>
       <select id="modalSessionSelect" class="session-select-modal">
@@ -440,17 +383,13 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
         <option value="อาทิตย์บ่าย"> อาทิตย์บ่าย</option>
       </select>
     </div>
-
     <div id="steps" class="flex flex-col gap-3 mb-5"></div>
-
     <button onclick="saveProgress()"
       class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-bold mb-2 transition-all flex items-center justify-center gap-2 text-sm">
       <i class="fas fa-save"></i> บันทึก
     </button>
     <button onclick="closeModal('progressModal')"
-      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">
-      ปิด
-    </button>
+      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">ปิด</button>
   </div>
 </div>
 
@@ -462,62 +401,46 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     </div>
     <h2 class="text-lg font-black text-gray-900 mb-1">Reset รอบใหม่</h2>
     <p id="resetStudentName" class="text-gray-400 text-sm mb-5"></p>
-
     <label class="text-xs font-bold text-gray-400 mb-2 block text-left">📅 บันทึกประวัติรอบนี้ว่าเป็นเดือน...</label>
-    <input
-      id="resetMonthInput"
-      placeholder="เช่น พ.ค. 2568"
-      class="reset-input mb-5">
-
+    <input id="resetMonthInput" placeholder="เช่น พ.ค. 2568" class="reset-input mb-5">
     <div class="bg-orange-50 rounded-2xl p-3 mb-5 text-left">
-      <p class="text-xs text-orange-700">
-        ⚠️ ข้อมูล <strong>Week 1–4, Instructor และ Progress</strong> จะถูกเซฟลง <strong>CourseHistory</strong> แล้ว reset กลับเป็น 0 อัตโนมัติ
-      </p>
+      <p class="text-xs text-orange-700">⚠️ ข้อมูล <strong>Week 1–4, Instructor และ Progress</strong> จะถูกเซฟลง <strong>CourseHistory</strong> แล้ว reset กลับเป็น 0 อัตโนมัติ</p>
     </div>
-
     <button onclick="confirmReset()"
       class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-2xl font-bold mb-2 transition-all flex items-center justify-center gap-2">
       <i class="fas fa-check text-sm"></i> ยืนยัน Reset
     </button>
     <button onclick="closeModal('resetModal')"
-      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">
-      ยกเลิก
-    </button>
+      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">ยกเลิก</button>
   </div>
 </div>
 
 <!-- ══ ADD STUDENT MODAL ══ -->
 <div id="addStudentModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
 <div class="bg-white p-8 rounded-[2rem] w-full max-w-lg shadow-2xl">
-
   <div class="flex items-center gap-3 mb-6">
     <div class="w-10 h-10 bg-gray-900 rounded-2xl flex items-center justify-center">
       <i class="fas fa-user-plus text-white text-sm"></i>
     </div>
     <h2 class="text-xl font-black text-gray-900">เพิ่มนักเรียน</h2>
   </div>
-
   <div class="grid grid-cols-2 gap-3">
     <select id="studentSelect" onchange="fillFromExisting()"
       class="col-span-2 p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all font-[Kanit] text-sm">
       <option value="">-- เลือกนักเรียนที่มีอยู่แล้ว หรือกรอกใหม่ --</option>
     </select>
-
     <input id="new-name" placeholder="ชื่อ-นามสกุล"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
     <input id="new-nickname" placeholder="ชื่อเล่น"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
-
     <input id="new-nameEng" placeholder="Name Eng"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
     <input id="new-nicknameEng" placeholder="Nickname Eng"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
-
     <input id="new-age" placeholder="อายุ"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
     <input id="new-phone" placeholder="เบอร์โทร"
       class="p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all text-sm">
-
     <select id="new-session"
       class="col-span-2 p-3 bg-gray-50 border-2 border-transparent rounded-2xl outline-none focus:border-red-400 transition-all font-[Kanit] text-sm cursor-pointer">
       <option value="">📅 เลือกวันเรียน (ถ้ามี)</option>
@@ -526,15 +449,12 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       <option value="อาทิตย์บ่าย"> อาทิตย์บ่าย</option>
     </select>
   </div>
-
   <button onclick="addStudent()"
     class="w-full bg-gray-900 hover:bg-red-600 text-white py-3 rounded-2xl mt-4 font-bold transition-all flex items-center justify-center gap-2">
     <i class="fas fa-check text-sm"></i> บันทึก
   </button>
   <button onclick="closeModal('addStudentModal')"
-    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl mt-2 font-bold transition-all">
-    ยกเลิก
-  </button>
+    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl mt-2 font-bold transition-all">ยกเลิก</button>
 </div>
 </div>
 
@@ -546,16 +466,13 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
     <i class="fas fa-bolt mr-1 text-xs"></i> อัปเดตที่เลือก
   </button>
   <button onclick="clearSelection()"
-    class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full font-bold text-sm transition-all">
-    ยกเลิก
-  </button>
+    class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full font-bold text-sm transition-all">ยกเลิก</button>
 </div>
 
 <!-- ══ BULK UPDATE MODAL ══ -->
 <div id="bulkModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
   <div class="bg-white rounded-t-[2rem] sm:rounded-[2rem] w-full sm:max-w-md shadow-2xl"
        style="max-height:92dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding: 28px 20px 100px 20px;">
-
     <div class="text-center mb-5">
       <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
         <i class="fas fa-bolt text-red-500 text-lg"></i>
@@ -563,7 +480,6 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
       <h2 class="text-lg font-black text-gray-900">Bulk Update</h2>
       <p id="bulkModalSubtitle" class="text-gray-400 text-xs mt-1"></p>
     </div>
-
     <div class="mb-4">
       <label class="text-xs font-bold text-gray-400 mb-2 block">📅 วันเรียน</label>
       <select id="bulkSession" class="session-select-modal">
@@ -573,17 +489,13 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
         <option value="อาทิตย์บ่าย"> อาทิตย์บ่าย</option>
       </select>
     </div>
-
     <div id="bulkSteps" class="flex flex-col gap-3 mb-5"></div>
-
     <button onclick="saveBulkProgress()"
       class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-2xl font-bold mb-2 transition-all flex items-center justify-center gap-2 text-sm">
       <i class="fas fa-save"></i> บันทึกทั้งหมด
     </button>
     <button onclick="closeModal('bulkModal')"
-      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">
-      ยกเลิก
-    </button>
+      class="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-3 rounded-2xl font-bold transition-all text-sm">ยกเลิก</button>
   </div>
 </div>
 
@@ -591,23 +503,20 @@ body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
 <script src="./js/main-navbar.js"></script>
 
 <script>
-// ✅ ดึง branch จาก localStorage (set ตอน login)
-const branch = localStorage.getItem('branch') || 'hdy';
+// ── Branch state
+let branch = localStorage.getItem('classBranch') || 'hdy';
 
 let allData = [];
 let instructors = [];
 let allStudentsCache = [];
 let activeSession = "";
-
 let currentStudentId = "";
 let currentCourseId = "";
 let tempProgress = 0;
 let currentWeeks = [];
 let currentInstructorsWeek = [];
 let currentClassSession = "";
-
 let resetTargetId = "";
-
 let selectedStudents = new Set();
 let bulkTempProgress = 0;
 let bulkWeeks = [];
@@ -619,13 +528,34 @@ const SESSION_CONFIG = {
   'อาทิตย์บ่าย': { cls: 'sun-evening', color: '#7c3aed', dot: '#a78bfa' },
 };
 
-function getSessionCls(session) {
-  return SESSION_CONFIG[session]?.cls || 'other';
+/* ── Branch Toggle ── */
+function setBranch(b) {
+  branch = b;
+  localStorage.setItem('classBranch', b);
+
+  const hdyBtn = document.getElementById('btn-hdy');
+  const bkkBtn = document.getElementById('btn-bkk');
+  const indicator = document.getElementById('branch-indicator');
+
+  if (b === 'hdy') {
+    hdyBtn.className = 'branch-btn active-hdy';
+    bkkBtn.className = 'branch-btn inactive';
+    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
+    indicator.textContent = '🏫 Hat Yai';
+  } else {
+    bkkBtn.className = 'branch-btn active-bkk';
+    hdyBtn.className = 'branch-btn inactive';
+    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
+    indicator.textContent = '🏙️ Bangkok';
+  }
+
+  document.getElementById('searchInput').value = '';
+  allData = [];
+  loadStudents();
 }
 
-function getSessionEmoji(session) {
-  return SESSION_CONFIG[session]?.emoji || '📋';
-}
+function getSessionCls(session) { return SESSION_CONFIG[session]?.cls || 'other'; }
+function getSessionEmoji(session) { return SESSION_CONFIG[session]?.emoji || '📋'; }
 
 function loadInstructors() {
   fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getInstructors" }) })
@@ -634,17 +564,23 @@ function loadInstructors() {
       instructors = res.data || [];
       const dd = document.getElementById("instructorDropdown");
       dd.innerHTML = '<option value="">ครูทั้งหมด</option>';
-      instructors.forEach(i => {
-        dd.innerHTML += `<option value="${i.name}">${i.name}</option>`;
-      });
+      instructors.forEach(i => { dd.innerHTML += `<option value="${i.name}">${i.name}</option>`; });
     });
 }
 
 function loadStudents() {
+  // Regular class ดึงจาก DataCourseRegular ซึ่ง join ทั้ง 2 sheets อยู่แล้ว
+  // แต่เราจะ filter ด้วย studentId prefix (HDY/BKK) หลัง fetch
   fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getStudentCoursesRegular" }) })
     .then(r => r.json())
     .then(res => {
-      allData = res.data || [];
+      const allFetched = res.data || [];
+      // filter ตาม branch โดยดูจาก studentId prefix
+      if (branch === 'bkk') {
+        allData = allFetched.filter(s => String(s.studentId).toUpperCase().startsWith('BKK'));
+      } else {
+        allData = allFetched.filter(s => !String(s.studentId).toUpperCase().startsWith('BKK'));
+      }
       clearSelection();
       filterAndRender();
     });
@@ -652,13 +588,7 @@ function loadStudents() {
 
 function setSessionFilter(session) {
   activeSession = session;
-  const tabMap = {
-    '': 'tab-all',
-    'เสาร์เช้า': 'tab-sat-morning',
-    'อาทิตย์เช้า': 'tab-sun-morning',
-    'อาทิตย์บ่าย': 'tab-sun-evening',
-    '__other__': 'tab-other'
-  };
+  const tabMap = { '': 'tab-all', 'เสาร์เช้า': 'tab-sat-morning', 'อาทิตย์เช้า': 'tab-sun-morning', 'อาทิตย์บ่าย': 'tab-sun-evening', '__other__': 'tab-other' };
   document.querySelectorAll('.session-tab').forEach(btn => btn.classList.remove('active'));
   const activeTab = document.getElementById(tabMap[session] || 'tab-all');
   if (activeTab) activeTab.classList.add('active');
@@ -668,46 +598,29 @@ function setSessionFilter(session) {
 function filterAndRender() {
   const q = document.getElementById("searchInput").value.toLowerCase();
   const instructor = document.getElementById("instructorDropdown").value;
-
   let data = allData.filter(x => {
     const matchInstructor = !instructor || x.instructor == instructor;
     const matchSearch = x.name.toLowerCase().includes(q);
     let matchSession = true;
-    if (activeSession === '__other__') {
-      matchSession = !x.classSession || x.classSession.trim() === '';
-    } else if (activeSession !== '') {
-      matchSession = x.classSession === activeSession;
-    }
+    if (activeSession === '__other__') { matchSession = !x.classSession || x.classSession.trim() === ''; }
+    else if (activeSession !== '') { matchSession = x.classSession === activeSession; }
     return matchInstructor && matchSearch && matchSession;
   });
-
   document.getElementById("studentCount").textContent = data.length + " คน";
-
-  if (activeSession === '') {
-    renderGrouped(data);
-  } else {
-    renderFlat(data);
-  }
+  if (activeSession === '') { renderGrouped(data); } else { renderFlat(data); }
 }
 
 function renderGrouped(data) {
   const grid = document.getElementById("studentGrid");
   grid.innerHTML = '';
-
-  if (!data || data.length === 0) {
-    grid.innerHTML = emptyState();
-    return;
-  }
-
+  if (!data || data.length === 0) { grid.innerHTML = emptyState(); return; }
   const groups = {};
   const ORDER = ['เสาร์เช้า', 'อาทิตย์เช้า', 'อาทิตย์บ่าย', '__other__'];
-
   data.forEach(s => {
     const key = (s.classSession && s.classSession.trim()) ? s.classSession : '__other__';
     if (!groups[key]) groups[key] = [];
     groups[key].push(s);
   });
-
   ORDER.forEach(sessionKey => {
     if (!groups[sessionKey]) return;
     const students = groups[sessionKey];
@@ -715,7 +628,6 @@ function renderGrouped(data) {
     const label = sessionKey === '__other__' ? 'ยังไม่ระบุวันเรียน' : sessionKey;
     const emoji = sessionKey === '__other__' ? '📋' : (cfg?.emoji || '');
     const dotColor = sessionKey === '__other__' ? '#94a3b8' : (cfg?.dot || '#94a3b8');
-
     grid.innerHTML += `
       <div>
         <div class="session-section-header">
@@ -726,25 +638,15 @@ function renderGrouped(data) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           ${students.map(s => renderCard(s)).join('')}
         </div>
-      </div>
-    `;
+      </div>`;
   });
 }
 
 function renderFlat(data) {
   const grid = document.getElementById("studentGrid");
   grid.innerHTML = '';
-
-  if (!data || data.length === 0) {
-    grid.innerHTML = emptyState();
-    return;
-  }
-
-  grid.innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      ${data.map(s => renderCard(s)).join('')}
-    </div>
-  `;
+  if (!data || data.length === 0) { grid.innerHTML = emptyState(); return; }
+  grid.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${data.map(s => renderCard(s)).join('')}</div>`;
 }
 
 function renderCard(s) {
@@ -753,20 +655,13 @@ function renderCard(s) {
   const sessionLabel = s.classSession
     ? `<span class="session-badge ${sessionCls}">${getSessionEmoji(s.classSession)} ${s.classSession}</span>`
     : `<span class="session-badge other">📋 ยังไม่ระบุ</span>`;
-
   const isSelected = selectedStudents.has(s.studentId);
-
   const resetBtnClass = p >= 4
     ? "w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-2xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-1"
     : "w-full bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-400 py-2.5 rounded-2xl font-bold text-sm transition-all mb-2 flex items-center justify-center gap-1";
-
   return `
-    <div id="card-${s.studentId}"
-      class="student-card bg-white p-7 rounded-[2rem] shadow-sm${isSelected ? ' selected' : ''}"
-      onclick="toggleSelect(event, '${s.studentId}')">
-
+    <div id="card-${s.studentId}" class="student-card bg-white p-7 rounded-[2rem] shadow-sm${isSelected ? ' selected' : ''}" onclick="toggleSelect(event, '${s.studentId}')">
       <div class="card-checkbox${isSelected ? ' checked' : ''}" id="chk-${s.studentId}"></div>
-
       <div class="flex justify-between items-start mb-1" style="padding-right:36px">
         <div>
           <h3 class="font-black text-gray-900 text-lg">${s.name}</h3>
@@ -799,44 +694,28 @@ function renderCard(s) {
 }
 
 function emptyState() {
-  return `
-    <div class="col-span-3 text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-gray-100">
-      <i class="fas fa-user-graduate text-gray-100 text-5xl mb-4"></i>
-      <p class="text-gray-300 font-medium">ไม่พบข้อมูลนักเรียน</p>
-    </div>`;
+  return `<div class="col-span-3 text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-gray-100">
+    <i class="fas fa-user-graduate text-gray-100 text-5xl mb-4"></i>
+    <p class="text-gray-300 font-medium">ไม่พบข้อมูลนักเรียน</p>
+  </div>`;
 }
 
 function toggleSelect(event, studentId) {
   if (event.target.closest('button') || event.target.closest('select')) return;
-
-  if (selectedStudents.has(studentId)) {
-    selectedStudents.delete(studentId);
-  } else {
-    selectedStudents.add(studentId);
-  }
-
+  if (selectedStudents.has(studentId)) { selectedStudents.delete(studentId); }
+  else { selectedStudents.add(studentId); }
   const card = document.getElementById("card-" + studentId);
   const chk  = document.getElementById("chk-" + studentId);
-  if (selectedStudents.has(studentId)) {
-    card?.classList.add("selected");
-    chk?.classList.add("checked");
-  } else {
-    card?.classList.remove("selected");
-    chk?.classList.remove("checked");
-  }
-
+  if (selectedStudents.has(studentId)) { card?.classList.add("selected"); chk?.classList.add("checked"); }
+  else { card?.classList.remove("selected"); chk?.classList.remove("checked"); }
   updateBulkBar();
 }
 
 function updateBulkBar() {
   const bar = document.getElementById("bulkBar");
   const cnt = document.getElementById("bulkCount");
-  if (selectedStudents.size > 0) {
-    bar.classList.add("show");
-    cnt.textContent = selectedStudents.size + " คน";
-  } else {
-    bar.classList.remove("show");
-  }
+  if (selectedStudents.size > 0) { bar.classList.add("show"); cnt.textContent = selectedStudents.size + " คน"; }
+  else { bar.classList.remove("show"); }
 }
 
 function clearSelection() {
@@ -849,14 +728,9 @@ function clearSelection() {
 }
 
 function openBulkModal() {
-  bulkTempProgress = 0;
-  bulkWeeks = ["", "", "", ""];
-  bulkInstructorsWeek = ["", "", "", ""];
-
-  document.getElementById("bulkModalSubtitle").textContent =
-    "อัปเดตพร้อมกัน " + selectedStudents.size + " คน";
+  bulkTempProgress = 0; bulkWeeks = ["","","",""]; bulkInstructorsWeek = ["","","",""];
+  document.getElementById("bulkModalSubtitle").textContent = "อัปเดตพร้อมกัน " + selectedStudents.size + " คน";
   document.getElementById("bulkSession").value = "";
-
   renderBulkSteps();
   document.getElementById("bulkModal").classList.remove("hidden");
 }
@@ -866,41 +740,24 @@ function renderBulkSteps() {
   box.innerHTML = '';
   for (let i = 1; i <= 4; i++) {
     const done = bulkTempProgress >= i;
-    const insOptions = instructors.map(ins =>
-      `<option value="${ins.name}" ${bulkInstructorsWeek[i-1] == ins.name ? 'selected' : ''}>${ins.name}</option>`
-    ).join('');
-
+    const insOptions = instructors.map(ins => `<option value="${ins.name}" ${bulkInstructorsWeek[i-1] == ins.name ? 'selected' : ''}>${ins.name}</option>`).join('');
     box.innerHTML += `
       <div id="bulkStepCard${i}" class="step-card ${done ? 'done' : 'pending'}">
         <div class="step-top">
-          <button id="bulkStepBtn${i}" class="step-sbtn ${done ? 'done' : 'pending'}"
-            onclick="bulkToggle(${i})">S${i}</button>
+          <button id="bulkStepBtn${i}" class="step-sbtn ${done ? 'done' : 'pending'}" onclick="bulkToggle(${i})">S${i}</button>
           <select id="bulkIns${i}" class="step-select">${insOptions}</select>
         </div>
-        <input id="bulkWeek${i}"
-          value="${bulkWeeks[i-1] || ''}"
-          placeholder="สัปดาห์นี้เรียนอะไร..."
-          oninput="bulkAutoTick()"
-          class="step-input" />
+        <input id="bulkWeek${i}" value="${bulkWeeks[i-1] || ''}" placeholder="สัปดาห์นี้เรียนอะไร..." oninput="bulkAutoTick()" class="step-input" />
       </div>`;
   }
 }
 
 function bulkAutoTick() {
   let newProgress = 0;
-  for (let j = 1; j <= 4; j++) {
-    const el = document.getElementById("bulkWeek" + j);
-    if (el && el.value.trim()) newProgress = j;
-  }
-  bulkTempProgress = newProgress;
-  updateBulkStepStyles();
+  for (let j = 1; j <= 4; j++) { const el = document.getElementById("bulkWeek" + j); if (el && el.value.trim()) newProgress = j; }
+  bulkTempProgress = newProgress; updateBulkStepStyles();
 }
-
-function bulkToggle(i) {
-  bulkTempProgress = (i === bulkTempProgress) ? i - 1 : i;
-  updateBulkStepStyles();
-}
-
+function bulkToggle(i) { bulkTempProgress = (i === bulkTempProgress) ? i - 1 : i; updateBulkStepStyles(); }
 function updateBulkStepStyles() {
   for (let i = 1; i <= 4; i++) {
     const done = bulkTempProgress >= i;
@@ -911,64 +768,30 @@ function updateBulkStepStyles() {
 
 function saveBulkProgress() {
   const session = document.getElementById("bulkSession").value;
-  const newWeekData = [];
-  const newInstructorData = [];
-  for (let i = 1; i <= 4; i++) {
-    newWeekData.push(document.getElementById("bulkWeek" + i).value);
-    newInstructorData.push(document.getElementById("bulkIns" + i).value);
-  }
-
+  const newWeekData = [], newInstructorData = [];
+  for (let i = 1; i <= 4; i++) { newWeekData.push(document.getElementById("bulkWeek" + i).value); newInstructorData.push(document.getElementById("bulkIns" + i).value); }
   const ids = [...selectedStudents];
   showLoading();
-
   Promise.all(ids.map(studentId => {
     const existing = allData.find(s => s.studentId === studentId);
-    const oldWeeks = existing?.weeks || ["", "", "", ""];
-    const oldInstructors = existing?.instructorsWeek || ["", "", "", ""];
-
+    const oldWeeks = existing?.weeks || ["","","",""];
+    const oldInstructors = existing?.instructorsWeek || ["","","",""];
     const mergedWeeks = newWeekData.map((w, i) => w.trim() !== "" ? w : oldWeeks[i] || "");
     const mergedInstructors = newInstructorData.map((ins, i) => ins !== "" ? ins : oldInstructors[i] || "");
-
     let newProgress = 0;
-    for (let j = 0; j < 4; j++) {
-      if (mergedWeeks[j] && mergedWeeks[j].trim()) newProgress = j + 1;
-    }
+    for (let j = 0; j < 4; j++) { if (mergedWeeks[j] && mergedWeeks[j].trim()) newProgress = j + 1; }
     if (bulkTempProgress > 0) newProgress = Math.max(newProgress, bulkTempProgress);
-
-    return fetch(scriptURL, { method: "POST", body: JSON.stringify({
-      action: "updateWeekAndInstructor",
-      studentId,
-      weekData: mergedWeeks,
-      instructorData: mergedInstructors,
-      ...(session ? { classSession: session } : {})
-    })})
-    .then(r => r.json())
-    .then(() => fetch(scriptURL, { method: "POST", body: JSON.stringify({
-      action: "updateProgressRegular",
-      studentId,
-      progress: newProgress
-    })}).then(r => r.json()));
+    return fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "updateWeekAndInstructor", studentId, weekData: mergedWeeks, instructorData: mergedInstructors, ...(session ? { classSession: session } : {}) }) })
+      .then(r => r.json())
+      .then(() => fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "updateProgressRegular", studentId, progress: newProgress }) }).then(r => r.json()));
   }))
-  .then(() => {
-    hideLoading();
-    closeModal('bulkModal');
-    clearSelection();
-    loadStudents();
-  })
-  .catch(() => {
-    hideLoading();
-    alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
-  });
+  .then(() => { hideLoading(); closeModal('bulkModal'); clearSelection(); loadStudents(); })
+  .catch(() => { hideLoading(); alert("เกิดข้อผิดพลาด กรุณาลองใหม่"); });
 }
 
 function openProgress(id, courseId, name, p, weeks = [], insWeek = [], classSession = '') {
-  currentStudentId = id;
-  currentCourseId = courseId;
-  tempProgress = p;
-  currentWeeks = weeks;
-  currentInstructorsWeek = insWeek;
-  currentClassSession = classSession;
-
+  currentStudentId = id; currentCourseId = courseId; tempProgress = p;
+  currentWeeks = weeks; currentInstructorsWeek = insWeek; currentClassSession = classSession;
   document.getElementById("modalName").innerText = name;
   document.getElementById("modalSessionSelect").value = classSession || '';
   renderSteps();
@@ -980,51 +803,32 @@ function renderSteps() {
   box.innerHTML = '';
   for (let i = 1; i <= 4; i++) {
     const done = tempProgress >= i;
-    const insOptions = instructors.map(ins =>
-      `<option value="${ins.name}" ${currentInstructorsWeek[i-1] == ins.name ? 'selected' : ''}>${ins.name}</option>`
-    ).join('');
-
+    const insOptions = instructors.map(ins => `<option value="${ins.name}" ${currentInstructorsWeek[i-1] == ins.name ? 'selected' : ''}>${ins.name}</option>`).join('');
     box.innerHTML += `
       <div id="stepCard${i}" class="step-card ${done ? 'done' : 'pending'}">
         <div class="step-top">
-          <button id="stepBtn${i}" class="step-sbtn ${done ? 'done' : 'pending'}" onclick="toggle(${i})">
-            S${i}
-          </button>
+          <button id="stepBtn${i}" class="step-sbtn ${done ? 'done' : 'pending'}" onclick="toggle(${i})">S${i}</button>
           <select id="ins${i}" class="step-select">${insOptions}</select>
         </div>
-        <input id="week${i}"
-          value="${currentWeeks[i-1] || ''}"
-          placeholder="สัปดาห์นี้เรียนอะไร..."
-          oninput="autoTickStep(${i})"
-          class="step-input" />
+        <input id="week${i}" value="${currentWeeks[i-1] || ''}" placeholder="สัปดาห์นี้เรียนอะไร..." oninput="autoTickStep(${i})" class="step-input" />
       </div>`;
   }
 }
 
 function autoTickStep(i) {
   let newProgress = 0;
-  for (let j = 1; j <= 4; j++) {
-    const el = document.getElementById("week" + j);
-    if (el && el.value.trim()) newProgress = j;
-  }
-  tempProgress = newProgress;
-  updateStepStyles();
+  for (let j = 1; j <= 4; j++) { const el = document.getElementById("week" + j); if (el && el.value.trim()) newProgress = j; }
+  tempProgress = newProgress; updateStepStyles();
 }
-
 function updateStepStyles() {
   for (let i = 1; i <= 4; i++) {
     const done = tempProgress >= i;
-    const card = document.getElementById("stepCard" + i);
-    const btn  = document.getElementById("stepBtn" + i);
+    const card = document.getElementById("stepCard" + i); const btn = document.getElementById("stepBtn" + i);
     if (card) card.className = "step-card " + (done ? "done" : "pending");
     if (btn)  btn.className  = "step-sbtn " + (done ? "done" : "pending");
   }
 }
-
-function toggle(i) {
-  tempProgress = (i === tempProgress) ? i - 1 : i;
-  updateStepStyles();
-}
+function toggle(i) { tempProgress = (i === tempProgress) ? i - 1 : i; updateStepStyles(); }
 
 function showLoading() { document.getElementById("saveLoadingOverlay").classList.add("show"); }
 function hideLoading() { document.getElementById("saveLoadingOverlay").classList.remove("show"); }
@@ -1032,26 +836,11 @@ function hideLoading() { document.getElementById("saveLoadingOverlay").classList
 function saveProgress() {
   showLoading();
   const selectedSession = document.getElementById("modalSessionSelect").value;
-  let weekData = [];
-  let instructorData = [];
-  for (let i = 1; i <= 4; i++) {
-    weekData.push(document.getElementById("week" + i).value);
-    instructorData.push(document.getElementById("ins" + i).value);
-  }
-
-  fetch(scriptURL, { method: "POST", body: JSON.stringify({
-    action: "updateWeekAndInstructor",
-    studentId: currentStudentId,
-    weekData,
-    instructorData,
-    classSession: selectedSession
-  })})
+  let weekData = [], instructorData = [];
+  for (let i = 1; i <= 4; i++) { weekData.push(document.getElementById("week" + i).value); instructorData.push(document.getElementById("ins" + i).value); }
+  fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "updateWeekAndInstructor", studentId: currentStudentId, weekData, instructorData, classSession: selectedSession }) })
   .then(() => {
-    fetch(scriptURL, { method: "POST", body: JSON.stringify({
-      action: "updateProgressRegular",
-      studentId: currentStudentId,
-      progress: tempProgress
-    })})
+    fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "updateProgressRegular", studentId: currentStudentId, progress: tempProgress }) })
     .then(() => { hideLoading(); closeModal('progressModal'); loadStudents(); });
   })
   .catch(() => { hideLoading(); });
@@ -1060,92 +849,47 @@ function saveProgress() {
 function openResetModal(studentId, name) {
   resetTargetId = studentId;
   document.getElementById("resetStudentName").textContent = name;
-
   const now = new Date();
   const thMonth = now.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' });
   document.getElementById("resetMonthInput").value = thMonth;
-
   document.getElementById("resetModal").classList.remove("hidden");
 }
 
 function confirmReset() {
   const month = document.getElementById("resetMonthInput").value.trim();
   if (!month) { alert("กรุณาระบุเดือน เช่น พ.ค. 2568"); return; }
-
   showLoading();
-  fetch(scriptURL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: "archiveAndResetStudent",
-      studentId: resetTargetId,
-      month: month
-    })
-  })
+  fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "archiveAndResetStudent", studentId: resetTargetId, month }) })
   .then(r => r.json())
-  .then(res => {
-    hideLoading();
-    if (res.status === "success") {
-      closeModal("resetModal");
-      loadStudents();
-    } else {
-      alert("เกิดข้อผิดพลาด: " + (res.message || "ไม่ทราบสาเหตุ"));
-    }
-  })
-  .catch(() => {
-    hideLoading();
-    alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
-  });
+  .then(res => { hideLoading(); if (res.status === "success") { closeModal("resetModal"); loadStudents(); } else alert("เกิดข้อผิดพลาด: " + (res.message || "ไม่ทราบสาเหตุ")); })
+  .catch(() => { hideLoading(); alert("เกิดข้อผิดพลาด กรุณาลองใหม่"); });
 }
 
 function deleteStudentRegular(studentId) {
   if (!confirm("ต้องการลบนักเรียนคนนี้ออกจาก Regular Class ใช่ไหม?")) return;
   showLoading();
-  fetch(scriptURL, { method: "POST", body: JSON.stringify({
-    action: "deleteEnrollmentRegular",
-    studentId: studentId,
-    courseId: ""
-  })})
+  fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "deleteEnrollmentRegular", studentId, courseId: "" }) })
   .then(r => r.json())
-  .then(res => {
-    hideLoading();
-    if (res.status === "success") {
-      loadStudents();
-    } else {
-      alert("ลบไม่สำเร็จ: " + res.message);
-    }
-  })
+  .then(res => { hideLoading(); if (res.status === "success") { loadStudents(); } else alert("ลบไม่สำเร็จ: " + res.message); })
   .catch(() => { hideLoading(); alert("เกิดข้อผิดพลาด"); });
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.add("hidden");
-}
+function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
 
-/* ── Open Add Student Modal ── ✅ ส่ง branch */
+/* ── Add Student Modal ── */
 function openAddStudentModal() {
   document.getElementById("studentSelect").value = "";
-  document.getElementById("new-name").value = "";
-  document.getElementById("new-nickname").value = "";
-  document.getElementById("new-nameEng").value = "";
-  document.getElementById("new-nicknameEng").value = "";
-  document.getElementById("new-age").value = "";
-  document.getElementById("new-phone").value = "";
+  ["new-name","new-nickname","new-nameEng","new-nicknameEng","new-age","new-phone"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("new-session").value = "";
-
-  // ✅ ส่ง branch ไปด้วย
-  fetch(scriptURL, { method: "POST", body: JSON.stringify({
-    action: "getStudentsByType", type: "Regular", courseId: "", query: "", branch
-  })})
+  // ดึงเฉพาะนักเรียนของ branch ที่เลือก
+  fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents", branch }) })
   .then(r => r.json())
   .then(res => {
     allStudentsCache = res.data || [];
     const sel = document.getElementById("studentSelect");
     sel.innerHTML = '<option value="">-- เลือกนักเรียนที่มีอยู่แล้ว หรือกรอกใหม่ --</option>';
-    allStudentsCache.forEach(s => {
-      sel.innerHTML += `<option value="${s.studentId}">${s.name}</option>`;
-    });
+    allStudentsCache.forEach(s => { sel.innerHTML += `<option value="${s.studentId}">${s.name}</option>`; });
   });
-
   document.getElementById("addStudentModal").classList.remove("hidden");
 }
 
@@ -1163,67 +907,47 @@ function fillFromExisting() {
   }
 }
 
-/* ── Add Student ── ✅ ส่ง branch ตอนสร้างใหม่ */
 function addStudent() {
   const existingId = document.getElementById("studentSelect").value;
   const name = document.getElementById("new-name").value.trim();
   const classSession = document.getElementById("new-session").value;
-
   if (!name) { alert("กรุณากรอกชื่อ"); return; }
-
   showLoading();
-
   if (existingId) {
-    fetch(scriptURL, { method: "POST", body: JSON.stringify({
-      action: "addStudentToCourseRegular",
-      studentId: existingId,
-      classSession: classSession
-    })})
+    fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "addStudentToCourseRegular", studentId: existingId, classSession }) })
     .then(r => r.json())
     .then(() => { hideLoading(); closeModal('addStudentModal'); loadStudents(); })
     .catch(() => { hideLoading(); alert("เกิดข้อผิดพลาด"); });
   } else {
-    // ✅ ส่ง branch ไปด้วยตอนสร้างนักเรียนใหม่
     fetch(scriptURL, { method: "POST", body: JSON.stringify({
-      action: "addStudent",
-      name: name,
+      action: "addStudent", name, branch,
       nickname: document.getElementById("new-nickname").value.trim(),
       nameEng: document.getElementById("new-nameEng").value.trim(),
       nicknameEng: document.getElementById("new-nicknameEng").value.trim(),
       age: document.getElementById("new-age").value.trim(),
       phone: document.getElementById("new-phone").value.trim(),
-      type: "Regular",
-      courseId: "",
-      branch: branch
-    })})
+      type: "Regular", courseId: ""
+    }) })
     .then(r => r.json())
     .then(res => {
       if (res.status === "success") {
-        // ✅ ส่ง branch ตอนดึงข้อมูลใหม่ด้วย
         fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "getAllStudents", branch }) })
-          .then(r => r.json())
-          .then(res2 => {
-            const newStudent = (res2.data || []).find(s => s.name === name);
-            if (newStudent) {
-              fetch(scriptURL, { method: "POST", body: JSON.stringify({
-                action: "addStudentToCourseRegular",
-                studentId: newStudent.studentId,
-                classSession: classSession
-              })})
-              .then(() => { hideLoading(); closeModal('addStudentModal'); loadStudents(); });
-            } else {
-              hideLoading(); closeModal('addStudentModal'); loadStudents();
-            }
-          });
-      } else {
-        hideLoading(); alert("เกิดข้อผิดพลาดในการเพิ่มนักเรียน");
-      }
+        .then(r => r.json())
+        .then(res2 => {
+          const newStudent = (res2.data || []).find(s => s.name === name);
+          if (newStudent) {
+            fetch(scriptURL, { method: "POST", body: JSON.stringify({ action: "addStudentToCourseRegular", studentId: newStudent.studentId, classSession }) })
+            .then(() => { hideLoading(); closeModal('addStudentModal'); loadStudents(); });
+          } else { hideLoading(); closeModal('addStudentModal'); loadStudents(); }
+        });
+      } else { hideLoading(); alert("เกิดข้อผิดพลาดในการเพิ่มนักเรียน"); }
     })
     .catch(() => { hideLoading(); alert("เกิดข้อผิดพลาด"); });
   }
 }
 
 window.onload = () => {
+  setBranch(branch); // sync UI
   loadInstructors();
   loadStudents();
 };
