@@ -259,7 +259,9 @@
               <i class="fas fa-map-marker-alt mr-1"></i> BKK Bangkok
             </button>
           </div>
-         
+          <div id="branch-indicator" class="text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600">
+            Hat Yai
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
@@ -510,17 +512,16 @@
       const indicator = document.getElementById('branch-indicator');
 
       if (b === 'hdy') {
-    hdyBtn.className = 'branch-btn active-hdy';
-    bkkBtn.className = 'branch-btn inactive';
-    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
-    
-  } else {
-    bkkBtn.className = 'branch-btn active-bkk';
-    hdyBtn.className = 'branch-btn inactive';
-    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
-    
-  }
-      
+        hdyBtn.className = 'branch-btn active-hdy';
+        bkkBtn.className = 'branch-btn inactive';
+        indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
+        indicator.textContent = 'Hat Yai';
+      } else {
+        bkkBtn.className = 'branch-btn active-bkk';
+        hdyBtn.className = 'branch-btn inactive';
+        indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
+        indicator.textContent = 'Bangkok';
+      }
 
       // reset search & reload
       document.getElementById('searchInput').value = '';
