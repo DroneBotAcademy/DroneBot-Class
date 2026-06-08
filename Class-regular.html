@@ -541,6 +541,17 @@ function setBranch(b) {
   loadStudents();
 }
 
+   if (b === 'hdy') {
+    hdyBtn.className = 'branch-btn active-hdy';
+    bkkBtn.className = 'branch-btn inactive';
+    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-red-50 text-red-600';
+    indicator.textContent = '🏫 Hat Yai';
+  } else {
+    bkkBtn.className = 'branch-btn active-bkk';
+    hdyBtn.className = 'branch-btn inactive';
+    indicator.className = 'text-xs font-black px-3 py-1.5 rounded-full bg-blue-50 text-blue-600';
+    indicator.textContent = '🏙️ Bangkok';
+  }
 function getSessionCls(session) { return SESSION_CONFIG[session]?.cls || 'other'; }
 function getSessionEmoji(session) { return SESSION_CONFIG[session]?.emoji || '📋'; }
 
