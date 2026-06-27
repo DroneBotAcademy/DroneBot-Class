@@ -7,6 +7,15 @@
     return (window.location.pathname.split("/").pop() || "Home.html").toLowerCase();
   }
 
+  function getUserRole() {
+    try {
+      const userData = JSON.parse(localStorage.getItem("userData") || "null");
+      return (userData?.role || "").toLowerCase();
+    } catch (e) {
+      return "";
+    }
+  }
+
   function getLinkClasses(isActive) {
     const base = "flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 font-medium";
     return isActive
@@ -56,6 +65,9 @@
     if (!target) return;
 
     const currentPage       = getCurrentPage();
+    const role              = getUserRole();
+    const isManager         = role === "manager";
+
     const classActive       = classPages.includes(currentPage);
     const courseActive      = currentPage === "class-course.html" || currentPage === "class.html";
     const regularActive     = currentPage === "class-regular.html";
@@ -65,6 +77,15 @@
     const studentActive     = studentPages.includes(currentPage);
     const bkkActive         = currentPage === "student-bkk.html";
     const hdyActive         = currentPage === "student-hdy.html";
+
+    // Regular Class link — แสดงเฉพาะ manager เท่านั้น
+    const regularClassLink = isManager ? `
+        <li>
+          <a href="Class-regular.html" class="${getSubLinkClasses(regularActive)}">
+            <i class="fas fa-users w-4 text-center"></i>
+            <span>Regular Class</span>
+          </a>
+        </li>` : '';
 
     target.innerHTML = `
 
@@ -185,12 +206,7 @@
             <span>Course Class</span>
           </a>
         </li>
-        <li>
-          <a href="Class-regular.html" class="${getSubLinkClasses(regularActive)}">
-            <i class="fas fa-users w-4 text-center"></i>
-            <span>Regular Class</span>
-          </a>
-        </li>
+        ${regularClassLink}
       </ul>
     </li>
 
