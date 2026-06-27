@@ -23,7 +23,7 @@ const Auth = {
         );
         if (isAdminOnly && userData) {
             const user = JSON.parse(userData);
-            if (user.role !== 'admin' && user.role !== 'manager') {
+            if (user.role !== 'manager') {
                 window.location.replace('Home.html?message=no_permission');
                 return;
             }
