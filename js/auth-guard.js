@@ -1,6 +1,6 @@
 const Auth = {
     publicPages: ['index.html', 'login.html', 'Login.html'],
-
+    adminOnlyPages: ['regularClass.html'],
     checkAccess: function() {
         const userData = localStorage.getItem('userData');
         const path = window.location.pathname;
@@ -13,17 +13,25 @@ const Auth = {
             window.location.replace('Login.html?message=please_login');
             return;
         }
-
         if (userData && isPublic) {
             window.location.replace('Home.html');
             return;
         }
 
-        // ✅ ใช้ visibility แทน display
+        const isAdminOnly = this.adminOnlyPages.some(
+            page => currentPage.toLowerCase() === page.toLowerCase()
+        );
+        if (isAdminOnly && userData) {
+            const user = JSON.parse(userData);
+            if (user.role !== 'admin' && user.role !== 'manager') {
+                window.location.replace('Home.html?message=no_permission');
+                return;
+            }
+        }
+
         function showBody() {
             document.body.style.visibility = 'visible';
         }
-
         if (document.body) {
             showBody();
         } else {
@@ -38,5 +46,4 @@ const Auth = {
         }
     }
 };
-
 Auth.checkAccess();
